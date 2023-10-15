@@ -154,10 +154,17 @@ export const FieldEditor: VFC<{
         `}
       </style>
       <Focusable
-        style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}
+        style={{
+          flex: "1",
+          display: "flex",
+          gap: "8px",
+          alignItems: "flex-end",
+          marginLeft: "1em",
+          marginRight: "1em",
+        }}
       >
         <Focusable
-          style={{ width: "400px", marginLeft: "20px" }}
+          style={{ width: "100%" }}
           onFocus={() => {
             updateHelpText(field);
           }}
