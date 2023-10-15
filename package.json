@@ -39,7 +39,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "decky-frontend-lib": "^3.21.1",
+    "decky-frontend-lib": "^3.22.0",
     "react-icons": "^4.4.0"
   },
   "pnpm": {

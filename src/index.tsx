@@ -1,105 +1,84 @@
 import {
   ButtonItem,
   definePlugin,
-  DialogButton,
-  Menu,
-  MenuItem,
   PanelSection,
   PanelSectionRow,
   Router,
   ServerAPI,
-  showContextMenu,
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { FaBoxOpen } from "react-icons/fa";
 
 import logo from "../assets/logo.png";
+import { StorePage } from "./StorePage";
+import { GameDetailsPage } from "./GameDetailsPage";
+import { ConfEditorPage } from "./ConfEditorPage";
+export interface GameData {
+  id: number;
+  name: string;
+  image: string;
+  shortname: string;
+}
 
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
-
-const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
-  // const [result, setResult] = useState<number | undefined>();
-
-  // const onClick = async () => {
-  //   const result = await serverAPI.callPluginMethod<AddMethodArgs, number>(
-  //     "add",
-  //     {
-  //       left: 2,
-  //       right: 2,
-  //     }
-  //   );
-  //   if (result.success) {
-  //     setResult(result.result);
-  //   }
-  // };
-
+// @ts-ignore
+const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   return (
-    <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
+    <PanelSection title="Custom Games Store">
 
-      <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
 
       <PanelSectionRow>
         <ButtonItem
           layout="below"
           onClick={() => {
             Router.CloseSideMenus();
-            Router.Navigate("/decky-plugin-test");
+            Router.Navigate("/store");
           }}
         >
-          Router
+          Store
         </ButtonItem>
+      </PanelSectionRow>
+      <PanelSectionRow>
+        <ButtonItem layout="below"
+          onClick={() => {
+            Router.CloseSideMenus();
+            Router.Navigate("/conf-editor/inca1/linux/_/_");
+          }} >Conf Editor</ButtonItem>
+      </PanelSectionRow>
+      <PanelSectionRow>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <img src={logo} />
+        </div>
       </PanelSectionRow>
     </PanelSection>
   );
 };
 
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => Router.NavigateToLibraryTab()}>
-        Go to Library
-      </DialogButton>
-    </div>
-  );
-};
+export interface RunScriptArgs {
+  cmd: string;
+}
 
+//@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
+  serverApi.routerHook.addRoute("/store",
+    () => <StorePage serverAPI={serverApi} />, {
     exact: true,
   });
-
+  serverApi.routerHook.addRoute("/game/:shortname",
+    () => <GameDetailsPage serverAPI={serverApi} />, {
+    exact: true,
+  });
+  serverApi.routerHook.addRoute("/conf-editor/:shortname/:platform/:forkname/:version",
+    () => <ConfEditorPage serverAPI={serverApi} />, {
+    exact: true,
+  });
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
+    title: <div className={staticClasses.Title}>Custom Games Store</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
+    icon: <FaBoxOpen />,
     onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
+      serverApi.routerHook.removeRoute("/store");
+      serverApi.routerHook.removeRoute("/game/:shortname");
     },
   };
 });
