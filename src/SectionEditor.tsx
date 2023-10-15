@@ -19,24 +19,26 @@ export const SectionEditor: VFC<{
     onChange({ ...section, Options: newOptions });
   };
 
-  //
-
   return (
     <PanelSection title={"[" + section.Name + "]"}>
-      {options.map((option, index) => {
-        if (modeLevel >= option.ModeLevel)
-          return (
-            <FieldEditor
-              field={option}
-              onChange={(updatedOption) =>
-                handleOptionChange(index, updatedOption)
-              }
-              updateHelpText={(field: KeyValuePair) => {
-                updateHelpText(field);
-              }}
-            />
-          );
-      })}
+      <Focusable
+        style={{ display: "flex", flexDirection: "column", gap: "1em" }}
+      >
+        {options.map((option, index) => {
+          if (modeLevel >= option.ModeLevel)
+            return (
+              <FieldEditor
+                field={option}
+                onChange={(updatedOption) =>
+                  handleOptionChange(index, updatedOption)
+                }
+                updateHelpText={(field: KeyValuePair) => {
+                  updateHelpText(field);
+                }}
+              />
+            );
+        })}
+      </Focusable>
     </PanelSection>
   );
 };

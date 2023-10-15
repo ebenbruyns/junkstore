@@ -64,105 +64,107 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
     setHelpText(field);
   };
   return (
-    <div>
-      <div style={{ float: "left" }}>
-        <Focusable
-          style={{
-            marginTop: "80px",
-            color: "white",
-            height: "640px",
-            overflow: "scroll",
-            display: "grid",
-            justifyContent: "center",
-            gridGap: "5px",
-            gridTemplateColumns: "repeat(1, 1fr)",
-            gridTemplateRows: "repeat(2, 1fr)",
-          }}
-          onSecondaryActionDescription="Save config"
-          onSecondaryButton={(e) => {
-            serverAPI.callPluginMethod("save_config", {
-              shortname: shortname,
-              platform: platform,
-              forkname: forkname,
-              version: version,
-              config_data: confData,
-            });
-            //Router.Navigate("/game/" + shortname)
-          }}
-        >
-          <PanelSection title={"Confirugation: " + shortname}>
-            <Dropdown
-              rgOptions={[
-                { data: 0, label: "Basic" },
-                { data: 1, label: "Advanced" },
-                { data: 2, label: "Expert" },
-                { data: 3, label: "All" },
-              ]}
-              onChange={(e) => {
-                setModeLevel(e.data);
-              }}
-              selectedOption={modeLevel}
-            />
-            {confData.Sections &&
-              confData.Sections.map((section) => {
-                if (section && modeLevel >= section.ModeLevel)
-                  return (
-                    <SectionEditor
-                      key={section.Name}
-                      section={section}
-                      modeLevel={modeLevel}
-                      onChange={(updatedSection) =>
-                        handleSectionChange(updatedSection)
-                      }
-                      updateHelpText={(field: KeyValuePair) => {
-                        updateHelpText(field);
-                        setSectionHelpText(section.Description);
-                      }}
-                    />
-                  );
-              })}
-          </PanelSection>
-          <PanelSection title="[Autoexec]">
+    <ScrollPanelGroup focusable={false}>
+      <Panel>
+        <div>
+          <div style={{ float: "left" }}>
             <Focusable
-              focusableIfNoChildren={true}
-              noFocusRing={false}
-              onFocusCapture={(e) => {
-                if (focusRef && focusRef.current != null)
-                  focusRef.current.focus();
+              style={{
+                marginTop: "80px",
+                color: "white",
+                display: "grid",
+                justifyContent: "center",
+                gridGap: "5px",
+                gridTemplateColumns: "repeat(1, 1fr)",
+                gridTemplateRows: "repeat(2, 1fr)",
               }}
-              onOKButton={(e) => {}}
+              onSecondaryActionDescription="Save config"
+              onSecondaryButton={(_) => {
+                serverAPI.callPluginMethod("save_config", {
+                  shortname: shortname,
+                  platform: platform,
+                  forkname: forkname,
+                  version: version,
+                  config_data: confData,
+                });
+                //Router.Navigate("/game/" + shortname)
+              }}
             >
-              <textarea
-                className=""
-                ref={focusRef}
-                style={{ width: "100%", height: "200px" }}
-                value={confData.Autoexec}
-                onChange={(e) => {
-                  setConfData({ ...confData, Autoexec: e.target.value });
-                }}
-              />
+              <PanelSection title={"Configuration: " + shortname}>
+                <Dropdown
+                  rgOptions={[
+                    { data: 0, label: "Basic" },
+                    { data: 1, label: "Advanced" },
+                    { data: 2, label: "Expert" },
+                    { data: 3, label: "All" },
+                  ]}
+                  onChange={(e) => {
+                    setModeLevel(e.data);
+                  }}
+                  selectedOption={modeLevel}
+                />
+                {confData.Sections &&
+                  confData.Sections.map((section) => {
+                    if (section && modeLevel >= section.ModeLevel)
+                      return (
+                        <SectionEditor
+                          key={section.Name}
+                          section={section}
+                          modeLevel={modeLevel}
+                          onChange={(updatedSection) =>
+                            handleSectionChange(updatedSection)
+                          }
+                          updateHelpText={(field: KeyValuePair) => {
+                            updateHelpText(field);
+                            setSectionHelpText(section.Description);
+                          }}
+                        />
+                      );
+                  })}
+              </PanelSection>
+              <PanelSection title="[Autoexec]">
+                <Focusable
+                  focusableIfNoChildren={true}
+                  noFocusRing={false}
+                  onFocusCapture={(e) => {
+                    if (focusRef && focusRef.current != null)
+                      focusRef.current.focus();
+                  }}
+                  onOKButton={(e) => {}}
+                >
+                  <textarea
+                    className=""
+                    ref={focusRef}
+                    style={{ width: "100%", height: "200px" }}
+                    value={confData.Autoexec}
+                    onChange={(e) => {
+                      setConfData({ ...confData, Autoexec: e.target.value });
+                    }}
+                  />
+                </Focusable>
+              </PanelSection>
             </Focusable>
-          </PanelSection>
-        </Focusable>
-      </div>
-      <div style={{ float: "right", marginTop: "50px", width: "700px" }}>
-        <ScrollPanelGroup
-          focusable={false}
-          style={{ flex: 1, minHeight: 0, height: "640px" }}
-          scrollPaddingTop={32}
-        >
-          <Panel focusable={true} noFocusRing={false}>
-            <div>{sectionHelpText}</div>
-            <div>{helpText.Description}</div>
-            {helpText.EnumValues &&
-              helpText.EnumValues.map((enumValue) => (
-                <div>
-                  {enumValue.Key} {enumValue.Description}
-                </div>
-              ))}
-          </Panel>
-        </ScrollPanelGroup>
-      </div>
-    </div>
+          </div>
+          <div style={{ float: "right", marginTop: "50px", width: "700px" }}>
+            <ScrollPanelGroup
+              focusable={false}
+              style={{ flex: 1, minHeight: 0, height: "640px" }}
+              scrollPaddingTop={32}
+            >
+              <Panel focusable={true} noFocusRing={false}>
+                <div>{sectionHelpText}</div>
+                <div>{helpText.Description}</div>
+                {helpText.EnumValues &&
+                  helpText.EnumValues.map((enumValue) => (
+                    <div>
+                      {enumValue.Key} {enumValue.Description}
+                    </div>
+                  ))}
+              </Panel>
+            </ScrollPanelGroup>
+          </div>
+        </div>
+      </Panel>
+    </ScrollPanelGroup>
   );
 };
