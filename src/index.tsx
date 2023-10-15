@@ -25,8 +25,6 @@ export interface GameData {
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   return (
     <PanelSection title="Custom Games Store">
-
-
       <PanelSectionRow>
         <ButtonItem
           layout="below"
@@ -39,11 +37,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
-        <ButtonItem layout="below"
+        <ButtonItem
+          layout="below"
           onClick={() => {
             Router.CloseSideMenus();
             Router.Navigate("/conf-editor/inca1/linux/_/_");
-          }} >Conf Editor</ButtonItem>
+          }}
+        >
+          Conf Editor
+        </ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -60,18 +62,27 @@ export interface RunScriptArgs {
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/store",
-    () => <StorePage serverAPI={serverApi} />, {
-    exact: true,
-  });
-  serverApi.routerHook.addRoute("/game/:shortname",
-    () => <GameDetailsPage serverAPI={serverApi} />, {
-    exact: true,
-  });
-  serverApi.routerHook.addRoute("/conf-editor/:shortname/:platform/:forkname/:version",
-    () => <ConfEditorPage serverAPI={serverApi} />, {
-    exact: true,
-  });
+  serverApi.routerHook.addRoute(
+    "/store",
+    () => <StorePage serverAPI={serverApi} />,
+    {
+      exact: true,
+    }
+  );
+  serverApi.routerHook.addRoute(
+    "/game/:shortname",
+    () => <GameDetailsPage serverAPI={serverApi} />,
+    {
+      exact: true,
+    }
+  );
+  serverApi.routerHook.addRoute(
+    "/conf-editor/:shortname/:platform/:forkname/:version",
+    () => <ConfEditorPage serverAPI={serverApi} />,
+    {
+      exact: true,
+    }
+  );
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
     content: <Content serverAPI={serverApi} />,
