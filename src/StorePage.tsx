@@ -9,6 +9,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   useEffect(() => {
     serverAPI
       .callPluginMethod<{}, GameData[]>("get_game_data", {
+        tabindex: 0,
         filter: searchQuery,
       })
       .then((data) => {
@@ -20,7 +21,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   }, []);
   const onInit = async () => {
     serverAPI
-      .callPluginMethod<{}, GameData[]>("get_game_data", { filter: "" })
+      .callPluginMethod<{}, GameData[]>("get_game_data", { tabindex: 0, filter: "" })
       .then((data) => {
         setGames(data.result as GameData[]);
       });

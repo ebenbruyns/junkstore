@@ -14,6 +14,7 @@ export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
   const onInit = async () => {
     serverAPI
       .callPluginMethod<{}, GameDetails>("get_game_details", {
+        tabindex: 0,
         shortname: shortname,
       })
       .then((data) => {
@@ -35,6 +36,7 @@ export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
           installer={() => {
             serverAPI
               .callPluginMethod<{}, string>("install_game", {
+                tabindex: 0,
                 shortname: gameData.ShortName,
               })
               .then((data) => {

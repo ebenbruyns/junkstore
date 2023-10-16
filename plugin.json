@@ -1,10 +1,10 @@
 {
   "name": "Junk Store",
   "author": "Eben Bruyns",
-  "flags": ["debug", "_root"],
+  "flags": ["debug"],
   "publish": {
-    "tags": ["template", "root"],
-    "description": "Edit dosbox.conf files.",
+    "tags": ["template"],
+    "description": "Junk store for games not listed on any store. This is particularly useful for games that you want to play in dosbox.",
     "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
   }
 }

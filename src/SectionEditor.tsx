@@ -1,4 +1,4 @@
-import { Key, VFC, useState } from "react";
+import React, { VFC, useState } from "react";
 import { ValueType, Section, KeyValuePair } from "./Types";
 import { ButtonItem, Focusable, PanelSectionRow } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
@@ -38,6 +38,7 @@ export const SectionEditor: VFC<{
           {options.map((option, index) => {
             if (modeLevel >= option.ModeLevel)
               return (
+
                 <FieldEditor
                   field={option}
                   onChange={(updatedOption) =>
