@@ -49,6 +49,7 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
   useEffect(() => {
     serverAPI
       .callPluginMethod<{}, ConfData>("get_config", {
+        tabindex: 0,
         shortname: shortname,
         platform: platform,
         version: version,
@@ -127,7 +128,7 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
                   if (focusRef && focusRef.current != null)
                     focusRef.current.focus();
                 }}
-                onOKButton={(e) => {}}
+                onOKButton={(e) => { }}
               >
                 <textarea
                   className=""
