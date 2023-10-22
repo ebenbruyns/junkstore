@@ -3,8 +3,10 @@ import {
   PanelSectionRow,
   Focusable,
   ButtonItem,
+  Router
 } from "decky-frontend-lib";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
+import { useState } from "react";
 //@ts-ignore
 function GameDisplay(props) {
   return (
@@ -18,6 +20,10 @@ function GameDisplay(props) {
           height: "600px",
           overflow: "scroll",
         }}
+        onCancel={(_) => {
+          Router.Navigate("/store")
+        }}
+        onCancelActionDescription="Go back to Store"
       >
         <Focusable style={{ display: "flex" }}>
           <ScrollPanelGroup>
@@ -29,12 +35,28 @@ function GameDisplay(props) {
         </Focusable>
 
         <PanelSection>
+          {props.steamClientID == "" && (
+            <ButtonItem
+              layout="below"
+              onClick={props.installer}
+              onOKButton={props.installer}
+            >
+              Install Game
+            </ButtonItem>)}
+          {props.steamClientID !== "" && (
+            <ButtonItem
+              layout="below"
+              onClick={props.runner}
+              onOKButton={props.runner}
+            >
+              Run Game
+            </ButtonItem>)}
           <ButtonItem
             layout="below"
-            onClick={props.installer}
-            onOKButton={props.installer}
+            onClick={props.confeditor}
+            onOKButton={props.confeditor}
           >
-            Install Game
+            Configure Game
           </ButtonItem>
         </PanelSection>
         <PanelSectionRow style={{ margin: "10px" }}>

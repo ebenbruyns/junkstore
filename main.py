@@ -40,6 +40,7 @@ class Helper:
         os.environ["DECKY_PLUGIN_NAME"] = decky_plugin.DECKY_PLUGIN_NAME
         os.environ["DECKY_PLUGIN_RUNTIME_DIR"] = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
         os.environ["DECKY_PLUGIN_SETTINGS_DIR"] = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
+        os.environ["CONTENT_SERVER"] = "http://localhost:1337/plugins"
         os.environ["DECKY_USER_HOME"] = decky_plugin.DECKY_USER_HOME
         os.environ["HOME"] = os.path.abspath(decky_plugin.DECKY_USER_HOME)
         os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
@@ -58,6 +59,7 @@ class Helper:
             os.environ["DECKY_PLUGIN_NAME"] = "junk-store"
             os.environ["DECKY_PLUGIN_RUNTIME_DIR"] = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
             os.environ["DECKY_PLUGIN_SETTINGS_DIR"] = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
+            os.environ["CONTENT_SERVER"] = "http://localhost:1337/plugins"
             os.environ["DECKY_USER_HOME"] = decky_plugin.DECKY_USER_HOME
             os.environ["HOME"] = os.path.abspath(decky_plugin.DECKY_USER_HOME)
             os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
@@ -98,13 +100,16 @@ class Plugin:
         decky_plugin.logger.info(Helper.get_scripts()['init_script'])
         cmd = os.path.expanduser(Helper.get_scripts()['init_script'])
         # pass cmd argument to _call_script method
-        # Helper.call_script(cmd)
+        Helper.call_script(cmd)
 
-    async def get_game_data(self, tabindex, filter):
+    async def get_game_data(self, tabindex, filter, installed):
         decky_plugin.logger.info(
             f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
+        tmp = "false"
+        if installed:
+            tmp = "true"
         result = Helper.get_json_output(tabindex,
-                                        "get_game_data", filter, input_data=None)
+                                        "get_game_data", filter, tmp, input_data=None)
         return result
 
     async def get_game_details(self, tabindex, shortname):
@@ -115,7 +120,13 @@ class Plugin:
         return result
 
     async def save_config(self, tabindex, shortname, platform, forkname, version, config_data):
-        cmd = Helper.build_cmd("save_config",  shortname, platform,
+        if forkname == '_':
+            forkname = ''
+        if version == '_':
+            version = ''
+        decky_plugin.logger.info(
+            f"save_config: {shortname} {platform} {forkname} {version} {config_data} tabindex: {tabindex} self: {self}")
+        cmd = Helper.build_cmd(tabindex, "save_config", shortname, platform,
                                forkname, version, input_data=json.dumps(config_data))
         return cmd
 
@@ -128,8 +139,12 @@ class Plugin:
                                         "get_config", shortname, platform, forkname, version)
         return result
 
-    async def install_game(self, tabindex, shortname):
-        result = Helper.get_json_output(tabindex, "install_game", shortname)
+    async def install_game(self, tabindex, shortname, id):
+        decky_plugin.logger.info(
+            f"install_game: {shortname} {id} tabindex: {tabindex} self: {self}")
+        result = Helper.get_json_output(
+            tabindex, "install_game", shortname,  str(id))
+        decky_plugin.logger.info(f"install_game: {result}")
         return result
 
     async def _unload(self):

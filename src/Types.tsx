@@ -50,12 +50,19 @@ export interface GameDetails {
   ReleaseDate: string;
   Images: string[];
   ShortName: string;
+  SteamClientID: string;
 }
 // Define the grid container
 
 export interface GameData {
-  id: number;
-  name: string;
-  images: string[];
-  shortname: string;
+  ID: number;
+  Name: string;
+  Images: string[];
+  ShortName: string;
+  SteamClientID: string;
+}
+export interface LaunchOptions {
+  exe: string;
+  options: string;
+  workingdir: string;
 }

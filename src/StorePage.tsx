@@ -6,22 +6,24 @@ import { GameData } from "./Types";
 export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [games, setGames] = useState([] as GameData[]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterInstalled, setFilterInstalled] = useState(false);
   useEffect(() => {
     serverAPI
       .callPluginMethod<{}, GameData[]>("get_game_data", {
         tabindex: 0,
         filter: searchQuery,
+        installed: filterInstalled,
       })
       .then((data) => {
         setGames(data.result as GameData[]);
       });
-  }, [searchQuery]);
+  }, [searchQuery, filterInstalled]);
   useEffect(() => {
     onInit();
   }, []);
   const onInit = async () => {
     serverAPI
-      .callPluginMethod<{}, GameData[]>("get_game_data", { tabindex: 0, filter: "" })
+      .callPluginMethod<{}, GameData[]>("get_game_data", { tabindex: 0, filter: "", installed: filterInstalled })
       .then((data) => {
         setGames(data.result as GameData[]);
       });
@@ -31,6 +33,10 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       <Focusable
         style={{
           marginBottom: "20px",
+        }}
+        onSecondaryActionDescription="Toggle Installed Filter"
+        onSecondaryButton={() => {
+          setFilterInstalled(!filterInstalled);
         }}
       >
         <TextField

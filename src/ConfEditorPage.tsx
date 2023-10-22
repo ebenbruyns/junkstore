@@ -79,14 +79,19 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
             onSecondaryActionDescription="Save config"
             onSecondaryButton={(_) => {
               serverAPI.callPluginMethod("save_config", {
+                tabindex: 0,
                 shortname: shortname,
                 platform: platform,
                 forkname: forkname,
                 version: version,
                 config_data: confData,
               });
-              //Router.Navigate("/game/" + shortname)
+              Router.Navigate("/game/" + shortname)
             }}
+            onCancel={(_) => {
+              Router.Navigate("/game/" + shortname)
+            }}
+            onCancelActionDescription="Go back to Game Details"
           >
             <PanelSection title={"Configuration: " + shortname}>
               <Dropdown

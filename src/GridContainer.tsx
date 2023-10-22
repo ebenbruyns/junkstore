@@ -21,15 +21,15 @@ function GridContainer(props: { games: GameData[] }) {
       {props.games.map((game: GameData) => (
         <div>
           <GameImage
-            key={game.id}
-            src={game.images.length > 0 ? game.images[0] : ""}
-            alt={game.name}
+            key={game.ID}
+            src={game.Images.length > 0 ? game.Images[0] : ""}
+            alt={game.Name}
             onClick={() => {
               Router.CloseSideMenus();
-              Router.Navigate("/game/" + game.shortname);
+              Router.Navigate("/game/" + game.ShortName);
             }}
           />
-          <div>{game.name}</div>
+          <div>{game.Name}</div>
         </div>
       ))}
     </Focusable>
