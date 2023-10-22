@@ -12,11 +12,7 @@ function GameImage(props) {
       onClick={props.onClick}
       onOKButton={props.onClick}
       onOKActionDescription="Show details"
-      onMenuActionDescription="menu"
-      onOptionsActionDescription="options"
-      onMenuButton={() => { }}
-      onOptionsButton={() => { }}
-      onAbort={() => { }}
+
     >
       <img width={100} height={150} src={props.src} alt={props.src}></img>
     </Focusable>

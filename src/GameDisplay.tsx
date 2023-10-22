@@ -49,7 +49,7 @@ function GameDisplay(props) {
               onClick={props.runner}
               onOKButton={props.runner}
             >
-              Run Game
+              Play Game
             </ButtonItem>)}
           <ButtonItem
             layout="below"

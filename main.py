@@ -102,14 +102,17 @@ class Plugin:
         # pass cmd argument to _call_script method
         Helper.call_script(cmd)
 
-    async def get_game_data(self, tabindex, filter, installed):
+    async def get_game_data(self, tabindex, filter, installed, limited):
         decky_plugin.logger.info(
             f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
-        tmp = "false"
+        installed_only = "false"
         if installed:
-            tmp = "true"
+            installed_only = "true"
+        limited_only = "false"
+        if limited:
+            limited_only = "true"
         result = Helper.get_json_output(tabindex,
-                                        "get_game_data", filter, tmp, input_data=None)
+                                        "get_game_data", filter, installed_only, limited_only, input_data=None)
         return result
 
     async def get_game_details(self, tabindex, shortname):

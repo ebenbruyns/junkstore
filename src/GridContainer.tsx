@@ -2,7 +2,12 @@ import GameImage from "./GameImage";
 import { Focusable, Router } from "decky-frontend-lib";
 import { GameData } from "./Types";
 
-function GridContainer(props: { games: GameData[] }) {
+function GridContainer(props: {
+  games: GameData[]
+  filterFn: () => void
+  limitFn: () => void
+  limited: boolean
+}) {
   return (
     <Focusable
       style={{
@@ -14,9 +19,14 @@ function GridContainer(props: { games: GameData[] }) {
         gridTemplateColumns: "repeat(6, 1fr)",
         gridTemplateRows: "repeat(6, 1fr)",
         width: "100%",
-        height: "340px",
+
         overflow: "scroll",
+
       }}
+      onSecondaryActionDescription="Toggle Installed Filter"
+      onSecondaryButton={props.filterFn}
+      onOptionsActionDescription={props.limited ? "Show All" : "Limit Results"}
+      onOptionsButton={props.limitFn}
     >
       {props.games.map((game: GameData) => (
         <div>
@@ -28,8 +38,11 @@ function GridContainer(props: { games: GameData[] }) {
               Router.CloseSideMenus();
               Router.Navigate("/game/" + game.ShortName);
             }}
+            filterFn={props.filterFn}
+            limitFn={props.limitFn}
+            limited={props.limited}
           />
-          <div>{game.Name}</div>
+          <div style={{ width: "110px", overflow: "clip" }}>{game.Name}</div>
         </div>
       ))}
     </Focusable>

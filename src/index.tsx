@@ -24,7 +24,7 @@ export interface GameData {
 // @ts-ignore
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   return (
-    <PanelSection title="Custom Games Store">
+    <PanelSection title="Junk Store">
       <PanelSectionRow>
         <ButtonItem
           layout="below"
@@ -33,10 +33,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             Router.Navigate("/store");
           }}
         >
-          Store
+          Browse Store
         </ButtonItem>
       </PanelSectionRow>
-      <PanelSectionRow>
+      {/* <PanelSectionRow>
         <ButtonItem
           layout="below"
           onClick={() => {
@@ -46,7 +46,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         >
           Conf Editor
         </ButtonItem>
-      </PanelSectionRow>
+      </PanelSectionRow> */}
       <PanelSectionRow>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img src={logo} />
