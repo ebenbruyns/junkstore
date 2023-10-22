@@ -8,17 +8,17 @@ function GameImage(props) {
 
     <Focusable
       focusableIfNoChildren={true}
-      style={{ width: 150, height: 200 }}
+      style={{ width: 100, height: 150 }}
       onClick={props.onClick}
       onOKButton={props.onClick}
       onOKActionDescription="Show details"
       onMenuActionDescription="menu"
       onOptionsActionDescription="options"
-      onMenuButton={() => {}}
-      onOptionsButton={() => {}}
-      onAbort={() => {}}
+      onMenuButton={() => { }}
+      onOptionsButton={() => { }}
+      onAbort={() => { }}
     >
-      <img width={150} height={200} src={props.src} alt={props.src}></img>
+      <img width={100} height={150} src={props.src} alt={props.src}></img>
     </Focusable>
   );
 }

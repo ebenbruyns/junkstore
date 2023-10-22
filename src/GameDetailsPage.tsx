@@ -21,6 +21,7 @@ export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
   const [gameData, setGameData] = useState({} as GameDetails);
   const [steamClientID, setSteamClientID] = useState("");
   const { shortname } = useParams<{ shortname: string }>();
+  const [buttonText, setButtonText] = useState("Play Game")
   useEffect(() => {
     onInit();
   }, []);
@@ -38,7 +39,27 @@ export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
   };
   return (
     <div style={{ margin: "50px", color: "white" }}>
-      <Focusable>
+      <Focusable onOptionsButton={() => {
+        const id = parseInt(steamClientID)
+        setSteamClientID("")
+        serverAPI
+          .callPluginMethod<{}, LaunchOptions>("install_game", {
+            tabindex: 0,
+            shortname: gameData.ShortName,
+            id: steamClientID,
+          })
+          .then((data) => {
+
+            const r = data.result as LaunchOptions;
+            SteamClient.Apps.SetAppLaunchOptions(id, r.options)
+            SteamClient.Apps.SetShortcutName(id, gameData.Name)
+            SteamClient.Apps.SetShortcutExe(id, r.exe)
+            SteamClient.Apps.SetShortcutStartDir(id, r.workingdir)
+            setSteamClientID(id.toString())
+          });
+      }}
+        onOptionsActionDescription="Reinstall Game"
+      >
         <GameDisplay
           name={gameData.Name}
           description={gameData.Description}

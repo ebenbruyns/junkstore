@@ -10,11 +10,11 @@ function GridContainer(props: { games: GameData[] }) {
         color: "white",
         display: "grid",
         justifyContent: "center",
-        gridGap: "40px",
+        gridGap: "20px",
         gridTemplateColumns: "repeat(6, 1fr)",
         gridTemplateRows: "repeat(6, 1fr)",
         width: "100%",
-        height: "640px",
+        height: "340px",
         overflow: "scroll",
       }}
     >

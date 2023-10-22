@@ -17,7 +17,7 @@ function GameDisplay(props) {
           color: "white",
 
           width: "100%",
-          height: "600px",
+          height: "400px",
           overflow: "scroll",
         }}
         onCancel={(_) => {
