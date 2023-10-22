@@ -124,11 +124,10 @@ gets the json for a given fork/version of dosbox and poluates the games configs 
 
 ```bash
 #!/bin/bash
-# Save the current configuration to a file
 source $HOME/bin/script_settings.sh
 
-cat | $DOSCONF --parsejson "${1}" --dbfile $DBFILE --platform "${2}" --forkname "${3}" --version "${4}"
-
+TEMP=$($DOSCONF --confjson "${1}" --platform "${2}" --forkname "${3}" --version "${4}" --dbfile $DBFILE)
+echo $TEMP
 ```
 
 ## Developers
