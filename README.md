@@ -1,6 +1,6 @@
 # Junk Store plugin [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/muzlQCEjuYo?si=BzUrzK2kkL1wLPfW" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[<iframe width="560" height="315" src="https://www.youtube.com/embed/muzlQCEjuYo?si=BzUrzK2kkL1wLPfW" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>]
 
 This is a very simple plugin that builds it's content from a set of scripts.
 
