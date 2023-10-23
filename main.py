@@ -50,6 +50,8 @@ class Helper:
     @staticmethod
     def build_cmd(tabindex, script_name, *args, input_data=None):
         try:
+            if isinstance(tabindex, str):
+                tabindex = int(tabindex)
             decky_plugin.logger.info(
                 f"build_cmd: tabindex: {tabindex} scriptname: {script_name} args: {args}")
             encoded_args = [shlex.quote(arg) for arg in args]
@@ -63,6 +65,7 @@ class Helper:
             os.environ["DECKY_USER_HOME"] = decky_plugin.DECKY_USER_HOME
             os.environ["HOME"] = os.path.abspath(decky_plugin.DECKY_USER_HOME)
             os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
+
             script = os.path.expanduser(
                 Helper.get_scripts()['scripts'][tabindex][script_name])
             cmd = f"{script} {' '.join(encoded_args)}"
@@ -79,7 +82,7 @@ class Helper:
             return None
 
     @staticmethod
-    def get_json_output(tabindex, script_name, *args, input_data=None):
+    def get_json_output(tabindex: int, script_name, *args, input_data=None):
         try:
             decky_plugin.logger.info(
                 f"get_json_output: tabindex: {tabindex} scriptname: {script_name} args: {args}")
@@ -102,6 +105,10 @@ class Plugin:
         # pass cmd argument to _call_script method
         Helper.call_script(cmd)
 
+    async def get_scripts(self):
+        decky_plugin.logger.info(f"get_scripts: {self}")
+        return Helper.get_scripts()
+
     async def get_game_data(self, tabindex, filter, installed, limited):
         decky_plugin.logger.info(
             f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
@@ -115,7 +122,7 @@ class Plugin:
                                         "get_game_data", filter, installed_only, limited_only, input_data=None)
         return result
 
-    async def get_game_details(self, tabindex, shortname):
+    async def get_game_details(self, tabindex: int, shortname):
         decky_plugin.logger.info(
             f"get_game_details: {shortname} tabindex: {tabindex} self: {self}")
         result = Helper.get_json_output(
@@ -147,6 +154,14 @@ class Plugin:
             f"install_game: {shortname} {id} tabindex: {tabindex} self: {self}")
         result = Helper.get_json_output(
             tabindex, "install_game", shortname,  str(id))
+        decky_plugin.logger.info(f"install_game: {result}")
+        return result
+
+    async def uninstall_game(self, tabindex, shortname):
+        decky_plugin.logger.info(
+            f"uninstall_game: {shortname} tabindex: {tabindex} self: {self}")
+        result = Helper.get_json_output(
+            tabindex, "uninstall_game", shortname)
         decky_plugin.logger.info(f"install_game: {result}")
         return result
 

@@ -24,7 +24,8 @@ export interface SectionEditorProps {
 export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
   serverAPI,
 }) => {
-  const { shortname, platform, forkname, version } = useParams<{
+  const { tabindex, shortname, platform, forkname, version } = useParams<{
+    tabindex: number;
     shortname: string;
     platform: string;
     forkname: string;
@@ -49,7 +50,7 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
   useEffect(() => {
     serverAPI
       .callPluginMethod<{}, ConfData>("get_config", {
-        tabindex: 0,
+        tabindex: tabindex,
         shortname: shortname,
         platform: platform,
         version: version,
@@ -79,17 +80,17 @@ export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
             onSecondaryActionDescription="Save config"
             onSecondaryButton={(_) => {
               serverAPI.callPluginMethod("save_config", {
-                tabindex: 0,
+                tabindex: tabindex,
                 shortname: shortname,
                 platform: platform,
                 forkname: forkname,
                 version: version,
                 config_data: confData,
               });
-              Router.Navigate("/game/" + shortname)
+              Router.Navigate("/game/" + tabindex + "/" + shortname)
             }}
             onCancel={(_) => {
-              Router.Navigate("/game/" + shortname)
+              Router.Navigate("/game/" + tabindex + "/" + shortname)
             }}
             onCancelActionDescription="Go back to Game Details"
           >

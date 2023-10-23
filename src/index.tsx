@@ -14,6 +14,7 @@ import logo from "../assets/logo.png";
 import { StorePage } from "./StorePage";
 import { GameDetailsPage } from "./GameDetailsPage";
 import { ConfEditorPage } from "./ConfEditorPage";
+import { StoreTabs } from "./StoreTabs";
 export interface GameData {
   id: number;
   name: string;
@@ -36,17 +37,17 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           Browse Store
         </ButtonItem>
       </PanelSectionRow>
-      {/* <PanelSectionRow>
+      <PanelSectionRow>
         <ButtonItem
           layout="below"
           onClick={() => {
             Router.CloseSideMenus();
-            Router.Navigate("/conf-editor/inca1/linux/_/_");
+            Router.Navigate("/conf-editor/0/inca1/linux/_/_");
           }}
         >
           Conf Editor
         </ButtonItem>
-      </PanelSectionRow> */}
+      </PanelSectionRow>
       <PanelSectionRow>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img src={logo} />
@@ -64,20 +65,20 @@ export interface RunScriptArgs {
 export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute(
     "/store",
-    () => <StorePage serverAPI={serverApi} />,
+    () => <StoreTabs serverAPI={serverApi} />,
     {
       exact: true,
     }
   );
   serverApi.routerHook.addRoute(
-    "/game/:shortname",
+    "/game/:tabindex/:shortname",
     () => <GameDetailsPage serverAPI={serverApi} />,
     {
       exact: true,
     }
   );
   serverApi.routerHook.addRoute(
-    "/conf-editor/:shortname/:platform/:forkname/:version",
+    "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version",
     () => <ConfEditorPage serverAPI={serverApi} />,
     {
       exact: true,
@@ -89,7 +90,10 @@ export default definePlugin((serverApi: ServerAPI) => {
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/store");
-      serverApi.routerHook.removeRoute("/game/:shortname");
+      serverApi.routerHook.removeRoute("/game/:tabindex/:shortname");
+      serverApi.routerHook.removeRoute(
+        "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version"
+      );
     },
   };
 });

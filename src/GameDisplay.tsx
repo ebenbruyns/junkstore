@@ -17,7 +17,7 @@ function GameDisplay(props) {
           color: "white",
 
           width: "100%",
-          height: "400px",
+
           overflow: "scroll",
         }}
         onCancel={(_) => {
@@ -40,6 +40,8 @@ function GameDisplay(props) {
               layout="below"
               onClick={props.installer}
               onOKButton={props.installer}
+              onSecondaryActionDescription="Remove Game"
+              onSecondaryButton={props.uninstaller}
             >
               Install Game
             </ButtonItem>)}

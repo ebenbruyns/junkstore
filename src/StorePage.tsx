@@ -4,7 +4,7 @@ import GridContainer from "./GridContainer";
 import { GameData } from "./Types";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 
-export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
+export const StorePage: VFC<{ serverAPI: ServerAPI, tabindex: number }> = ({ serverAPI, tabindex }) => {
   const [games, setGames] = useState([] as GameData[]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterInstalled, setFilterInstalled] = useState(false);
@@ -12,7 +12,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   useEffect(() => {
     serverAPI
       .callPluginMethod<{}, GameData[]>("get_game_data", {
-        tabindex: 0,
+        tabindex: tabindex,
         filter: searchQuery,
         installed: filterInstalled,
         limited: limited,
@@ -28,7 +28,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     serverAPI
       .callPluginMethod<{}, GameData[]>("get_game_data",
         {
-          tabindex: 0,
+          tabindex: tabindex,
           filter: "",
           installed: filterInstalled,
           limited: limited
@@ -39,33 +39,31 @@ export const StorePage: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   };
   return (
-    <ScrollPanelGroup focusable={false}>
-      <Panel>
-        <div style={{ margin: "50px", color: "white" }}>
-          <Focusable
-            style={{
-              marginBottom: "20px",
-            }}
-            onSecondaryActionDescription="Toggle Installed Filter"
-            onSecondaryButton={() => {
-              setFilterInstalled(!filterInstalled);
-            }}
-            onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-            onOptionsButton={() => {
-              setLimited(!limited);
 
-            }}
-          >
-            <TextField
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e: any) => setSearchQuery(e.target.value)}
-            />
-          </Focusable>
+    <div>
+      <Focusable
+        style={{
+          marginBottom: "20px",
+        }}
+        onSecondaryActionDescription="Toggle Installed Filter"
+        onSecondaryButton={() => {
+          setFilterInstalled(!filterInstalled);
+        }}
+        onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
+        onOptionsButton={() => {
+          setLimited(!limited);
 
-          <GridContainer games={games} limited={limited} limitFn={() => { setLimited(!limited) }} filterFn={() => { setFilterInstalled(!filterInstalled) }} />
-        </div >
-      </Panel>
-    </ScrollPanelGroup >
+        }}
+      >
+        <TextField
+          placeholder="Search"
+          value={searchQuery}
+          onChange={(e: any) => setSearchQuery(e.target.value)}
+        />
+      </Focusable>
+
+      <GridContainer games={games} limited={limited} tabindex={tabindex} limitFn={() => { setLimited(!limited) }} filterFn={() => { setFilterInstalled(!filterInstalled) }} />
+    </div >
   );
-};
+}
+

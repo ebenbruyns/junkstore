@@ -7,6 +7,7 @@ function GridContainer(props: {
   filterFn: () => void
   limitFn: () => void
   limited: boolean
+  tabindex: number
 }) {
   return (
     <Focusable
@@ -36,7 +37,7 @@ function GridContainer(props: {
             alt={game.Name}
             onClick={() => {
               Router.CloseSideMenus();
-              Router.Navigate("/game/" + game.ShortName);
+              Router.Navigate("/game/" + props.tabindex + "/" + game.ShortName);
             }}
             filterFn={props.filterFn}
             limitFn={props.limitFn}
