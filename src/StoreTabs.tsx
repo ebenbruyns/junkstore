@@ -18,83 +18,53 @@ interface ScriptsState {
     scripts: ScriptSet[];
 };
 export const StoreTabs: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    const [currentTab, setCurrentTab] = useState(0);
+    const [currentTab, setCurrentTab] = useState("0");
 
-    // const [scripts, setScripts] = useState({
+    const [scripts, setScripts] = useState({
 
-    //     init_script: "",
-    //     content_dir: "",
-    //     scripts: [
-    //         {
-    //             TabName: "Dos",
-    //             get_game_details: "",
-    //             save_config: "",
-    //             get_config: "",
-    //             install_game: "",
-    //             uninstall_game: "",
-    //             get_game_data: "",
-    //             plugin_init: ""
-    //         },
-    //         {
-    //             TabName: "Windows",
-    //             get_game_details: "",
-    //             save_config: "",
-    //             get_config: "",
-    //             install_game: "",
-    //             uninstall_game: "",
-    //             get_game_data: "",
-    //             plugin_init: ""
-    //         }
-    //     ]
-    // } as ScriptsState);
-    // const [tabdata, setTabData] = useState(scripts.scripts.map((script, index) => ({
-    //     title: script.TabName,
-    //     content: <StorePage serverAPI={serverAPI} tabindex={index} />,
-    //     id: index,
-    // })))
+        init_script: "",
+        content_dir: "",
+        scripts: [
+            {
+                TabName: "None",
+                get_game_details: "",
+                save_config: "",
+                get_config: "",
+                install_game: "",
+                uninstall_game: "",
+                get_game_data: "",
+                plugin_init: ""
+            }
+        ]
+    } as ScriptsState);
 
-    // useEffect(() => {
-    //     onInit();
-    // }, []);
-    // const onInit = async () => {
-    //     serverAPI
-    //         .callPluginMethod<{}, {}>("get_scripts",
-    //             {}
-    //         )
-    //         .then((data) => {
-    //             setScripts(data.result as ScriptsState)
+    useEffect(() => {
+        onInit();
+    }, []);
+    const onInit = async () => {
+        serverAPI
+            .callPluginMethod<{}, {}>("get_scripts",
+                {}
+            )
+            .then((data) => {
+                setScripts(data.result as ScriptsState)
 
-    //         });
+            });
 
-    // };
-    // useEffect(() => {
-    //     setTabData(scripts.scripts.map((script, index) => ({
-    //         title: script.TabName,
-    //         content: <StorePage serverAPI={serverAPI} tabindex={index} />,
-    //         id: index,
-    //     })))
-    // }, [scripts]);
+    };
 
     return (
-        <div style={{ margin: "40px", height: "calc(100% - 40px)", color: "white" }}>
+        <div style={{ marginTop: "40px", height: "calc(100% - 40px)", color: "white" }}>
             <Tabs
                 activeTab={currentTab}
-                onShowTab={(tabID: number) => {
+                onShowTab={(tabID: string) => {
                     setCurrentTab(tabID);
-                    dispatchEvent(new Event("stateUpdate"));
-                    //this.eventBus.dispatchEvent(new Event("stateUpdate"));
                 }}
-                tabs={[{
-                    title: "Dos",
-                    content: <StorePage serverAPI={serverAPI} tabindex={0} />,
-                    id: 0
-                },
-                {
-                    title: "Windows",
-                    content: <StorePage serverAPI={serverAPI} tabindex={1} />,
-                    id: 1
-                }
-                ]}
+                tabs={scripts.scripts.map((script, index) => ({
+                    title: script.TabName,
+                    content: <StorePage serverAPI={serverAPI} tabindex={index} />,
+                    id: index.toString(),
+                }))}
             />
         </div>
     );

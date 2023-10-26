@@ -40,8 +40,7 @@ function GameDisplay(props) {
               layout="below"
               onClick={props.installer}
               onOKButton={props.installer}
-              onSecondaryActionDescription="Remove Game"
-              onSecondaryButton={props.uninstaller}
+              
             >
               Install Game
             </ButtonItem>)}
