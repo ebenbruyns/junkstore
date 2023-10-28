@@ -37,7 +37,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           Browse Store
         </ButtonItem>
       </PanelSectionRow>
-      <PanelSectionRow>
+      {/* <PanelSectionRow>
         <ButtonItem
           layout="below"
           onClick={() => {
@@ -47,12 +47,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         >
           Conf Editor
         </ButtonItem>
-      </PanelSectionRow>
+      </PanelSectionRow> 
       <PanelSectionRow>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img src={logo} />
         </div>
-      </PanelSectionRow>
+      </PanelSectionRow>*/}
     </PanelSection>
   );
 };
@@ -70,30 +70,30 @@ export default definePlugin((serverApi: ServerAPI) => {
       exact: true,
     }
   );
-  serverApi.routerHook.addRoute(
-    "/game/:tabindex/:shortname",
-    () => <GameDetailsPage serverAPI={serverApi} />,
-    {
-      exact: true,
-    }
-  );
-  serverApi.routerHook.addRoute(
-    "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version",
-    () => <ConfEditorPage serverAPI={serverApi} />,
-    {
-      exact: true,
-    }
-  );
+  // serverApi.routerHook.addRoute(
+  //   "/game/:tabindex/:shortname",
+  //   () => <GameDetailsPage serverAPI={serverApi} />,
+  //   {
+  //     exact: true,
+  //   }
+  // );
+  // serverApi.routerHook.addRoute(
+  //   "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version",
+  //   () => <ConfEditorPage serverAPI={serverApi} />,
+  //   {
+  //     exact: true,
+  //   }
+  // );
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
     content: <Content serverAPI={serverApi} />,
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/store");
-      serverApi.routerHook.removeRoute("/game/:tabindex/:shortname");
-      serverApi.routerHook.removeRoute(
-        "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version"
-      );
+      // serverApi.routerHook.removeRoute("/game/:tabindex/:shortname");
+      // serverApi.routerHook.removeRoute(
+      // "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version"
+      // );
     },
   };
 });

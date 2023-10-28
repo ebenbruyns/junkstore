@@ -43,7 +43,7 @@ class Helper:
         os.environ["CONTENT_SERVER"] = "http://localhost:1337/plugins"
         os.environ["DECKY_USER_HOME"] = decky_plugin.DECKY_USER_HOME
         os.environ["HOME"] = os.path.abspath(decky_plugin.DECKY_USER_HOME)
-        os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
+        # os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
 
         return subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, env=os.environ).communicate()[0].decode()
 
@@ -64,11 +64,13 @@ class Helper:
             os.environ["CONTENT_SERVER"] = "http://localhost:1337/plugins"
             os.environ["DECKY_USER_HOME"] = decky_plugin.DECKY_USER_HOME
             os.environ["HOME"] = os.path.abspath(decky_plugin.DECKY_USER_HOME)
-            os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
+            # os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
 
             script = os.path.expanduser(
                 Helper.get_scripts()['scripts'][tabindex][script_name])
             cmd = f"{script} {' '.join(encoded_args)}"
+            os.environ["PLATFORM"] = Helper.get_scripts()[
+                'scripts'][tabindex]['TabName']
             decky_plugin.logger.info("command: " + cmd)
             if input_data:
                 p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
@@ -90,7 +92,7 @@ class Helper:
                 tabindex, script_name, *args, input_data=input_data)
             return json.loads(cmd)
         except Exception as e:
-            decky_plugin.logger.error(f"Error in _get_json_output: {e}")
+            decky_plugin.logger.error(f"Error in _get_json_output: {cmd}")
             return None
 
 
@@ -169,7 +171,22 @@ class Plugin:
         decky_plugin.logger.info("Goodbye World!")
         pass
 
+    async def get_game_bats(self, tabindex, shortname):
+        decky_plugin.logger.info(
+            f"get_game_bats: {shortname} tabindex: {tabindex} self: {self}")
+        result = Helper.get_json_output(
+            tabindex, "get_game_bats", shortname)
+        return result
+
+    async def save_game_bats(self, tabindex, shortname, bats):
+        decky_plugin.logger.info(
+            f"save_game_bats: {shortname} {bats} tabindex: {tabindex} self: {self}")
+        decky_plugin.logger.info(f"save_game_bats: {bats}")
+        cmd = Helper.build_cmd(tabindex, "save_game_bats",
+                               shortname, input_data=json.dumps(bats))
+        return cmd
     # Migrations that should be performed before entering `_main()`.
+
     async def _migration(self):
         plugin_dir = "junk-store"
         decky_plugin.logger.info("Migrating")

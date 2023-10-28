@@ -42,6 +42,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI, tabindex: number }> = ({ ser
 
     <div>
       <Focusable
+        focusableIfNoChildren={true}
         style={{
           marginBottom: "20px",
         }}
@@ -62,7 +63,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI, tabindex: number }> = ({ ser
         />
       </Focusable>
 
-      <GridContainer games={games} limited={limited} tabindex={tabindex} limitFn={() => { setLimited(!limited) }} filterFn={() => { setFilterInstalled(!filterInstalled) }} />
+      <GridContainer serverAPI={serverAPI} games={games} limited={limited} tabindex={tabindex} limitFn={() => { setLimited(!limited) }} filterFn={() => { setFilterInstalled(!filterInstalled) }} />
     </div >
   );
 }

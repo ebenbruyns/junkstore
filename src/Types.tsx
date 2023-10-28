@@ -51,6 +51,8 @@ export interface GameDetails {
   Images: string[];
   ShortName: string;
   SteamClientID: string;
+  HasDosConfig: boolean;
+  HasBatFiles: boolean
 }
 // Define the grid container
 
@@ -65,4 +67,11 @@ export interface LaunchOptions {
   exe: string;
   options: string;
   workingdir: string;
+}
+
+export interface BatData {
+  id: number;
+  gameId: number;
+  Path: string;
+  Content: string;
 }

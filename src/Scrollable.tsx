@@ -1,4 +1,4 @@
-import { findModuleChild } from "decky-frontend-lib";
+import { ButtonProps, DialogButton, DialogButtonProps, findModuleChild } from "decky-frontend-lib";
 import { FC } from "react";
 
 interface SimpleModalProps {
@@ -24,6 +24,12 @@ export const Panel = findModuleChild((mod) => {
   if (typeof mod !== "object" || !mod.__esModule) return undefined;
   return mod.Panel;
 });
+
+
+export interface PlayButtonProps extends ButtonProps { }
+
+// Button isn't exported, so call DialogButton to grab it
+export const PlayButton = (DialogButton as any)?.render({}).type as FC<PlayButtonProps>;
 
 export const ScrollPanel = ScrollingModule.ScrollPanel;
 export const SimpleModal = ModalModule.SimpleModal as FC<SimpleModalProps>;
