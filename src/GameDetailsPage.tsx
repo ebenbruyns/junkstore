@@ -39,6 +39,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
 }) => {
   const [gameData, setGameData] = useState({} as GameDetails);
   const [steamClientID, setSteamClientID] = useState("");
+  const [installing, setInstalling] = useState(false);
   // const { tabindex, shortname } = useParams<{
   //   tabindex: number;
   //   shortname: string
@@ -60,6 +61,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         setSteamClientID(res.SteamClientID);
       });
   };
+
   return (
     <>
       <style>
@@ -68,13 +70,14 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         width: 100% !important;
     }
 `} </style>
-      <ModalRoot style={{ width: 800 }} onCancel={closeModal} onEscKeypress={closeModal} closeModal={closeModal}>
+      <ModalRoot style={{ width: 800 }} onCancel={closeModal} onEscKeypress={closeModal} closeModal={closeModal} >
         <ScrollPanelGroup focusable={false} style={{ background: parent }}>
           <Panel>
             <div style={{ margin: "0px", color: "white" }}>
               <Focusable onOptionsButton={() => {
                 const id = parseInt(steamClientID)
                 setSteamClientID("")
+                setInstalling(true)
                 serverAPI
                   .callPluginMethod<{}, LaunchOptions>("install_game", {
                     tabindex: tabindex,
@@ -89,6 +92,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                     SteamClient.Apps.SetShortcutExe(id, r.exe)
                     SteamClient.Apps.SetShortcutStartDir(id, r.workingdir)
                     setSteamClientID(id.toString())
+                    setInstalling(false)
                   });
               }}
                 onOptionsActionDescription="Reinstall Game"
@@ -116,7 +120,9 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                   genre={gameData.Genre}
                   steamClientID={steamClientID}
                   closeModal={closeModal}
+                  installing={installing}
                   installer={() => {
+                    setInstalling(true)
                     SteamClient.Apps.AddShortcut("Name", "/bin/bash", "/target", "options").then((id: number) => {
                       serverAPI
                         .callPluginMethod<{}, LaunchOptions>("install_game", {
@@ -132,6 +138,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                           SteamClient.Apps.SetShortcutExe(id, r.exe)
                           SteamClient.Apps.SetShortcutStartDir(id, r.workingdir)
                           setSteamClientID(id.toString());
+                          setInstalling(false)
                         });
 
 

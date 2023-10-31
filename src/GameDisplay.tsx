@@ -32,6 +32,7 @@ const GameDisplay: VFC<{
   bateditor: () => void;
   hasDosConfig: boolean;
   hasBatFiles: boolean;
+  installing: boolean;
 }> = (
   {
     closeModal,
@@ -51,6 +52,7 @@ const GameDisplay: VFC<{
     bateditor,
     hasDosConfig,
     hasBatFiles,
+    installing
   }
 ) => {
     return (
@@ -108,7 +110,7 @@ const GameDisplay: VFC<{
                 marginTop: "1em"
               }}
             >
-              {steamClientID == "" && (
+              {steamClientID == "" && !installing && (
 
                 <DialogButton
                   layout="below"
@@ -121,7 +123,7 @@ const GameDisplay: VFC<{
                   Install Game
                 </DialogButton>
               )}
-              {steamClientID !== "" && (
+              {steamClientID !== "" && !installing && (
 
                 <DialogButton
                   layout="below"
@@ -147,7 +149,11 @@ const GameDisplay: VFC<{
                   }} /> */}
                   <span>Play Game</span>
                 </DialogButton>)}
-              <div style={{ flexGrow: 1, flexShrink: 1 }}></div>
+              <div style={{ flexGrow: 1, flexShrink: 1 }}>
+                {installing && (
+                  <span>Installing please wait...</span>
+                )}
+              </div>
               {hasDosConfig && (
                 <DialogButton
                   onClick={confeditor}
