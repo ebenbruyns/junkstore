@@ -6,21 +6,8 @@ import shlex
 import subprocess
 
 import decky_plugin
-# sample scripts.json
-# {
-#   "init_script": "~/bin/plugin_init.sh",
-#   "scripts": [
-#     {
-#       "TabName": "Dosbox",
-#       "get_game_details": "~/bin/get_game_details.sh",
-#       "save_config": "~/bin/save_config.sh",
-#       "get_config": "~/bin/get_config.sh",
-#       "install_game": "~/bin/install_game.sh",
-#       "get_game_data": "~/bin/get_game_data.sh",
-#       "plugin_init": "~/bin/plugin_init.sh"
-#     }
-#   ]
-# }
+import os
+import json
 
 
 class Helper:
@@ -28,8 +15,18 @@ class Helper:
     @staticmethod
     def get_scripts():
         scripts = {}
+
         with open(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "scripts.json")) as f:
             scripts = json.load(f)
+        single_script_files = []
+        tabs_dir = os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "tabs")
+        for filename in sorted(os.listdir(tabs_dir)):
+            filepath = os.path.join(tabs_dir, filename)
+            if os.path.isfile(filepath) and filename.endswith('.json'):
+                with open(filepath) as f:
+                    data = json.load(f)
+                    single_script_files.append(data)
+        scripts['scripts'] = scripts['scripts'] + single_script_files
         return scripts
 
     @staticmethod
@@ -105,7 +102,7 @@ class Plugin:
         decky_plugin.logger.info(Helper.get_scripts()['init_script'])
         cmd = os.path.expanduser(Helper.get_scripts()['init_script'])
         # pass cmd argument to _call_script method
-        Helper.call_script(cmd)
+        decky_plugin.logger.info(Helper.call_script(cmd))
 
     async def get_scripts(self):
         decky_plugin.logger.info(f"get_scripts: {self}")
