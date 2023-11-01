@@ -1,4 +1,7 @@
 # Junk Store plugin [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
+[Just Store Discord server](https://discord.gg/Dy7JUNc44A)
+
+
 [See it in action here!](https://www.youtube.com/watch?v=dzoQzM_xExU)
 
 This is a very simple plugin that builds it's content from a set of scripts.
