@@ -75,3 +75,12 @@ export interface BatData {
   Path: string;
   Content: string;
 }
+
+
+export interface ProgressUpdate {
+  progress_percentage: number;
+  progress_current: string;
+  progress_total: string;
+  running_time: string;
+  eta: string;
+}

@@ -148,6 +148,14 @@ class Plugin:
                                         "get_config", shortname, platform, forkname, version)
         return result
 
+    async def get_install_progress(self, tabindex, shortname):
+        decky_plugin.logger.info(
+            f"get_install_progress: {shortname} tabindex: {tabindex} self: {self}")
+        result = Helper.get_json_output(
+            tabindex, "get_install_progress", shortname)
+        decky_plugin.logger.info(f"get_install_progress: {result}")
+        return result
+
     async def install_game(self, tabindex, shortname, id):
         decky_plugin.logger.info(
             f"install_game: {shortname} {id} tabindex: {tabindex} self: {self}")

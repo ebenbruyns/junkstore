@@ -9,12 +9,15 @@ import {
   Marquee,
   showModal,
   ModalRoot,
+  ProgressBar,
+  ProgressBarWithInfo,
 
 } from "decky-frontend-lib";
-import { Panel, PlayButton, ScrollPanelGroup } from "./Scrollable";
+import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { useState, VFC } from "react";
 import { FaArrowRight, FaCog, FaScroll } from "react-icons/fa";
 import { RiArrowRightSFill } from "react-icons/ri";
+import { ProgressUpdate } from "./Types";
 //@ts-ignore
 
 const GameDisplay: VFC<{
@@ -33,6 +36,7 @@ const GameDisplay: VFC<{
   hasDosConfig: boolean;
   hasBatFiles: boolean;
   installing: boolean;
+  progress: ProgressUpdate
 }> = (
   {
     closeModal,
@@ -52,7 +56,8 @@ const GameDisplay: VFC<{
     bateditor,
     hasDosConfig,
     hasBatFiles,
-    installing
+    installing,
+    progress
   }
 ) => {
     return (
@@ -151,7 +156,7 @@ const GameDisplay: VFC<{
                 </DialogButton>)}
               <div style={{ flexGrow: 1, flexShrink: 1 }}>
                 {installing && (
-                  <span>Installing please wait...</span>
+                  <ProgressBarWithInfo nProgress={progress.progress_percentage} description={"Eta: " + progress.eta + " Running: " + progress.running_time} />
                 )}
               </div>
               {hasDosConfig && (

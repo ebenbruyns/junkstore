@@ -1,7 +1,7 @@
-import { Router, Focusable, ServerAPI, useParams, ModalRoot, showModal, SimpleModal } from "decky-frontend-lib";
+import { Router, Focusable, ServerAPI, useParams, ModalRoot, showModal, SimpleModal, ProgressBarWithInfo, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC } from "react";
 import GameDisplay from "./GameDisplay";
-import { GameDetails, LaunchOptions } from "./Types";
+import { GameDetails, LaunchOptions, ProgressUpdate } from "./Types";
 import { RiTestTubeFill } from "react-icons/ri";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { ConfEditor } from "./ConfEditor";
@@ -40,6 +40,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
   const [gameData, setGameData] = useState({} as GameDetails);
   const [steamClientID, setSteamClientID] = useState("");
   const [installing, setInstalling] = useState(false);
+  const [progress, setProgress] = useState({ progress_percentage: 0.0, eta: "", progress_current: "", progress_total: "", running_time: "" } as ProgressUpdate);
   // const { tabindex, shortname } = useParams<{
   //   tabindex: number;
   //   shortname: string
@@ -61,7 +62,63 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         setSteamClientID(res.SteamClientID);
       });
   };
+  const updateProgress = async () => {
 
+    if (installing) {
+      do {
+        try {
+          const res = (await serverAPI.callPluginMethod<{}, ProgressUpdate>("get_install_progress", {
+            tabindex: tabindex,
+            shortname: shortname,
+          })).result as ProgressUpdate
+          setProgress(res);
+          if (res.progress_percentage < 100) {
+
+            // setTimeout(updateProgress, 1000); // wait for 1 second before calling updateProgress again
+          } else {
+            //setInstalling(false); // installation is complete, set installing to false
+          }
+        } catch (e) {
+        }
+        await sleep(1000)
+      } while (progress.progress_percentage < 100.0)
+    }
+  };
+
+  useEffect(() => {
+    onInit();
+  }, []);
+
+  useEffect(() => {
+    if (installing) {
+      updateProgress(); // start the loop when installing is true
+    }
+  }, [installing]);
+  const install = async () => {
+    setInstalling(true)
+    //updateProgress();
+    SteamClient.Apps.AddShortcut("Name", "/bin/bash", "/target", "options").then((id: number) => {
+      serverAPI
+        .callPluginMethod<{}, LaunchOptions>("install_game", {
+          tabindex: tabindex,
+          shortname: gameData.ShortName,
+          id: id,
+        })
+        .then((data) => {
+
+          const r = data.result as LaunchOptions;
+          SteamClient.Apps.SetAppLaunchOptions(id, r.options)
+          SteamClient.Apps.SetShortcutName(id, gameData.Name)
+          SteamClient.Apps.SetShortcutExe(id, r.exe)
+          SteamClient.Apps.SetShortcutStartDir(id, r.workingdir)
+          setSteamClientID(id.toString());
+          setInstalling(false)
+        });
+
+
+    });
+
+  }
   return (
     <>
       <style>
@@ -109,6 +166,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                     })
                 }}
               >
+
                 <GameDisplay
                   name={gameData.Name}
                   description={gameData.Description}
@@ -121,30 +179,8 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                   steamClientID={steamClientID}
                   closeModal={closeModal}
                   installing={installing}
-                  installer={() => {
-                    setInstalling(true)
-                    SteamClient.Apps.AddShortcut("Name", "/bin/bash", "/target", "options").then((id: number) => {
-                      serverAPI
-                        .callPluginMethod<{}, LaunchOptions>("install_game", {
-                          tabindex: tabindex,
-                          shortname: gameData.ShortName,
-                          id: id,
-                        })
-                        .then((data) => {
-
-                          const r = data.result as LaunchOptions;
-                          SteamClient.Apps.SetAppLaunchOptions(id, r.options)
-                          SteamClient.Apps.SetShortcutName(id, gameData.Name)
-                          SteamClient.Apps.SetShortcutExe(id, r.exe)
-                          SteamClient.Apps.SetShortcutStartDir(id, r.workingdir)
-                          setSteamClientID(id.toString());
-                          setInstalling(false)
-                        });
-
-
-                    });
-
-                  }}
+                  installer={() => { install() }}
+                  progress={progress}
                   uninstaller={() => {
                     serverAPI
                       .callPluginMethod<{}, LaunchOptions>("uninstall_game", {

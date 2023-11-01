@@ -26,10 +26,6 @@ export const Panel = findModuleChild((mod) => {
 });
 
 
-export interface PlayButtonProps extends ButtonProps { }
-
-// Button isn't exported, so call DialogButton to grab it
-export const PlayButton = (DialogButton as any)?.render({}).type as FC<PlayButtonProps>;
 
 export const ScrollPanel = ScrollingModule.ScrollPanel;
 export const SimpleModal = ModalModule.SimpleModal as FC<SimpleModalProps>;
