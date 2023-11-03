@@ -2,21 +2,14 @@ import {
   PanelSection,
   PanelSectionRow,
   Focusable,
-  ButtonItem,
-  Router,
   DialogButton,
-  Carousel,
   Marquee,
-  showModal,
-  ModalRoot,
-  ProgressBar,
   ProgressBarWithInfo,
 
 } from "decky-frontend-lib";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
-import { useState, VFC } from "react";
-import { FaArrowRight, FaCog, FaScroll } from "react-icons/fa";
-import { RiArrowRightSFill } from "react-icons/ri";
+import { VFC } from "react";
+import { FaCog, FaScroll } from "react-icons/fa";
 import { ProgressUpdate } from "./Types";
 //@ts-ignore
 
@@ -36,7 +29,8 @@ const GameDisplay: VFC<{
   hasDosConfig: boolean;
   hasBatFiles: boolean;
   installing: boolean;
-  progress: ProgressUpdate
+  progress: ProgressUpdate;
+  cancelInstall: () => void;
 }> = (
   {
     closeModal,
@@ -45,6 +39,7 @@ const GameDisplay: VFC<{
     steamClientID,
     installer,
     uninstaller,
+    cancelInstall,
     runner,
     confeditor,
     developer,
@@ -57,7 +52,8 @@ const GameDisplay: VFC<{
     hasDosConfig,
     hasBatFiles,
     installing,
-    progress
+    progress,
+
   }
 ) => {
     return (
@@ -156,7 +152,22 @@ const GameDisplay: VFC<{
                 </DialogButton>)}
               <div style={{ flexGrow: 1, flexShrink: 1 }}>
                 {installing && (
-                  <ProgressBarWithInfo nProgress={progress.progress_percentage} description={"Eta: " + progress.eta + " Running: " + progress.running_time} />
+                  <>
+                    <DialogButton
+                      layout="below"
+                      onClick={cancelInstall}
+                      onOKButton={cancelInstall}
+                      style={{
+                        width: "168px", height: "40px", verticalAlign: "middle"
+                      }}
+                    >
+                      Cancel
+                    </DialogButton>
+                    <ProgressBarWithInfo
+                      nProgress={progress.progress_percentage}
+                      description={`Downloaded ${progress.progress_current} MB of ${progress.progress_total} MB (${progress.progress_percentage}%)\nSpeed: ${progress.download_speed_decompressed} MB/s`}
+                    />
+                  </>
                 )}
               </div>
               {hasDosConfig && (

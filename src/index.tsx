@@ -10,10 +10,6 @@ import {
 import { VFC } from "react";
 import { FaBoxOpen } from "react-icons/fa";
 
-import logo from "../assets/logo.png";
-import { StorePage } from "./StorePage";
-import { GameDetailsPage } from "./GameDetailsPage";
-import { ConfEditorPage } from "./ConfEditorPage";
 import { StoreTabs } from "./StoreTabs";
 export interface GameData {
   id: number;

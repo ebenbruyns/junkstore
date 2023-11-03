@@ -1,8 +1,8 @@
-import React, { VFC, useState } from "react";
-import { ValueType, Section, KeyValuePair } from "./Types";
+import { Section, KeyValuePair } from "./Types";
 import { ButtonItem, Focusable, PanelSectionRow } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { FieldEditor } from "./FieldEditor";
+import { VFC, useState } from "react";
 export const SectionEditor: VFC<{
   section: Section;
   updateHelpText: (helpText: KeyValuePair) => void;

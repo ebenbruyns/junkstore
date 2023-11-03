@@ -1,4 +1,4 @@
-import { ButtonProps, DialogButton, DialogButtonProps, findModuleChild } from "decky-frontend-lib";
+import { findModuleChild } from "decky-frontend-lib";
 import { FC } from "react";
 
 interface SimpleModalProps {

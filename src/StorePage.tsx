@@ -2,7 +2,6 @@ import { Focusable, ServerAPI, TextField } from "decky-frontend-lib";
 import { useState, useEffect, VFC } from "react";
 import GridContainer from "./GridContainer";
 import { GameData } from "./Types";
-import { Panel, ScrollPanelGroup } from "./Scrollable";
 
 export const StorePage: VFC<{ serverAPI: ServerAPI, tabindex: number }> = ({ serverAPI, tabindex }) => {
   const [games, setGames] = useState([] as GameData[]);

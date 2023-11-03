@@ -42,12 +42,12 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
                         <Focusable
 
                             onSecondaryActionDescription="Save bat files"
-                            onSecondaryButton={(_) => {
-                                serverAPI.callPluginMethod("save_game_bats", {
+                            onSecondaryButton={async (_) => {
+                                await serverAPI.callPluginMethod("save_game_bats", {
                                     tabindex: tabindex,
                                     shortname: shortname,
                                     bats: batData,
-                                }).then((data) => { });
+                                });
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                 closeModal();
                             }}

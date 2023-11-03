@@ -10,6 +10,12 @@ interface ScriptSet {
     uninstall_game: string;
     get_game_data: string;
     plugin_init: string;
+    cancel_install: string;
+    get_install_progress: string;
+    get_game_bats: string;
+    save_game_bats: string;
+    download_game: string;
+
 };
 
 interface ScriptsState {
@@ -17,6 +23,7 @@ interface ScriptsState {
     content_dir: string;
     scripts: ScriptSet[];
 };
+
 export const StoreTabs: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const [currentTab, setCurrentTab] = useState("0");
 
@@ -33,7 +40,13 @@ export const StoreTabs: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                 install_game: "",
                 uninstall_game: "",
                 get_game_data: "",
-                plugin_init: ""
+                plugin_init: "",
+                cancel_install: "",
+                get_install_progress: "",
+                get_game_bats: "",
+                save_game_bats: "",
+                download_game: "",
+
             }
         ]
     } as ScriptsState);

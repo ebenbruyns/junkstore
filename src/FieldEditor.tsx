@@ -3,8 +3,7 @@ import {
   TextField,
   ToggleField,
   Dropdown,
-  Button,
-  ButtonItem,
+
   showContextMenu,
   Menu,
   MenuItem,
@@ -30,10 +29,10 @@ const Field: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
     if (field.Parents && field.Parents.length > 0) {
       setParentValue(
         "[Parent: " +
-          field.Parents[0].Parent +
-          ", Value: " +
-          field.Parents[0].Value +
-          "]"
+        field.Parents[0].Parent +
+        ", Value: " +
+        field.Parents[0].Value +
+        "]"
       );
     }
   }, [field.Parents]);
@@ -118,7 +117,7 @@ export const FieldEditor: VFC<{
   };
   const changeType = (e) => {
     showContextMenu(
-      <Menu label="Menu" cancelText="CANCEL" onCancel={() => {}}>
+      <Menu label="Menu" cancelText="CANCEL" onCancel={() => { }}>
         <MenuItem onSelected={() => handleFieldTypeChange(ValueType.Boolean)}>
           Boolean
         </MenuItem>

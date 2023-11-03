@@ -83,4 +83,16 @@ export interface ProgressUpdate {
   progress_total: string;
   running_time: string;
   eta: string;
+  downloaded_size: number;
+  written_size: number;
+  cache_usage: number;
+  active_tasks: number;
+  download_speed_raw: number;
+  download_speed_decompressed: number;
+  disk_write_speed: number;
+  disk_read_speed: number;
+  file_size_mb: number;
+  remaining_mb: number;
+  total_size: number;
+
 }
