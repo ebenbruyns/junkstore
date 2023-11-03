@@ -171,8 +171,8 @@ const GameDisplay: VFC<{
                       Cancel
                     </DialogButton>
                     <ProgressBarWithInfo
-                      nProgress={progress.progress_percentage}
-                      description={`Downloaded ${progress.progress_current} MB of ${progress.progress_total} MB (${progress.progress_percentage}%)\nSpeed: ${progress.download_speed_decompressed} MB/s`}
+                      nProgress={progress.Percentage}
+                      description={progress.Description}
                     />
                   </>
                 )}

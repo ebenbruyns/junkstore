@@ -239,11 +239,7 @@ class Plugin:
             tabindex, "uninstall_game", shortname)
         decky_plugin.logger.info(f"install_game: {result}")
         return result
-
-    async def _unload(self):
-        decky_plugin.logger.info("Goodbye World!")
-        pass
-
+    
     async def get_game_bats(self, tabindex, shortname):
         decky_plugin.logger.info(
             f"get_game_bats: {shortname} tabindex: {tabindex} self: {self}")
@@ -258,6 +254,12 @@ class Plugin:
         cmd = await Helper.build_cmd(tabindex, "save_game_bats",
                                      shortname, input_data=json.dumps(bats))
         return cmd
+
+    async def _unload(self):
+        decky_plugin.logger.info("Goodbye World!")
+        pass
+
+    
     # Migrations that should be performed before entering `_main()`.
 
     async def _migration(self):

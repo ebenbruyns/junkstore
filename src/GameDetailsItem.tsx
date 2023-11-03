@@ -15,22 +15,8 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
     const [steamClientID, setSteamClientID] = useState("");
     const [installing, setInstalling] = useState(false);
     const [progress, setProgress] = useState({
-        progress_percentage: 0,
-        progress_current: "",
-        progress_total: "",
-        running_time: "",
-        eta: "",
-        downloaded_size: 0,
-        written_size: 0,
-        cache_usage: 0,
-        active_tasks: 0,
-        download_speed_raw: 0,
-        download_speed_decompressed: 0,
-        disk_write_speed: 0,
-        disk_read_speed: 0,
-        file_size_mb: 0,
-        remaining_mb: 0,
-        total_size: 0,
+        Percentage: 0,
+        Description: ""
     } as ProgressUpdate);
     // const { tabindex, shortname } = useParams<{
     //   tabindex: number;
@@ -79,8 +65,8 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
                     if (progressUpdate != null) {
                         console.log(progressUpdate);
                         setProgress(progressUpdate);
-                        console.log(progressUpdate.progress_percentage);
-                        if (progressUpdate.progress_percentage >= 100) {
+                        console.log(progressUpdate.Percentage);
+                        if (progressUpdate.Percentage >= 100) {
                             setInstalling(false);
                             console.log("setInstalling(false)");
                             install();
