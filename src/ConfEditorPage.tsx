@@ -4,13 +4,8 @@ import {
 
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { Section } from "./Types";
 import { ConfEditor } from "./ConfEditor";
 
-export interface SectionEditorProps {
-  section: Section;
-  onChange: (section: Section) => void;
-}
 export const ConfEditorPage: VFC<{ serverAPI: ServerAPI }> = ({
   serverAPI,
 }) => {

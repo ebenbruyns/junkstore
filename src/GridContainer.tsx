@@ -1,7 +1,7 @@
 import GameImage from "./GameImage";
 import { Focusable, ServerAPI, showModal } from "decky-frontend-lib";
 import { GameData } from "./Types";
-import { GameDetailsItem } from "./GameDetailsPage";
+import { GameDetailsItem } from "./GameDetailsItem";
 function GridContainer(props: {
   games: GameData[]
   filterFn: () => void

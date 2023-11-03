@@ -9,8 +9,8 @@ export const SectionEditor: VFC<{
   modeLevel: number;
   onChange: (section: Section) => void;
 }> = ({ section, updateHelpText, modeLevel, onChange }) => {
-  const [name, setName] = useState(section.Name);
-  const [description, setDescription] = useState(section.Description);
+  // const [name, setName] = useState(section.Name);
+  // const [description, setDescription] = useState(section.Description);
   const [options, setOptions] = useState(section.Options);
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
@@ -49,6 +49,8 @@ export const SectionEditor: VFC<{
                   }}
                 />
               );
+            else
+              return null;
           })}
         </>
       )}

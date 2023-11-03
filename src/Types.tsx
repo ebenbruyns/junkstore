@@ -1,3 +1,5 @@
+import { Section } from "./Types";
+
 export interface EnumStrings {
   Key: string;
   Description: string;
@@ -95,4 +97,8 @@ export interface ProgressUpdate {
   remaining_mb: number;
   total_size: number;
 
+}
+export interface SectionEditorProps {
+  section: Section;
+  onChange: (section: Section) => void;
 }

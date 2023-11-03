@@ -38,6 +38,7 @@ const GameDisplay: VFC<{
     images,
     steamClientID,
     installer,
+    // @ts-ignore
     uninstaller,
     cancelInstall,
     runner,
@@ -47,6 +48,7 @@ const GameDisplay: VFC<{
     genre,
     source,
     description,
+    // @ts-ignore
     publisher,
     bateditor,
     hasDosConfig,
@@ -69,7 +71,7 @@ const GameDisplay: VFC<{
 
             overflow: "scroll",
           }}
-          onCancel={(e) => {
+          onCancel={(_) => {
             //e.stopPropagation();
             closeModal();
             // Router.CloseSideMenus();
@@ -89,7 +91,9 @@ const GameDisplay: VFC<{
             </Focusable>
           </Panel>
 
-          <PanelSection style={{ display: "flex", flexDirection: "row" }} focusable={true}>
+          <PanelSection
+            // @ts-ignore
+            style={{ display: "flex", flexDirection: "row" }} focusable={true}>
             <style>
               {`
             .DialogInputLabelGroup {
@@ -114,6 +118,7 @@ const GameDisplay: VFC<{
               {steamClientID == "" && !installing && (
 
                 <DialogButton
+                  // @ts-ignore
                   layout="below"
                   onClick={installer}
                   onOKButton={installer}
@@ -127,6 +132,7 @@ const GameDisplay: VFC<{
               {steamClientID !== "" && !installing && (
 
                 <DialogButton
+                  // @ts-ignore
                   layout="below"
                   onClick={runner}
                   onOKButton={runner}
@@ -154,6 +160,7 @@ const GameDisplay: VFC<{
                 {installing && (
                   <>
                     <DialogButton
+                      // @ts-ignore
                       layout="below"
                       onClick={cancelInstall}
                       onOKButton={cancelInstall}

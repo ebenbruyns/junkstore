@@ -35,7 +35,10 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
             height: 100% !important,
         }
     `} </style>
-            <ModalRoot bAllowFullSize={true} bAllowFullSizeMobile={true}>
+            <ModalRoot
+                bAllowFullSize={true}
+                // @ts-ignore
+                bAllowFullSizeMobile={true}>
                 <ScrollPanelGroup focusable={false} style={{ margin: "0px" }}>
                     <Panel style={{ background: "inherit" }}>
 
@@ -80,10 +83,13 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
 
                                             }} />
                                     </Focusable>
-                                    <Focusable focusableIfNoChildren={true}
+                                    <Focusable
+                                        // @ts-ignore
+                                        focusableIfNoChildren={true}
                                         noFocusRing={true}
-                                        onFocusCapture={(e) => {
+                                        onFocusCapture={() => {
                                             if (focusRef && focusRef.current != null)
+                                                // @ts-ignore
                                                 focusRef.current.focus();
                                         }}>
                                         <textarea

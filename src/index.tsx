@@ -66,30 +66,14 @@ export default definePlugin((serverApi: ServerAPI) => {
       exact: true,
     }
   );
-  // serverApi.routerHook.addRoute(
-  //   "/game/:tabindex/:shortname",
-  //   () => <GameDetailsPage serverAPI={serverApi} />,
-  //   {
-  //     exact: true,
-  //   }
-  // );
-  // serverApi.routerHook.addRoute(
-  //   "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version",
-  //   () => <ConfEditorPage serverAPI={serverApi} />,
-  //   {
-  //     exact: true,
-  //   }
-  // );
+
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
     content: <Content serverAPI={serverApi} />,
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/store");
-      // serverApi.routerHook.removeRoute("/game/:tabindex/:shortname");
-      // serverApi.routerHook.removeRoute(
-      // "/conf-editor/:tabindex/:shortname/:platform/:forkname/:version"
-      // );
+
     },
   };
 });

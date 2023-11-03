@@ -52,6 +52,7 @@ const Field: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
         <div>
           <span>{field.Key + " " + parentValue}</span>
           <TextField
+            // @ts-ignore
             type="number"
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -115,7 +116,7 @@ export const FieldEditor: VFC<{
   const handleFieldTypeChange = (newFieldType: ValueType) => {
     setFieldType(newFieldType);
   };
-  const changeType = (e) => {
+  const changeType = (e: any) => {
     showContextMenu(
       <Menu label="Menu" cancelText="CANCEL" onCancel={() => { }}>
         <MenuItem onSelected={() => handleFieldTypeChange(ValueType.Boolean)}>

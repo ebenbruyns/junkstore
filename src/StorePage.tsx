@@ -41,6 +41,7 @@ export const StorePage: VFC<{ serverAPI: ServerAPI, tabindex: number }> = ({ ser
 
     <div>
       <Focusable
+        // @ts-ignore
         focusableIfNoChildren={true}
         style={{
           marginBottom: "20px",

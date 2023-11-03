@@ -7,6 +7,7 @@ function GameImage(props) {
     // @ts-ignore
 
     <Focusable
+      // @ts-ignore
       focusableIfNoChildren={true}
       style={{ width: "100%", height: "77%" }}
       onClick={props.onClick}
