@@ -7,7 +7,7 @@ function GridContainer(props: {
   filterFn: () => void
   limitFn: () => void
   limited: boolean
-  tabindex: number
+
   serverAPI: ServerAPI
 }) {
   return (
@@ -38,7 +38,7 @@ function GridContainer(props: {
             src={game.Images.length > 0 ? game.Images[0] : ""}
             alt={game.Name}
             onClick={() => {
-              showModal(<GameDetailsItem serverAPI={props.serverAPI} tabindex={props.tabindex} shortname={game.ShortName} />)
+              showModal(<GameDetailsItem serverAPI={props.serverAPI} shortname={game.ShortName} />)
               //Router.CloseSideMenus();
               //Router.Navigate("/game/" + props.tabindex + "/" + game.ShortName);
 

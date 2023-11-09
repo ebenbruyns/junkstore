@@ -10,9 +10,9 @@ import { Panel, ScrollPanelGroup } from "./Scrollable";
 export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname: string; closeModal?: any; }> = ({
     serverAPI, tabindex, shortname, closeModal
 }) => {
-    const [batData, setBatData] = useState([{ id: 0, gameId: 0, Path: '', Content: '' }] as BatData[]);
+    const [batData, setBatData] = useState([{ Id: 0, GameId: 0, Path: '', Content: '' }] as BatData[]);
     //const [editorText, setEditorText] = useState("test" as string);
-    const [selectedBat, setSelectedBat] = useState({ id: 0, gameId: 0, Content: "", Path: "" } as BatData);
+    const [selectedBat, setSelectedBat] = useState({ Id: 0, GameId: 0, Content: "", Path: "" } as BatData);
     const focusRef = useRef(null);
     useEffect(() => {
         serverAPI
@@ -22,7 +22,8 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
             })
             .then((data) => {
                 setBatData(data.result as BatData[]);
-                setSelectedBat(data.result[0] as BatData);
+                const files = data.result as BatData[];
+                setSelectedBat(files[0]);
                 //setEditorText(data.result[0].Content as string);
             });
     }, []);
@@ -74,11 +75,11 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
                                 >
                                     <Focusable style={{ marginBottom: "1em" }}>
                                         <Dropdown rgOptions={batData.map((bat) => {
-                                            return { data: bat.id, label: bat.Path };
+                                            return { data: bat.Id, label: bat.Path };
                                         })}
-                                            selectedOption={batData[0].id}
+                                            selectedOption={batData[0].Id}
                                             onChange={(e: any) => {
-                                                const temp = batData.find((bat) => bat.id == e.data);
+                                                const temp = batData.find((bat) => bat.Id == e.data);
                                                 setSelectedBat(temp as BatData);
 
                                             }} />
@@ -102,7 +103,7 @@ export const BatEditor: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname:
 
                                                 setBatData(prevBatData => {
                                                     const newData = [...prevBatData];
-                                                    const batIndex = newData.findIndex(bat => bat.id === selectedBat.id);
+                                                    const batIndex = newData.findIndex(bat => bat.Id === selectedBat.Id);
                                                     if (batIndex !== -1) {
                                                         newData[batIndex] = { ...newData[batIndex], Content: newContent };
                                                     }

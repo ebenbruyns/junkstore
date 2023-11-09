@@ -1,3 +1,4 @@
+
 export interface EnumStrings {
   Key: string;
   Description: string;
@@ -64,14 +65,14 @@ export interface GameData {
   SteamClientID: string;
 }
 export interface LaunchOptions {
-  exe: string;
-  options: string;
-  workingdir: string;
+  Exe: string;
+  Options: string;
+  WorkingDir: string;
 }
 
 export interface BatData {
-  id: number;
-  gameId: number;
+  Id: number;
+  GameId: number;
   Path: string;
   Content: string;
 }
@@ -79,24 +80,53 @@ export interface BatData {
 
 export interface ProgressUpdate {
   Percentage: number;
-  // progress_current: string;
-  // progress_total: string;
-  // running_time: string;
-  // eta: string;
-  // downloaded_size: number;
-  // written_size: number;
-  // cache_usage: number;
-  // active_tasks: number;
-  // download_speed_raw: number;
-  // download_speed_decompressed: number;
-  // disk_write_speed: number;
-  // disk_read_speed: number;
-  // file_size_mb: number;
-  // remaining_mb: number;
-  // total_size: number;
   Description: string;
 }
 export interface SectionEditorProps {
   section: Section;
   onChange: (section: Section) => void;
 }
+export interface GameData {
+  id: number;
+  name: string;
+  image: string;
+  shortname: string;
+}
+export interface ActionSet {
+  SetName: string;
+  Actions: MenuActions[];
+}export interface MenuActions {
+  ActionId: string;
+  Title: string;
+  Type: string;
+}
+
+export interface ContentResult {
+  Type: string;
+  Content: Content;
+}
+export interface Content { }
+export interface StoreContent extends Content {
+  Panels: Panel[];
+}
+export interface StoreTabsContent extends Content {
+  Tabs: TabContent[];
+}
+export interface TabContent {
+  Title: string;
+  Type: string;
+  ActionId: string;
+}
+export interface ContentError extends Content {
+  Message: string;
+  Data: string;
+}
+export interface GameDataResult extends Content {
+  Games: GameData[];
+}
+export interface Panel {
+  Title: string;
+  Type: string;
+  Actions: MenuActions[];
+}
+

@@ -8,8 +8,8 @@ import { BatEditor } from "./BatEditor";
 import { gameIDFromAppID } from "./gameIDFromAppID";
 
 
-export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shortname: string; closeModal?: any; }> = ({
-    serverAPI, tabindex, shortname, closeModal
+export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; closeModal?: any; }> = ({
+    serverAPI, shortname, closeModal
 }) => {
     const [gameData, setGameData] = useState({} as GameDetails);
     const [steamClientID, setSteamClientID] = useState("");
@@ -41,7 +41,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
     const onInit = async () => {
         try {
             const data = await serverAPI.callPluginMethod<{}, GameDetails>("get_game_details", {
-                tabindex: tabindex,
+                tabindex: 0,
                 shortname: shortname,
             });
             const res = data.result as GameDetails;
@@ -58,7 +58,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
             try {
                 console.log("updateProgress");
                 serverAPI.callPluginMethod<{}, ProgressUpdate>("get_install_progress", {
-                    tabindex: tabindex,
+                    tabindex: 0,
                     shortname: shortname,
                 }).then((res) => {
                     const progressUpdate = res.result as ProgressUpdate;
@@ -100,7 +100,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
     const uninstall = async () => {
         try {
             await serverAPI.callPluginMethod<{}, LaunchOptions>("uninstall_game", {
-                tabindex: tabindex,
+                tabindex: 0,
                 shortname: gameData.ShortName,
             });
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
@@ -113,7 +113,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         try {
             setInstalling(true);
             await serverAPI.callPluginMethod<{}, LaunchOptions>("download_game", {
-                tabindex: tabindex,
+                tabindex: 0,
                 shortname: gameData.ShortName,
             });
         } catch (error) {
@@ -124,7 +124,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         try {
             setInstalling(false);
             await serverAPI.callPluginMethod<{}, LaunchOptions>("cancel_install", {
-                tabindex: tabindex,
+                tabindex: 0,
                 shortname: gameData.ShortName,
             });
         } catch (error) {
@@ -137,15 +137,15 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
         try {
             const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "target", "options");
             const data = await serverAPI.callPluginMethod<{}, LaunchOptions>("install_game", {
-                tabindex: tabindex,
+                tabindex: 0,
                 shortname: gameData.ShortName,
                 id: id,
             });
             const r = data.result as LaunchOptions;
-            await SteamClient.Apps.SetAppLaunchOptions(id, r.options);
+            await SteamClient.Apps.SetAppLaunchOptions(id, r.Options);
             await SteamClient.Apps.SetShortcutName(id, gameData.Name);
-            await SteamClient.Apps.SetShortcutExe(id, r.exe);
-            await SteamClient.Apps.SetShortcutStartDir(id, r.workingdir);
+            await SteamClient.Apps.SetShortcutExe(id, r.Exe);
+            await SteamClient.Apps.SetShortcutStartDir(id, r.WorkingDir);
             setSteamClientID(id.toString());
             setInstalling(false);
         } catch (error) {
@@ -204,12 +204,12 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; tabindex: number; shor
 
                                     confeditor={() => {
                                         //closeModal();
-                                        showModal(<ConfEditor serverAPI={serverAPI} tabindex={tabindex} shortname={shortname} platform={"linux"} forkname={"_"} version={"_"} />);
+                                        showModal(<ConfEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} platform={"linux"} forkname={"_"} version={"_"} />);
                                         //Router.CloseSideMenus();
                                         //Router.Navigate("/conf-editor/" + tabindex + "/" + shortname + "/linux/_/_");
                                     }}
                                     bateditor={() => {
-                                        showModal(<BatEditor serverAPI={serverAPI} tabindex={tabindex} shortname={shortname} />);
+                                        showModal(<BatEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} />);
                                     }}
                                     hasDosConfig={gameData.HasDosConfig}
                                     hasBatFiles={gameData.HasBatFiles} />
