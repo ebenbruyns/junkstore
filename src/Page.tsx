@@ -3,10 +3,12 @@ import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, StoreTabsContent } from "./Types";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { StoreTabs } from "./StoreTabs";
+import Logger from "./logger";
 
 export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
+    const logger = new Logger("StorePage");
     const { initActionSet, initAction } = useParams<{ initActionSet: string; initAction: string; }>();
-    console.log(`Action Set: ${initActionSet}, Init Action: ${initAction}`);
+    logger.debug(`Action Set: ${initActionSet}, Init Action: ${initAction}`);
     const [content, setContent] = useState({
         Type: "Error",
         Content: {
@@ -15,19 +17,20 @@ export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             Data: "",
         }
     } as ContentResult);
+    // @ts-ignore
     const [setName, setSetName] = useState("");
     useEffect(() => {
         onInit();
     }, []);
     const onInit = async () => {
         try {
-            console.log("init");
+            logger.debug("init");
             const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
                 actionSet: initActionSet,
                 actionName: initAction,
                 inputData: "",
             });
-            console.log(data);
+            logger.debug(data);
             const result = data.result as ActionSet;
             const tmp = result.SetName;
             setSetName(tmp);
@@ -37,9 +40,9 @@ export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                 inputData: ""
             });
             setContent(content.result as ContentResult);
-            console.log(content);
+            logger.debug(content);
         } catch (error) {
-            console.error("Page.tsx", error);
+            logger.error("Page.tsx", error);
         }
     };
 

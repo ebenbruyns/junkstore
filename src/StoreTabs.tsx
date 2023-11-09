@@ -2,14 +2,16 @@ import { ServerAPI, Tabs } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { StorePage } from "./StorePage";
 import { ActionSet, StoreTabsContent } from "./Types";
+import Logger from "./logger";
 
 
 
 export const StoreTabs: VFC<{ serverAPI: ServerAPI, tabs: StoreTabsContent; initActionSet: string; initAction: string }> =
     ({ serverAPI, tabs,
         initAction, initActionSet }) => {
+        const logger = new Logger("StoreTabs");
         // const { actionSet, actionName } = useParams<{ actionSet: string; actionName: string }>();
-        // console.log(`Action Set: ${actionSet}, Action Name: ${actionName}`);
+        // logger.debug(`Action Set: ${actionSet}, Action Name: ${actionName}`);
 
         const [currentTab, setCurrentTab] = useState("-1");
 
@@ -23,13 +25,13 @@ export const StoreTabs: VFC<{ serverAPI: ServerAPI, tabs: StoreTabsContent; init
         }, []);
         const onInit = async () => {
             try {
-                console.log(`init StoreTabs.tsx: ${initActionSet}, ${initAction}`);
+                logger.debug(`init StoreTabs.tsx: ${initActionSet}, ${initAction}`);
                 if (!initActionSet || initActionSet === "") {
-                    console.log("initActionSet is empty");
+                    logger.debug("initActionSet is empty");
                     return;
                 }
                 if (!initAction || initAction === "") {
-                    console.log("initAction is empty");
+                    logger.debug("initAction is empty");
                     return;
                 }
                 const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
@@ -37,10 +39,10 @@ export const StoreTabs: VFC<{ serverAPI: ServerAPI, tabs: StoreTabsContent; init
                     actionName: initAction,
                     inputData: "",
                 });
-                console.log(`StoreTabs.tsx init result: ${data}`);
+                logger.debug(`StoreTabs.tsx init result: ${data}`);
                 const result = data.result as ActionSet;
                 const tmp = result.SetName;
-                console.log(`StoreTabs.tsx actionSet result: ${tmp}`);
+                logger.debug(`StoreTabs.tsx actionSet result: ${tmp}`);
                 setActionSetName(tmp);
                 setContent(tabs)
                 setCurrentTab("0")
@@ -63,7 +65,7 @@ export const StoreTabs: VFC<{ serverAPI: ServerAPI, tabs: StoreTabsContent; init
                         id: index.toString(),
                     }))}
                 />}
-                {content.Tabs.length === 0 && <div>Loading... tabid: {currentTab}</div>}
+                {content.Tabs.length === 0 && <div>Loading...</div>}
             </div>
         );
     };

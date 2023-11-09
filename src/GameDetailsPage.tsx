@@ -6,12 +6,12 @@ export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
   serverAPI,
 }) => {
 
-  const { tabindex, shortname } = useParams<{
-    tabindex: number;
+  const { shortname } = useParams<{
+
     shortname: string
   }>();
   return (
-    <GameDetailsItem serverAPI={serverAPI} tabindex={tabindex} shortname={shortname} />
+    <GameDetailsItem serverAPI={serverAPI} shortname={shortname} />
   )
 }
 

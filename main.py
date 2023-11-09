@@ -22,14 +22,15 @@ class Helper:
                                                          stderr=asyncio.subprocess.PIPE,
                                                          stdin=asyncio.subprocess.PIPE,
                                                          shell=True,
-                                                         env=env
+                                                         env=env,
                                                          )
-            await proc.wait()
+            # await proc.wait()
             stdout, stderr = await proc.communicate(input.encode())
+            # await proc.wait()
             stdout = stdout.decode()
             stderr = stderr.decode()
             decky_plugin.logger.info(
-                f'Returncode: {proc.returncode}\nSTDOUT: {stdout}\nSTDERR: {stderr[:300]}')
+                f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
             return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
         except Exception as e:
             decky_plugin.logger.error(f"Error in pyexec_subprocess: {e}")
@@ -77,11 +78,13 @@ class Helper:
             encoded_args = [shlex.quote(arg) for arg in args]
             decky_plugin.logger.info(
                 f"call_script: {cmd} {' '.join(encoded_args)}")
-            decky_plugin.logger.info(f"input_data: {input_data}")
+            # decky_plugin.logger.info(f"input_data: {input_data}")
             decky_plugin.logger.info(f"args: {args}")
             cmd = f"{cmd} {' '.join(encoded_args)}"
 
             res = await Helper.pyexec_subprocess(cmd, input_data)
+            # decky_plugin.logger.info(
+            #    f"call_script result: {res['stdout'][:100]}")
             return res['stdout']
         except Exception as e:
             decky_plugin.logger.error(f"Error in call_script: {e}")
@@ -113,20 +116,20 @@ class Helper:
                             decky_plugin.logger.info(
                                 f"execute_action input_data: {input_data}")
                             result = await Helper.call_script(os.path.expanduser(cmd), *args, input_data=input_data)
-                            decky_plugin.logger.info(
-                                f"execute_action result: {result}")
+                            # decky_plugin.logger.info(
+                            #    f"execute_action result: {result}")
                             try:
                                 json_result = json.loads(result)
-                                decky_plugin.logger.info(
-                                    f"json_result: {json_result}")
                                 if action['Type'] == 'Init':
                                     Helper.write_action_set_to_cache(
                                         json_result['SetName'], json_result['Actions'])
                             except Exception as e:
+                                decky_plugin.logger.info(
+                                    "Error parsing json result", e)
                                 json_result = {'Type': 'Error',
-                                               'Message': 'Error parsing json result', 'Data': result}
+                                               'Message': f"Error parsing json result {e}", 'Data': result}
                             return json_result
-            return json.dumps({'Type': 'Error', 'Message': f"Action not found {actionSet}, {actionName}", 'Data': result})
+            return json.dumps({'Type': 'Error', 'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]})
         except Exception as e:
             decky_plugin.logger.error(f"Error executing action: {e}")
             return json.dumps({'Type': 'Error', 'Message': 'Action not found', 'Data': str(e)})
@@ -140,9 +143,9 @@ class Helper:
             os.makedirs(cache_dir)
         file_path = os.path.join(cache_dir, f"{setName}.json")
 
-        if not os.path.exists(file_path):
-            with open(file_path, 'w') as f:
-                json.dump(actionSet, f)
+        # if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            json.dump(actionSet, f)
 
     @staticmethod
     def get_action_script(setName, actionName):
@@ -233,7 +236,7 @@ class Helper:
                 f"get_json_output: tabindex: {tabindex} scriptname: {script_name} args: {args}")
             result = await Helper.build_cmd(
                 tabindex, script_name, *args, input_data=input_data)
-            decky_plugin.logger.info(f"result: {result[:100]}")
+            # decky_plugin.logger.info(f"result: {result[:100]}")
             return json.loads(result)
         except Exception as e:
             decky_plugin.logger.error(f"Error in _get_json_output: {result}")
@@ -248,7 +251,7 @@ class Plugin:
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
             result = await Helper.execute_action("init", "init")
-            decky_plugin.logger.info(f"init result: {result}")
+           # decky_plugin.logger.info(f"init result: {result}")
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
 
@@ -261,7 +264,7 @@ class Plugin:
             decky_plugin.logger.info(f"execute_action kwargs: {kwargs}")
 
             result = await Helper.execute_action(actionSet, actionName, *args, *kwargs.values(), input_data=inputData)
-            decky_plugin.logger.info(f"execute_action result: {result}")
+           # decky_plugin.logger.info(f"execute_action result: {result}")
             return result
         except Exception as e:
             decky_plugin.logger.error(f"Error in execute_action: {e}")

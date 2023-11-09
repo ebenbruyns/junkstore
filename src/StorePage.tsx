@@ -3,6 +3,7 @@ import { useState, useEffect, VFC } from "react";
 import GridContainer from "./GridContainer";
 import { ActionSet, ContentError, ContentResult, GameDataResult } from "./Types";
 import { ErrorDisplay } from "./ErrorDisplay";
+import Logger from "./logger";
 
 export const StorePage: VFC<{
   serverAPI: ServerAPI,
@@ -13,6 +14,8 @@ export const StorePage: VFC<{
   initActionSet,
   initAction
 }) => {
+    const logger = new Logger("StorePage");
+    logger.log("Startup")
     const [actionSetName, setActionSetName] = useState("");
     const [content, setContent] = useState({
       Type: "Empty"
@@ -20,10 +23,13 @@ export const StorePage: VFC<{
     const [searchQuery, setSearchQuery] = useState("");
     const [filterInstalled, setFilterInstalled] = useState(false);
     const [limited, setLimited] = useState(true);
-    const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
-      console.log(`setName ${setName}, filter: ${filter}, installed: ${installed}, limited: ${limited}`)
+    const fetchData = async (setName: string,
+      filter: string,
+      installed: boolean,
+      limited: boolean) => {
+      logger.debug(`setName ${setName}, filter: ${filter}, installed: ${installed}, limited: ${limited}`)
       if (!setName || setName === "") {
-        console.log("setName is empty");
+        logger.debug("setName is empty");
         return;
       }
 
@@ -32,32 +38,32 @@ export const StorePage: VFC<{
         actionName: "GetContent",
         filter: filter,
         installed: String(installed),
-        limited: String(limited),
-        inputData: ""
+        limited: String(limited)
       }).then((data) => {
 
         setContent(data.result as ContentResult);
       }
       ).catch((error) => {
-        console.error("StorePage.tsx: ", error);
+        logger.error("GetContent: ", error);
       })
     };
     useEffect(() => {
 
-      fetchData(actionSetName, searchQuery, filterInstalled, limited);
+      fetchData(actionSetName, searchQuery, filterInstalled, limited).then(() => {
+      });
     }, [searchQuery, filterInstalled, limited, actionSetName]);
     useEffect(() => {
       onInit();
     }, []);
     const onInit = async () => {
       try {
-        console.log(`init StorePage.tsx:  ${initActionSet}, ${initAction}`);
+        logger.debug(`OnInit:  ${initActionSet}, ${initAction}`);
         if (!initActionSet || initActionSet === "") {
-          console.log("initActionSet is empty");
+          logger.debug("initActionSet is empty");
           return;
         }
         if (!initAction || initAction === "") {
-          console.log("initAction is empty");
+          logger.debug("initAction is empty");
           return;
         }
         const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
@@ -65,16 +71,16 @@ export const StorePage: VFC<{
           actionName: initAction,
           inputData: "",
         });
-        console.log("init StorePage result: ", data);
+        logger.debug("init StorePage result: ", data);
         const result = data.result as ActionSet;
         const tmp = result.SetName;
-        console.log(`StorePage.tsx actionSet name: ${tmp}`);
+        logger.debug(`actionSet name: ${tmp}`);
         setActionSetName(tmp);
         fetchData(tmp, "", filterInstalled, limited);
 
-        console.log(content);
+        logger.debug(content);
       } catch (error) {
-        console.error("Page.tsx", error);
+        console.error("OnInit: ", error);
       }
 
 

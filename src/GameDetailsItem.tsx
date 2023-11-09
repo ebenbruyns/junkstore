@@ -6,11 +6,14 @@ import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { ConfEditor } from "./ConfEditor";
 import { BatEditor } from "./BatEditor";
 import { gameIDFromAppID } from "./gameIDFromAppID";
+import Logger from "./logger";
 
 
 export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; closeModal?: any; }> = ({
     serverAPI, shortname, closeModal
 }) => {
+
+    const logger = new Logger("GameDetailsItem");
     const [gameData, setGameData] = useState({} as GameDetails);
     const [steamClientID, setSteamClientID] = useState("");
     const [installing, setInstalling] = useState(false);
@@ -48,43 +51,43 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
             setGameData(res);
             setSteamClientID(res.SteamClientID);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     };
 
     const updateProgress = async () => {
         while (installingRef.current) {
-            console.log("updateProgress loop starting");
+            logger.debug("updateProgress loop starting");
             try {
-                console.log("updateProgress");
+                logger.debug("updateProgress");
                 serverAPI.callPluginMethod<{}, ProgressUpdate>("get_install_progress", {
                     tabindex: 0,
                     shortname: shortname,
                 }).then((res) => {
                     const progressUpdate = res.result as ProgressUpdate;
                     if (progressUpdate != null) {
-                        console.log(progressUpdate);
+                        logger.debug(progressUpdate);
                         setProgress(progressUpdate);
-                        console.log(progressUpdate.Percentage);
+                        logger.debug(progressUpdate.Percentage);
                         if (progressUpdate.Percentage >= 100) {
                             setInstalling(false);
-                            console.log("setInstalling(false)");
+                            logger.debug("setInstalling(false)");
                             install();
                             return;
                         }
                     }
                 }).catch((e) => {
-                    console.log("Error in progress updater", e);
-                    console.error('Error in progress updater', e);
+                    logger.debug("Error in progress updater", e);
+                    logger.error('Error in progress updater', e);
                 });
             } catch (e) {
-                console.log("Error in progress updater", e);
-                console.error('Error in progress updater', e);
+                logger.debug("Error in progress updater", e);
+                logger.error('Error in progress updater', e);
             }
 
-            console.log("sleeping");
+            logger.debug("sleeping");
             await sleep(1000);
-            console.log("woke up");
+            logger.debug("woke up");
         }
     };
 
@@ -106,7 +109,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
             setSteamClientID("");
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     };
     const download = async () => {
@@ -117,7 +120,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
                 shortname: gameData.ShortName,
             });
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     };
     const cancelInstall = async () => {
@@ -128,7 +131,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
                 shortname: gameData.ShortName,
             });
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     };
     const install = async () => {
@@ -149,7 +152,7 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
             setSteamClientID(id.toString());
             setInstalling(false);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     };
     return (

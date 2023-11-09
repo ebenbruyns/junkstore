@@ -5,7 +5,7 @@ import {
 } from "decky-frontend-lib";
 import { VFC } from "react";
 import { StoreContent } from "./Types";
-
+// @ts-ignore
 export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initAction: string }> = ({ content, initAction, initActionSet }) => {
     return (
         <>

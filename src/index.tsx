@@ -11,6 +11,7 @@ import { ActionSet, ContentError } from "./Types";
 import { ContentResult, StoreContent } from "./Types";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { MainMenu } from "./MainMenu";
+import Logger from "./logger";
 
 // interface ExecuteAction {
 //   setName: string;
@@ -20,6 +21,7 @@ import { MainMenu } from "./MainMenu";
 // }
 // @ts-ignore
 const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
+  const logger = new Logger("index");
   const [content, setContent] = useState({
     Type: "",
     Content: {}
@@ -30,14 +32,13 @@ const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: st
   }, []);
   const onInit = async () => {
     try {
-      console.log("init");
+      logger.debug("init");
       const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
         actionSet: initActionSet,
         actionName: initAction,
-        inputData: "",
-        test: "test"
+        inputData: ""
       });
-      console.log(data);
+      logger.debug("init result: ", data);
       const result = data.result as ActionSet;
       const tmp = result.SetName;
       setSetName(tmp)
@@ -47,9 +48,10 @@ const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: st
         inputData: ""
       });
       setContent(content.result as ContentResult);
-      console.log(content);
+      logger.debug("GetContent result: ", content);
     } catch (error) {
-      console.error("index.tsx: ", error);
+
+      logger.error("OnInit: ", error);
     }
   };
 
