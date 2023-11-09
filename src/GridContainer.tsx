@@ -2,14 +2,19 @@ import GameImage from "./GameImage";
 import { Focusable, ServerAPI, showModal } from "decky-frontend-lib";
 import { GameData } from "./Types";
 import { GameDetailsItem } from "./GameDetailsItem";
-function GridContainer(props: {
-  games: GameData[]
-  filterFn: () => void
-  limitFn: () => void
-  limited: boolean
+import { VFC } from "react";
 
-  serverAPI: ServerAPI
-}) {
+interface GridContainerProperties {
+  games: GameData[];
+  filterFn: () => void;
+  limitFn: () => void;
+  limited: boolean;
+  serverAPI: ServerAPI;
+  initActionSet: string;
+  initAction: string;
+}
+
+const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterFn, limitFn, limited, initActionSet, initAction }) => {
   return (
     <Focusable
       style={{
@@ -24,28 +29,28 @@ function GridContainer(props: {
         height: "calc (100% - 120px)",
         overflow: "scroll",
         gridAutoRows: "1fr"
-
       }}
       onSecondaryActionDescription="Toggle Installed Filter"
-      onSecondaryButton={props.filterFn}
-      onOptionsActionDescription={props.limited ? "Show All" : "Limit Results"}
-      onOptionsButton={props.limitFn}
+      onSecondaryButton={filterFn}
+      onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
+      onOptionsButton={limitFn}
     >
-      {props.games.map((game: GameData) => (
+      {games.map((game: GameData) => (
         <div style={{ width: "118px", height: "210px", overflow: "clip" }}>
           <GameImage
             key={game.ID}
             src={game.Images.length > 0 ? game.Images[0] : ""}
             alt={game.Name}
             onClick={() => {
-              showModal(<GameDetailsItem serverAPI={props.serverAPI} shortname={game.ShortName} />)
+              showModal(<GameDetailsItem serverAPI={serverAPI} shortname={game.ShortName} initActionSet={initActionSet} initAction="" />)
               //Router.CloseSideMenus();
-              //Router.Navigate("/game/" + props.tabindex + "/" + game.ShortName);
-
+              //Router.Navigate("/game/" + tabindex + "/" + game.ShortName);
             }}
-            filterFn={props.filterFn}
-            limitFn={props.limitFn}
-            limited={props.limited}
+            filterFn={filterFn}
+            limitFn={limitFn}
+            limited={limited}
+            initActionSet={initActionSet}
+            initAction={initAction}
           />
           <div style={{ width: "calc ((100%/6) - 40px)", overflow: "clip" }}>{game.Name}</div>
         </div>

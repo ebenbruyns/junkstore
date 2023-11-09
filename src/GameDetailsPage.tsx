@@ -2,16 +2,22 @@ import { ServerAPI, useParams } from "decky-frontend-lib";
 import { VFC } from "react";
 import { GameDetailsItem } from "./GameDetailsItem";
 
-export const GameDetailsPage: VFC<{ serverAPI: ServerAPI }> = ({
+interface GameDetailsPageProperties {
+  serverAPI: ServerAPI;
+
+}
+
+export const GameDetailsPage: VFC<GameDetailsPageProperties> = ({
   serverAPI,
 }) => {
 
-  const { shortname } = useParams<{
-
+  const { initActionSet, initAction, shortname } = useParams<{
+    initActionSet: string;
+    initAction: string;
     shortname: string
   }>();
   return (
-    <GameDetailsItem serverAPI={serverAPI} shortname={shortname} />
+    <GameDetailsItem serverAPI={serverAPI} shortname={shortname} initActionSet={initActionSet} initAction={initAction} />
   )
 }
 

@@ -270,38 +270,38 @@ class Plugin:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
             return None
 
-    async def get_scripts(self):
-        try:
-            decky_plugin.logger.info(f"get_scripts: {self}")
-            return Helper.get_scripts()
+    # async def get_scripts(self):
+    #     try:
+    #         decky_plugin.logger.info(f"get_scripts: {self}")
+    #         return Helper.get_scripts()
 
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in get_scripts: {e}")
-            return None
+    #     except Exception as e:
+    #         decky_plugin.logger.error(f"Error in get_scripts: {e}")
+    #         return None
 
-    async def get_init_data(self):
-        try:
-            decky_plugin.logger.info(f"get_init_data...")
-            result = await Helper.get_json_output(0, "get_init_data")
-            decky_plugin.logger.info(f"get_init_data: {result}")
-            return result
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in get_init_data: {e}")
-            return None
+    # async def get_init_data(self):
+    #     try:
+    #         decky_plugin.logger.info(f"get_init_data...")
+    #         result = await Helper.get_json_output(0, "get_init_data")
+    #         decky_plugin.logger.info(f"get_init_data: {result}")
+    #         return result
+    #     except Exception as e:
+    #         decky_plugin.logger.error(f"Error in get_init_data: {e}")
+    #         return None
 
-    async def get_game_data(self, tabindex, filter, installed, limited):
-        decky_plugin.logger.info(
-            f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
-        installed_only = "false"
-        if installed:
-            installed_only = "true"
-        limited_only = "false"
-        if limited:
-            limited_only = "true"
-        result = await Helper.get_json_output(tabindex,
-                                              "get_game_data", filter, installed_only, limited_only, input_data='')
-        decky_plugin.logger.info(result)
-        return result
+    # async def get_game_data(self, tabindex, filter, installed, limited):
+    #     decky_plugin.logger.info(
+    #         f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
+    #     installed_only = "false"
+    #     if installed:
+    #         installed_only = "true"
+    #     limited_only = "false"
+    #     if limited:
+    #         limited_only = "true"
+    #     result = await Helper.get_json_output(tabindex,
+    #                                           "get_game_data", filter, installed_only, limited_only, input_data='')
+    #     decky_plugin.logger.info(result)
+    #     return result
 
     async def get_game_details(self, tabindex: int, shortname):
         decky_plugin.logger.info(

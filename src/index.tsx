@@ -8,9 +8,6 @@ import { FaBoxOpen } from "react-icons/fa";
 import { Page } from "./Page";
 import { Content } from "./Content";
 
-export interface RunScriptArgs {
-  cmd: string;
-}
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {

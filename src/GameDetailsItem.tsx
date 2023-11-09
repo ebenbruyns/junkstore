@@ -1,7 +1,7 @@
 import { Focusable, ServerAPI, ModalRoot, showModal, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { GameDetails, LaunchOptions, ProgressUpdate } from "./Types";
+import { ContentResult, GameDetails, GameDetailsContent, LaunchOptions, LaunchOptionsContent, ProgressUpdate } from "./Types";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { ConfEditor } from "./ConfEditor";
 import { BatEditor } from "./BatEditor";
@@ -9,47 +9,67 @@ import { gameIDFromAppID } from "./gameIDFromAppID";
 import Logger from "./logger";
 
 
-export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; closeModal?: any; }> = ({
-    serverAPI, shortname, closeModal
+interface GameDetailsItemProperties {
+    serverAPI: ServerAPI;
+    shortname: string;
+    initActionSet: string;
+    initAction: string;
+    closeModal?: any;
+}
+
+export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
+    serverAPI, shortname, closeModal, initActionSet, initAction
 }) => {
 
     const logger = new Logger("GameDetailsItem");
-    const [gameData, setGameData] = useState({} as GameDetails);
+    logger.log("GameDetailsItem startup");
+    const [gameData, setGameData] = useState<ContentResult>({ Type: "Empty", Content: { Details: {} } } as ContentResult);
+    logger.log("GameDetailsItem gameData", gameData);
     const [steamClientID, setSteamClientID] = useState("");
+    logger.log("GameDetailsItem steamClientID", steamClientID);
     const [installing, setInstalling] = useState(false);
-    const [progress, setProgress] = useState({
+    logger.log("GameDetailsItem installing", installing);
+    const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
         Description: ""
     } as ProgressUpdate);
-    // const { tabindex, shortname } = useParams<{
-    //   tabindex: number;
-    //   shortname: string
-    // }>();
-    const installingRef = useRef(installing);
+    logger.log("GameDetailsItem progress", progress);
 
+    const installingRef = useRef(installing);
+    logger.log("GameDetailsItem installingRef", installingRef);
     useEffect(() => {
+        logger.log("GameDetailsItem installingRef.current = installing");
         installingRef.current = installing;
     }, [installing]);
 
 
     useEffect(() => {
         if (installing) {
+            logger.log("GameDetailsItem updateProgress");
             updateProgress();
         }
     }, [installing]);
-    const [] = useState("Play Game");
+    //const [] = useState("Play Game");
     useEffect(() => {
+        logger.log("GameDetailsItem onInit");
         onInit();
     }, []);
     const onInit = async () => {
         try {
-            const data = await serverAPI.callPluginMethod<{}, GameDetails>("get_game_details", {
-                tabindex: 0,
+            logger.debug("onInit starting");
+            const data = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
+                actionSet: initActionSet,
+                actionName: "GetDetails",
                 shortname: shortname,
+                inputData: ""
             });
-            const res = data.result as GameDetails;
+            logger.debug("onInit data", data);
+            const res = (data.result as ContentResult);
+            logger.debug("onInit res", res);
             setGameData(res);
-            setSteamClientID(res.SteamClientID);
+            if (res.Type === "GameDetails")
+                setSteamClientID((res.Content as GameDetailsContent).Details.SteamClientID);
+            logger.debug("onInit finished");
         } catch (error) {
             logger.error(error);
         }
@@ -60,9 +80,12 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
             logger.debug("updateProgress loop starting");
             try {
                 logger.debug("updateProgress");
-                serverAPI.callPluginMethod<{}, ProgressUpdate>("get_install_progress", {
-                    tabindex: 0,
+
+                serverAPI.callPluginMethod<{}, ProgressUpdate>("execute_action", {
+                    actionSet: initActionSet,
+                    actionName: "GetProgress",
                     shortname: shortname,
+                    inputData: ""
                 }).then((res) => {
                     const progressUpdate = res.result as ProgressUpdate;
                     if (progressUpdate != null) {
@@ -77,11 +100,9 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
                         }
                     }
                 }).catch((e) => {
-                    logger.debug("Error in progress updater", e);
                     logger.error('Error in progress updater', e);
                 });
             } catch (e) {
-                logger.debug("Error in progress updater", e);
                 logger.error('Error in progress updater', e);
             }
 
@@ -102,9 +123,12 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
     }, [installing]);
     const uninstall = async () => {
         try {
-            await serverAPI.callPluginMethod<{}, LaunchOptions>("uninstall_game", {
-                tabindex: 0,
-                shortname: gameData.ShortName,
+            const data = await serverAPI.callPluginMethod<{}, {}
+            >("execute_action", {
+                actionSet: initActionSet,
+                actionName: "Uninstall",
+                shortname: shortname,
+                inputData: ""
             });
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
             setSteamClientID("");
@@ -115,10 +139,13 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
     const download = async () => {
         try {
             setInstalling(true);
-            await serverAPI.callPluginMethod<{}, LaunchOptions>("download_game", {
-                tabindex: 0,
-                shortname: gameData.ShortName,
+            const data = await serverAPI.callPluginMethod<{}, {}>("execute_action", {
+                actionSet: initActionSet,
+                actionName: "Download",
+                shortname: shortname,
+                inputData: ""
             });
+
         } catch (error) {
             logger.error(error);
         }
@@ -126,10 +153,13 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
     const cancelInstall = async () => {
         try {
             setInstalling(false);
-            await serverAPI.callPluginMethod<{}, LaunchOptions>("cancel_install", {
-                tabindex: 0,
-                shortname: gameData.ShortName,
+            const data = await serverAPI.callPluginMethod<{}, {}>("execute_action", {
+                actionSet: initActionSet,
+                actionName: "CancelInstall",
+                shortname: shortname,
+                inputData: ""
             });
+
         } catch (error) {
             logger.error(error);
         }
@@ -139,88 +169,100 @@ export const GameDetailsItem: VFC<{ serverAPI: ServerAPI; shortname: string; clo
         //updateProgress();
         try {
             const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "target", "options");
-            const data = await serverAPI.callPluginMethod<{}, LaunchOptions>("install_game", {
-                tabindex: 0,
-                shortname: gameData.ShortName,
-                id: id,
+            const data = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
+                actionSet: initActionSet,
+                actionName: "Install",
+                shortname: shortname,
+                inputData: ""
             });
-            const r = data.result as LaunchOptions;
-            await SteamClient.Apps.SetAppLaunchOptions(id, r.Options);
-            await SteamClient.Apps.SetShortcutName(id, gameData.Name);
-            await SteamClient.Apps.SetShortcutExe(id, r.Exe);
-            await SteamClient.Apps.SetShortcutStartDir(id, r.WorkingDir);
-            setSteamClientID(id.toString());
-            setInstalling(false);
+            if (data.success) {
+                if (data.result.Type === "LaunchOptions") {
+
+                    const lauchOptions = ((data.result as ContentResult).Content as LaunchOptionsContent).LaunchOptions as LaunchOptions;
+                    await SteamClient.Apps.SetAppLaunchOptions(id, lauchOptions.Options);
+                    await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetailsContent).Details.Name);
+                    await SteamClient.Apps.SetShortcutExe(id, lauchOptions.Exe);
+                    await SteamClient.Apps.SetShortcutStartDir(id, lauchOptions.WorkingDir);
+                    setSteamClientID(id.toString());
+                    setInstalling(false);
+                }
+            }
         } catch (error) {
             logger.error(error);
         }
     };
     return (
         <>
-            <style>
-                {`
-    .GenericConfirmDialog {
-        width: 100% !important;
-    }
-`} </style>
-            <ModalRoot
-                // @ts-ignore
-                style={{ width: 800 }}
-                onCancel={closeModal}
-                onEscKeypress={closeModal}
-                closeModal={closeModal}>
-                <ScrollPanelGroup focusable={false} style={{ background: parent }}>
-                    <Panel>
-                        <div style={{ margin: "0px", color: "white" }}>
-                            <Focusable onOptionsButton={install}
-                                onOptionsActionDescription="Reinstall Game"
-                                onSecondaryActionDescription="Remove Game"
-                                onSecondaryButton={uninstall}
-                            >
+            {gameData.Type === "Empty" && <div>Loading...</div>}
+            {gameData.Type === "GameDetails" &&
+                <>
+                    <style>
+                        {`
+                            .GenericConfirmDialog {
+                                width: 100% !important;
+                            }
+                        `}
+                    </style>
+                    <ModalRoot
+                        // @ts-ignore
+                        style={{ width: 800 }}
+                        onCancel={closeModal}
+                        onEscKeypress={closeModal}
+                        closeModal={closeModal}>
+                        <ScrollPanelGroup focusable={false} style={{ background: parent }}>
+                            <Panel>
+                                <div style={{ margin: "0px", color: "white" }}>
+                                    <Focusable onOptionsButton={install}
+                                        onOptionsActionDescription="Reinstall Game"
+                                        onSecondaryActionDescription="Remove Game"
+                                        onSecondaryButton={uninstall}
+                                    >
 
-                                <GameDisplay
-                                    name={gameData.Name}
-                                    description={gameData.Description}
-                                    releaseDate={gameData.ReleaseDate}
-                                    developer={gameData.Developer}
-                                    images={gameData.Images}
-                                    publisher={gameData.Publisher}
-                                    source={gameData.Source}
-                                    genre={gameData.Genre}
-                                    steamClientID={steamClientID}
-                                    closeModal={closeModal}
-                                    installing={installing}
-                                    installer={download}
-                                    progress={progress}
-                                    cancelInstall={cancelInstall}
-                                    uninstaller={uninstall}
+                                        <GameDisplay
+                                            name={(gameData.Content as GameDetailsContent).Details.Name}
+                                            description={(gameData.Content as GameDetailsContent).Details.Description}
+                                            releaseDate={(gameData.Content as GameDetailsContent).Details.ReleaseDate}
+                                            developer={(gameData.Content as GameDetailsContent).Details.Developer}
+                                            images={(gameData.Content as GameDetailsContent).Details.Images}
+                                            publisher={(gameData.Content as GameDetailsContent).Details.Publisher}
+                                            source={(gameData.Content as GameDetailsContent).Details.Source}
+                                            genre={(gameData.Content as GameDetailsContent).Details.Genre}
+                                            steamClientID={steamClientID}
+                                            closeModal={closeModal}
+                                            installing={installing}
+                                            installer={download}
+                                            progress={progress}
+                                            cancelInstall={cancelInstall}
+                                            uninstaller={uninstall}
 
 
-                                    runner={() => {
-                                        setTimeout(() => {
-                                            closeModal();
-                                            let gid = gameIDFromAppID(parseInt(steamClientID));
-                                            SteamClient.Apps.RunGame(gid, "", -1, 100);
-                                        }, 500);
-                                        //SteamClient.Apps.RunGame(parseInt(gameData.SteamClientID), "", -1, 100)
-                                    }}
+                                            runner={() => {
+                                                setTimeout(() => {
+                                                    closeModal();
+                                                    let gid = gameIDFromAppID(parseInt(steamClientID));
+                                                    SteamClient.Apps.RunGame(gid, "", -1, 100);
+                                                }, 500);
+                                                //SteamClient.Apps.RunGame(parseInt(gameData.SteamClientID), "", -1, 100)
+                                            }}
 
-                                    confeditor={() => {
-                                        //closeModal();
-                                        showModal(<ConfEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} platform={"linux"} forkname={"_"} version={"_"} />);
-                                        //Router.CloseSideMenus();
-                                        //Router.Navigate("/conf-editor/" + tabindex + "/" + shortname + "/linux/_/_");
-                                    }}
-                                    bateditor={() => {
-                                        showModal(<BatEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} />);
-                                    }}
-                                    hasDosConfig={gameData.HasDosConfig}
-                                    hasBatFiles={gameData.HasBatFiles} />
-                            </Focusable>
-                        </div>
-                    </Panel>
-                </ScrollPanelGroup>
-            </ModalRoot>
+                                            confeditor={() => {
+                                                //closeModal();
+                                                showModal(<ConfEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} platform={"linux"} forkname={"_"} version={"_"} />);
+                                                //Router.CloseSideMenus();
+                                                //Router.Navigate("/conf-editor/" + tabindex + "/" + shortname + "/linux/_/_");
+                                            }}
+                                            bateditor={() => {
+                                                showModal(<BatEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} />);
+                                            }}
+                                            hasDosConfig={(gameData.Content as GameDetailsContent).Details.HasDosConfig}
+                                            hasBatFiles={(gameData.Content as GameDetailsContent).Details.HasBatFiles} />
+                                    </Focusable>
+                                </div>
+                            </Panel>
+                        </ScrollPanelGroup>
+                    </ModalRoot>
+                </>
+            }
         </>
     );
 };

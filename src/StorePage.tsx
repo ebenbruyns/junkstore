@@ -9,7 +9,7 @@
 import { Focusable, ServerAPI, TextField } from "decky-frontend-lib";
 import { useState, useEffect, VFC } from "react";
 import GridContainer from "./GridContainer";
-import { ActionSet, ContentError, ContentResult, GameDataResult } from "./Types";
+import { ActionSet, ContentError, ContentResult, GameDataContent } from "./Types";
 import { ErrorDisplay } from "./ErrorDisplay";
 import Logger from "./logger";
 
@@ -98,10 +98,12 @@ export const StorePage: VFC<StorePageProperties> = ({
       {content.Type === "GameGrid" && (
         <GridContainer
           serverAPI={serverAPI}
-          games={(content.Content as GameDataResult).Games}
+          games={(content.Content as GameDataContent).Games}
           limited={limited}
           limitFn={() => setLimited(!limited)}
           filterFn={() => setFilterInstalled(!filterInstalled)}
+          initActionSet={actionSetName}
+          initAction=""
         />
       )}
       {content.Type === "Error" && <ErrorDisplay error={content.Content as ContentError} />}

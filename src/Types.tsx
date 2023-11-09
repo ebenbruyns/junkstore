@@ -121,8 +121,14 @@ export interface ContentError extends Content {
   Message: string;
   Data: string;
 }
-export interface GameDataResult extends Content {
+export interface GameDataContent extends Content {
   Games: GameData[];
+}
+export interface LaunchOptionsContent extends Content {
+  LaunchOptions: LaunchOptions;
+}
+export interface GameDetailsContent extends Content {
+  Details: GameDetails;
 }
 export interface Panel {
   Title: string;
