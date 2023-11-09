@@ -103,7 +103,7 @@ export interface ActionSet {
 
 export interface ContentResult {
   Type: string;
-  Content: Content;
+  Content?: Content;
 }
 export interface Content { }
 export interface StoreContent extends Content {

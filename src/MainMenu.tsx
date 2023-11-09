@@ -1,32 +1,34 @@
-import {
-    ButtonItem, PanelSection,
-    PanelSectionRow,
-    Router
-} from "decky-frontend-lib";
+import { ButtonItem, PanelSection, PanelSectionRow, Router } from "decky-frontend-lib";
 import { VFC } from "react";
 import { StoreContent } from "./Types";
+/**
+ * Renders the main menu of the Junk Store.
+ * @param content - The content of the store.
+ * @param initActionSet - The initial action set.
+ * @param initAction - The initial action.
+ * @returns A React component that renders the main menu of the Junk Store.
+ */
 // @ts-ignore
 export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initAction: string }> = ({ content, initAction, initActionSet }) => {
     return (
         <>
-            {content.Panels.map((c) => (
-                <PanelSection title={c.Title}>
-
-                    {c.Actions && c.Actions.map((a) => (
+            {content.Panels.map((panel) => (
+                <PanelSection title={panel.Title}>
+                    {panel.Actions && panel.Actions.map((action) => (
                         <PanelSectionRow>
-
                             <ButtonItem
                                 layout="below"
                                 onClick={() => {
                                     Router.CloseSideMenus();
-                                    Router.Navigate(`/store/${encodeURIComponent(initActionSet)}/${encodeURIComponent(a.ActionId)}`);
+                                    Router.Navigate(`/store/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
                                 }}
                             >
-                                {a.Title}
+                                {action.Title}
                             </ButtonItem>
-                        </PanelSectionRow>))}
-
-                </PanelSection>))}
+                        </PanelSectionRow>
+                    ))}
+                </PanelSection>
+            ))}
             <PanelSection title="About">
                 <PanelSectionRow>
                     <ButtonItem
@@ -34,10 +36,12 @@ export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initA
                         onClick={() => {
                             Router.CloseSideMenus();
                             Router.Navigate("/support");
-                        }}>Support us</ButtonItem>
+                        }}
+                    >
+                        Support us
+                    </ButtonItem>
                 </PanelSectionRow>
             </PanelSection>
         </>
-
     );
 };

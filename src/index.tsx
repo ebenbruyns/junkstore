@@ -3,66 +3,11 @@ import {
   ServerAPI,
   staticClasses,
 } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
 import { FaBoxOpen } from "react-icons/fa";
 
 import { Page } from "./Page";
-import { ActionSet, ContentError } from "./Types";
-import { ContentResult, StoreContent } from "./Types";
-import { ErrorDisplay } from "./ErrorDisplay";
-import { MainMenu } from "./MainMenu";
-import Logger from "./logger";
+import { Content } from "./Content";
 
-// interface ExecuteAction {
-//   setName: string;
-//   actionName: string;
-//   inputData: string;  
-//   ...args: any[]
-// }
-// @ts-ignore
-const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
-  const logger = new Logger("index");
-  const [content, setContent] = useState({
-    Type: "",
-    Content: {}
-  } as ContentResult);
-  const [setName, setSetName] = useState("");
-  useEffect(() => {
-    onInit();
-  }, []);
-  const onInit = async () => {
-    try {
-      logger.debug("init");
-      const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
-        actionSet: initActionSet,
-        actionName: initAction,
-        inputData: ""
-      });
-      logger.debug("init result: ", data);
-      const result = data.result as ActionSet;
-      const tmp = result.SetName;
-      setSetName(tmp)
-      const content = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-        actionSet: result.SetName,
-        actionName: "GetContent",
-        inputData: ""
-      });
-      setContent(content.result as ContentResult);
-      logger.debug("GetContent result: ", content);
-    } catch (error) {
-
-      logger.error("OnInit: ", error);
-    }
-  };
-
-  return (
-    (<>
-      {content.Type === "MainMenu" && <MainMenu content={content.Content as StoreContent} initActionSet={setName} initAction="" />}
-      {content.Type === "Error" && <ErrorDisplay error={content.Content as ContentError} />}
-    </>
-
-    ));
-};
 export interface RunScriptArgs {
   cmd: string;
 }
