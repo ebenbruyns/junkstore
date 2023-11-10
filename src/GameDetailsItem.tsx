@@ -1,13 +1,13 @@
 import { Focusable, ServerAPI, ModalRoot, showModal, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, GameDetails, GameDetailsContent, LaunchOptions, LaunchOptionsContent, ProgressUpdate } from "./Types";
+import { ContentResult, GameDetailsContent, LaunchOptions, LaunchOptionsContent, ProgressUpdate } from "./Types";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { ConfEditor } from "./ConfEditor";
 import { BatEditor } from "./BatEditor";
 import { gameIDFromAppID } from "./gameIDFromAppID";
 import Logger from "./logger";
-
+import { Loading } from "./Loading";
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;
@@ -17,8 +17,11 @@ interface GameDetailsItemProperties {
     closeModal?: any;
 }
 
+
 export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
-    serverAPI, shortname, closeModal, initActionSet, initAction
+    serverAPI, shortname, closeModal, initActionSet,
+    // @ts-ignore
+    initAction
 }) => {
 
     const logger = new Logger("GameDetailsItem");
@@ -123,7 +126,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     }, [installing]);
     const uninstall = async () => {
         try {
-            const data = await serverAPI.callPluginMethod<{}, {}
+            await serverAPI.callPluginMethod<{}, {}
             >("execute_action", {
                 actionSet: initActionSet,
                 actionName: "Uninstall",
@@ -139,7 +142,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const download = async () => {
         try {
             setInstalling(true);
-            const data = await serverAPI.callPluginMethod<{}, {}>("execute_action", {
+            await serverAPI.callPluginMethod<{}, {}>("execute_action", {
                 actionSet: initActionSet,
                 actionName: "Download",
                 shortname: shortname,
@@ -153,7 +156,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const cancelInstall = async () => {
         try {
             setInstalling(false);
-            const data = await serverAPI.callPluginMethod<{}, {}>("execute_action", {
+            await serverAPI.callPluginMethod<{}, {}>("execute_action", {
                 actionSet: initActionSet,
                 actionName: "CancelInstall",
                 shortname: shortname,
@@ -193,26 +196,29 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     };
     return (
         <>
-            {gameData.Type === "Empty" && <div>Loading...</div>}
-            {gameData.Type === "GameDetails" &&
-                <>
-                    <style>
-                        {`
+
+            <>
+                <style>
+                    {`
                             .GenericConfirmDialog {
                                 width: 100% !important;
                             }
                         `}
-                    </style>
-                    <ModalRoot
-                        // @ts-ignore
-                        style={{ width: 800 }}
-                        onCancel={closeModal}
-                        onEscKeypress={closeModal}
-                        closeModal={closeModal}>
+                </style>
+                <ModalRoot
+                    // @ts-ignore
+                    style={{ width: 800 }}
+                    onCancel={closeModal}
+                    onEscKeypress={closeModal}
+                    closeModal={closeModal}>
+                    {gameData.Type === "Empty" && <Loading />}
+                    {gameData.Type === "GameDetails" &&
                         <ScrollPanelGroup focusable={false} style={{ background: parent }}>
                             <Panel>
                                 <div style={{ margin: "0px", color: "white" }}>
                                     <Focusable onOptionsButton={install}
+                                        // @ts-ignore
+                                        focusableIfNoChildren={true}
                                         onOptionsActionDescription="Reinstall Game"
                                         onSecondaryActionDescription="Remove Game"
                                         onSecondaryButton={uninstall}
@@ -221,12 +227,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                         <GameDisplay
                                             name={(gameData.Content as GameDetailsContent).Details.Name}
                                             description={(gameData.Content as GameDetailsContent).Details.Description}
-                                            releaseDate={(gameData.Content as GameDetailsContent).Details.ReleaseDate}
-                                            developer={(gameData.Content as GameDetailsContent).Details.Developer}
                                             images={(gameData.Content as GameDetailsContent).Details.Images}
-                                            publisher={(gameData.Content as GameDetailsContent).Details.Publisher}
-                                            source={(gameData.Content as GameDetailsContent).Details.Source}
-                                            genre={(gameData.Content as GameDetailsContent).Details.Genre}
                                             steamClientID={steamClientID}
                                             closeModal={closeModal}
                                             installing={installing}
@@ -259,10 +260,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                     </Focusable>
                                 </div>
                             </Panel>
-                        </ScrollPanelGroup>
-                    </ModalRoot>
-                </>
-            }
+                        </ScrollPanelGroup>}
+                </ModalRoot>
+            </>
+
         </>
     );
 };

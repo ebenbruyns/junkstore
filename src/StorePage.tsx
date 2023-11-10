@@ -12,6 +12,7 @@ import GridContainer from "./GridContainer";
 import { ActionSet, ContentError, ContentResult, GameDataContent } from "./Types";
 import { ErrorDisplay } from "./ErrorDisplay";
 import Logger from "./logger";
+import { Loading } from "./Loading";
 
 interface StorePageProperties {
   serverAPI: ServerAPI;
@@ -107,7 +108,7 @@ export const StorePage: VFC<StorePageProperties> = ({
         />
       )}
       {content.Type === "Error" && <ErrorDisplay error={content.Content as ContentError} />}
-      {content.Type === "Empty" && <div>Loading...</div>}
+      {content.Type === "Empty" && <Loading />}
     </>
   );
 };

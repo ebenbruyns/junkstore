@@ -50,26 +50,6 @@ class Helper:
                "PLATFORM": platform}
         return env
 
-# {
-#   "Id": "init",
-#   "Title": "Store",
-#   "Type": "SideBar",
-#   "Command": "~/bin/junk-store.sh init",
-#   "Actions": [
-#     {
-#       "Id": "Init",
-#       "Command": "~/bin/junk-store.sh init",
-#       "Title": "Init Store",
-#       "Type": "Init"
-#     },
-#     {
-#       "Id": "Content",
-#       "Command": "~/bin/junk-store.sh content",
-#       "Title": "Content",
-#       "Type": "PageList"
-#     }
-#   ]
-# }
     @staticmethod
     async def call_script(cmd: str, *args, input_data=''):
         try:
@@ -270,47 +250,6 @@ class Plugin:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
             return None
 
-    # async def get_scripts(self):
-    #     try:
-    #         decky_plugin.logger.info(f"get_scripts: {self}")
-    #         return Helper.get_scripts()
-
-    #     except Exception as e:
-    #         decky_plugin.logger.error(f"Error in get_scripts: {e}")
-    #         return None
-
-    # async def get_init_data(self):
-    #     try:
-    #         decky_plugin.logger.info(f"get_init_data...")
-    #         result = await Helper.get_json_output(0, "get_init_data")
-    #         decky_plugin.logger.info(f"get_init_data: {result}")
-    #         return result
-    #     except Exception as e:
-    #         decky_plugin.logger.error(f"Error in get_init_data: {e}")
-    #         return None
-
-    # async def get_game_data(self, tabindex, filter, installed, limited):
-    #     decky_plugin.logger.info(
-    #         f"get_game_data: {filter} tabindex: {tabindex} self: {self}")
-    #     installed_only = "false"
-    #     if installed:
-    #         installed_only = "true"
-    #     limited_only = "false"
-    #     if limited:
-    #         limited_only = "true"
-    #     result = await Helper.get_json_output(tabindex,
-    #                                           "get_game_data", filter, installed_only, limited_only, input_data='')
-    #     decky_plugin.logger.info(result)
-    #     return result
-
-    async def get_game_details(self, tabindex: int, shortname):
-        decky_plugin.logger.info(
-            f"get_game_details: {shortname} tabindex: {tabindex} self: {self}")
-        result = await Helper.get_json_output(
-            tabindex, "get_game_details", shortname)
-        decky_plugin.logger.info(result)
-        return result
-
     async def save_config(self, tabindex, shortname, platform, forkname, version, config_data):
         if forkname == '_':
             forkname = ''
@@ -329,63 +268,6 @@ class Plugin:
             version = ''
         result = await Helper.get_json_output(tabindex,
                                               "get_config", shortname, platform, forkname, version)
-        return result
-
-    async def get_install_progress(self, tabindex, shortname):
-        try:
-            decky_plugin.logger.info(
-                f"get_install_progress: {shortname} tabindex: {tabindex} self: {self}")
-            result = await Helper.get_json_output(
-                tabindex, "get_install_progress", shortname)
-            decky_plugin.logger.info(f"get_install_progress: {result}")
-            return result
-        except Exception as e:
-            decky_plugin.logger.exception(
-                f"Error getting install progress: {e}")
-            raise
-
-    async def download_game(self, tabindex, shortname):
-        try:
-            decky_plugin.logger.info(
-                f"download_game: {shortname} {id} tabindex: {tabindex} self: {self}")
-            result = await Helper.build_cmd(
-                tabindex, "download_game", shortname)
-            decky_plugin.logger.info(f"download_game: {result}")
-            return result
-        except Exception as e:
-            decky_plugin.logger.exception(f"Error downloading game: {e}")
-            raise
-
-    async def cancel_install(self, tabindex, shortname):
-        try:
-            decky_plugin.logger.info(
-                f"cancel_install: {shortname} {id} tabindex: {tabindex} self: {self}")
-            result = await Helper.get_json_output(
-                tabindex, "cancel_install", shortname)
-            decky_plugin.logger.info(f"cancel_install: {result}")
-            return result
-        except Exception as e:
-            decky_plugin.logger.exception(f"Error cancelling install: {e}")
-            raise
-
-    async def install_game(self, tabindex, shortname, id):
-        try:
-            decky_plugin.logger.info(
-                f"install_game: {shortname} {id} tabindex: {tabindex} self: {self}")
-            result = await Helper.get_json_output(
-                tabindex, "install_game", shortname,  str(id))
-            decky_plugin.logger.info(f"install_game: {result}")
-            return result
-        except Exception as e:
-            decky_plugin.logger.exception(f"Error installing game: {e}")
-            raise
-
-    async def uninstall_game(self, tabindex, shortname):
-        decky_plugin.logger.info(
-            f"uninstall_game: {shortname} tabindex: {tabindex} self: {self}")
-        result = await Helper.get_json_output(
-            tabindex, "uninstall_game", shortname)
-        decky_plugin.logger.info(f"install_game: {result}")
         return result
 
     async def get_game_bats(self, tabindex, shortname):

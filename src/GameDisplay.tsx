@@ -19,12 +19,7 @@ const GameDisplay: VFC<{
   steamClientID: string;
   runner: () => void;
   confeditor: () => void;
-  developer: string;
-  releaseDate: string;
-  genre: string;
-  source: string;
   description: string;
-  publisher: string;
   bateditor: () => void;
   hasDosConfig: boolean;
   hasBatFiles: boolean;
@@ -43,10 +38,6 @@ const GameDisplay: VFC<{
     cancelInstall,
     runner,
     confeditor,
-    developer,
-    releaseDate,
-    genre,
-    source,
     description,
     // @ts-ignore
     publisher,
@@ -59,9 +50,11 @@ const GameDisplay: VFC<{
   }
 ) => {
     return (
-
-      <PanelSection title={name}>
+      <PanelSection>
+        <h1>{name}</h1>
         <Focusable
+          // @ts-ignore
+          focusableIfNoChildren={true}
 
           style={{
             marginLeft: "0px",
@@ -229,27 +222,28 @@ const GameDisplay: VFC<{
 
             </Focusable>
           </PanelSection>
-          <PanelSectionRow style={{ margin: "10px" }}>
-            Developer: {developer} {releaseDate}
-          </PanelSectionRow>
-          <PanelSectionRow style={{ margin: "10px" }}>
-            Genre: {genre}
-          </PanelSectionRow>
-          <PanelSectionRow style={{ margin: "10px" }}>
-            Source: {source}
-          </PanelSectionRow>
 
-          <PanelSectionRow style={{ margin: "10px" }}>
-            <ScrollPanelGroup
-              focusable={false}
-              style={{ flex: 1, minHeight: 0, height: "200px" }}
-              scrollPaddingTop={32}
-            >
-              <Panel focusable={true} noFocusRing={false}>
-                {description}
+
+          <ScrollPanelGroup
+            focusable={false}
+            style={{ flex: 1, minHeight: 0, height: "200px", width: "100%" }}
+            scrollPaddingTop={32}
+          >
+            <Focusable
+              // @ts-ignore
+              focusableIfNoChildren={true}
+              onCancel={(_) => {
+                //e.stopPropagation();
+                closeModal();
+                // Router.CloseSideMenus();
+              }}
+              onCancelActionDescription="Go back to Store" >
+              <Panel focusable={true} noFocusRing={false} style={{ width: "100%" }}>
+                <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
               </Panel>
-            </ScrollPanelGroup>
-          </PanelSectionRow>
+            </Focusable>
+          </ScrollPanelGroup>
+
         </Focusable>
       </PanelSection>
 
