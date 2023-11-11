@@ -41,6 +41,8 @@ export const BatEditor: VFC<{
                 })
 
             setBatData(data.result as BatData[]);
+            if (data.result.length > 0)
+                setSelectedBat(data.result[0] as BatData);
 
         }
 
@@ -83,56 +85,58 @@ export const BatEditor: VFC<{
                                 onCancelActionDescription="Go back to Game Details"
                             >
                                 <PanelSection title={"Configuration: " + contentId}>
-                                    <Focusable
-
-                                        noFocusRing={false}
-                                        style={{
-                                            marginTop: "40px",
-                                            height: "calc( 100% - 40px )",
-
-                                            justifyContent: "center",
-                                            margin: "40px",
-                                        }}
-                                    >
-                                        <Focusable style={{ marginBottom: "1em" }}>
-                                            <Dropdown rgOptions={batData.map((bat) => {
-                                                return { data: bat.Id, label: bat.Path };
-                                            })}
-                                                selectedOption={batData[0].Id}
-                                                onChange={(e: any) => {
-                                                    const temp = batData.find((bat) => bat.Id == e.data);
-                                                    setSelectedBat(temp as BatData);
-
-                                                }} />
-                                        </Focusable>
+                                    {batData.length > 0 && (
                                         <Focusable
-                                            // @ts-ignore
-                                            focusableIfNoChildren={true}
-                                            noFocusRing={true}
-                                            onFocusCapture={() => {
-                                                if (focusRef && focusRef.current != null)
-                                                    // @ts-ignore
-                                                    focusRef.current.focus();
-                                            }}>
-                                            <textarea
-                                                ref={focusRef}
-                                                style={{ width: "calc( 100% - 10px )", height: "200px " }}
-                                                value={selectedBat.Content}
-                                                onChange={(e) => {
-                                                    const newContent = e.target.value;
-                                                    setSelectedBat(prevSelectedBat => ({ ...prevSelectedBat, Content: newContent }));
 
-                                                    setBatData(prevBatData => {
-                                                        const newData = [...prevBatData];
-                                                        const batIndex = newData.findIndex(bat => bat.Id === selectedBat.Id);
-                                                        if (batIndex !== -1) {
-                                                            newData[batIndex] = { ...newData[batIndex], Content: newContent };
-                                                        }
-                                                        return newData;
-                                                    });
-                                                }} />
+                                            noFocusRing={false}
+                                            style={{
+                                                marginTop: "40px",
+                                                height: "calc( 100% - 40px )",
+
+                                                justifyContent: "center",
+                                                margin: "40px",
+                                            }}
+                                        >
+                                            <Focusable style={{ marginBottom: "1em" }}>
+                                                <Dropdown rgOptions={batData.map((bat) => {
+                                                    return { data: bat.Id, label: bat.Path };
+                                                })}
+                                                    selectedOption={batData[0].Id}
+                                                    onChange={(e: any) => {
+                                                        const temp = batData.find((bat) => bat.Id == e.data);
+                                                        setSelectedBat(temp as BatData);
+
+                                                    }} />
+                                            </Focusable>
+                                            <Focusable
+                                                // @ts-ignore
+                                                focusableIfNoChildren={true}
+                                                noFocusRing={true}
+                                                onFocusCapture={() => {
+                                                    if (focusRef && focusRef.current != null)
+                                                        // @ts-ignore
+                                                        focusRef.current.focus();
+                                                }}>
+                                                <textarea
+                                                    ref={focusRef}
+                                                    style={{ width: "calc( 100% - 10px )", height: "200px " }}
+                                                    value={selectedBat.Content}
+                                                    onChange={(e) => {
+                                                        const newContent = e.target.value;
+                                                        setSelectedBat(prevSelectedBat => ({ ...prevSelectedBat, Content: newContent }));
+
+                                                        setBatData(prevBatData => {
+                                                            const newData = [...prevBatData];
+                                                            const batIndex = newData.findIndex(bat => bat.Id === selectedBat.Id);
+                                                            if (batIndex !== -1) {
+                                                                newData[batIndex] = { ...newData[batIndex], Content: newContent };
+                                                            }
+                                                            return newData;
+                                                        });
+                                                    }} />
+                                            </Focusable>
                                         </Focusable>
-                                    </Focusable>
+                                    )}
                                 </PanelSection>
                             </Focusable>
 
