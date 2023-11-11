@@ -7,6 +7,9 @@ import json
 
 
 class Helper:
+
+    action_cache = {}
+
     @staticmethod
     async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None):
         try:
@@ -71,117 +74,92 @@ class Helper:
             return None
 
     @staticmethod
-    async def execute_action(actionSet, actionName, *args, input_data=''):
-        try:
-            decky_plugin.logger.info(
-                f"execute_action: {actionSet} {actionName} {args} {input_data}")
+    def get_action(actionSet, actionName):
+        decky_plugin.logger.info(
+            f"get_command action_cache {Helper.action_cache}")
+        result = None
+        set = Helper.action_cache.get(actionSet)
+        decky_plugin.logger.info(f"set: {set}")
+        if set:
+            for action in set:
+                if action['Id'] == actionName:
+                    result = action
+        if not result:
             file_path = os.path.join(
                 decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, f"{actionSet}.json")
-            decky_plugin.logger.info(
-                f"Helper.execute_action file path: {file_path}")
             if not os.path.exists(file_path):
                 file_path = os.path.join(
                     decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache", f"{actionSet}.json")
-            result = ""
+
             if os.path.exists(file_path):
                 with open(file_path) as f:
                     data = json.load(f)
                     for action in data:
                         if action['Id'] == actionName:
-                            cmd = action['Command']
-                            decky_plugin.logger.info(
-                                f"execute_action cmd: {cmd}")
-                            decky_plugin.logger.info(
-                                f"execute_action args: {args}")
-                            decky_plugin.logger.info(
-                                f"execute_action input_data: {input_data}")
-                            result = await Helper.call_script(os.path.expanduser(cmd), *args, input_data=input_data)
-                            # decky_plugin.logger.info(
-                            #    f"execute_action result: {result}")
-                            try:
-                                json_result = json.loads(result)
-                                if action['Type'] == 'Init':
-                                    Helper.write_action_set_to_cache(
-                                        json_result['SetName'], json_result['Actions'])
-                            except Exception as e:
-                                decky_plugin.logger.info(
-                                    "Error parsing json result", e)
-                                json_result = {'Type': 'Error',
-                                               'Message': f"Error parsing json result {e}", 'Data': result}
-                            return json_result
+                            result = action
+        decky_plugin.logger.info(f"get_command command: {result}")
+        decky_plugin.logger.info(f"action_cache {Helper.action_cache}")
+
+        return result
+
+    @staticmethod
+    async def execute_action(actionSet, actionName, *args, input_data=''):
+        try:
+            result = ""
+            json_result = {}
+            action = Helper.get_action(actionSet, actionName)
+            cmd = action['Command']
+            if cmd:
+                decky_plugin.logger.info(
+                    f"execute_action cmd: {cmd}")
+                decky_plugin.logger.info(
+                    f"execute_action args: {args}")
+                decky_plugin.logger.info(
+                    f"execute_action input_data: {input_data}")
+                result = await Helper.call_script(os.path.expanduser(cmd), *args, input_data=input_data)
+                decky_plugin.logger.info(
+                    f"execute_action result: {result}")
+                try:
+                    json_result = json.loads(result)
+                    if action['Type'] == 'Init':
+                        decky_plugin.logger.info(
+                            f"Init action set {json_result['SetName']}")
+                        Helper.write_action_set_to_cache(
+                            json_result['SetName'], json_result['Actions'])
+                except Exception as e:
+                    decky_plugin.logger.info(
+                        "Error parsing json result", e)
+                    json_result = {'Type': 'Error',
+                                   'Message': f"Error parsing json result {e}", 'Data': result}
+                return json_result
             return json.dumps({'Type': 'Error', 'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]})
+
         except Exception as e:
             decky_plugin.logger.error(f"Error executing action: {e}")
             return json.dumps({'Type': 'Error', 'Message': 'Action not found', 'Data': str(e)})
 
     @staticmethod
-    def write_action_set_to_cache(setName, actionSet):
+    def write_action_set_to_cache(setName, actionSet, writeToDisk: bool = False):
+        Helper.action_cache[setName] = actionSet
+        decky_plugin.logger.info(f"action_cache updated {Helper.action_cache}")
+        if writeToDisk:
+            cache_dir = os.path.join(
+                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache")
+            if not os.path.exists(cache_dir):
+                os.makedirs(cache_dir)
+            file_path = os.path.join(cache_dir, f"{setName}.json")
 
-        cache_dir = os.path.join(
-            decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache")
-        if not os.path.exists(cache_dir):
-            os.makedirs(cache_dir)
-        file_path = os.path.join(cache_dir, f"{setName}.json")
-
-        # if not os.path.exists(file_path):
-        with open(file_path, 'w') as f:
-            json.dump(actionSet, f)
+            # if not os.path.exists(file_path):
+            with open(file_path, 'w') as f:
+                json.dump(actionSet, f)
 
     @staticmethod
     def get_action_script(setName, actionName):
-        file_path = os.path.join(
-            decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, f"{setName}.json")
-
-        if not os.path.exists(file_path):
-            file_path = os.path.join(
-                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache", f"{setName}.json")
-        if os.path.exists(file_path):
-            with open(file_path) as f:
-                data = json.load(f)
-                for action in data['Actions']:
-                    if action['Title'] == actionName:
-                        return action['Command']
-        else:
-            return None
-
-    @staticmethod
-    def get_set_props(setName):
-        file_path = os.path.join(
-            decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, f"{setName}.json")
-
-        if not os.path.exists(file_path):
-            file_path = os.path.join(
-                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "cache", f"{setName}.json")
-        if os.path.exists(file_path):
-            with open(file_path) as f:
-                data = json.load(f)
-                del data['Actions']
-                return data
-        else:
-            return None
-
-    @staticmethod
-    def get_scripts():
-        scripts = {}
-
-        try:
-            with open(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "scripts.json")) as f:
-                scripts = json.load(f)
-            single_script_files = []
-            tabs_dir = os.path.join(
-                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "tabs")
-            for filename in sorted(os.listdir(tabs_dir)):
-                filepath = os.path.join(tabs_dir, filename)
-                if os.path.isfile(filepath) and filename.endswith('.json'):
-                    # decky_plugin.logger.info(f"Loading script: {filepath}")
-                    with open(filepath) as f:
-                        data = json.load(f)
-                        single_script_files.append(data)
-            scripts['Scripts'] = scripts['Scripts'] + single_script_files
-            # decky_plugin.logger.info(f"scripts: {scripts}")
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in get_scripts: {e}")
-        return scripts
+        if setName in Helper.action_cache:
+            for action in Helper.action_cache[setName]['Actions']:
+                if action['Title'] == actionName:
+                    return action['Command']
+        return None
 
     @staticmethod
     async def build_cmd(tabindex, script_name, *args, input_data=''):

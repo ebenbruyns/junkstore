@@ -41,19 +41,22 @@ export interface GameDetails {
   Description: string;
   ApplicationPath: string;
   ManualPath: string;
-  Publisher: string;
   RootFolder: string;
-  Source: string;
   DatabaseID: string;
-  Genre: string;
   ConfigurationPath: string;
-  Developer: string;
-  ReleaseDate: string;
   Images: string[];
   ShortName: string;
   SteamClientID: string;
   HasDosConfig: boolean;
-  HasBatFiles: boolean
+  HasBatFiles: boolean;
+  Editors: EditorAction[];
+}
+export interface EditorAction {
+  Type: string;
+  InitActionId: string;
+  Title: string;
+  Description: string;
+  ContentId: string;
 }
 // Define the grid container
 

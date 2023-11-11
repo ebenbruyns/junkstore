@@ -1,10 +1,8 @@
-import { Focusable, ServerAPI, ModalRoot, showModal, sleep } from "decky-frontend-lib";
+import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
 import { ContentResult, GameDetailsContent, LaunchOptions, LaunchOptionsContent, ProgressUpdate } from "./Types";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
-import { ConfEditor } from "./ConfEditor";
-import { BatEditor } from "./BatEditor";
 import { gameIDFromAppID } from "./gameIDFromAppID";
 import Logger from "./logger";
 import { Loading } from "./Loading";
@@ -225,6 +223,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                     >
 
                                         <GameDisplay
+                                            serverApi={serverAPI}
                                             name={(gameData.Content as GameDetailsContent).Details.Name}
                                             description={(gameData.Content as GameDetailsContent).Details.Description}
                                             images={(gameData.Content as GameDetailsContent).Details.Images}
@@ -235,7 +234,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             progress={progress}
                                             cancelInstall={cancelInstall}
                                             uninstaller={uninstall}
-
+                                            editors={(gameData.Content as GameDetailsContent).Details.Editors}
 
                                             runner={() => {
                                                 setTimeout(() => {
@@ -246,17 +245,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                                 //SteamClient.Apps.RunGame(parseInt(gameData.SteamClientID), "", -1, 100)
                                             }}
 
-                                            confeditor={() => {
-                                                //closeModal();
-                                                showModal(<ConfEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} platform={"linux"} forkname={"_"} version={"_"} />);
-                                                //Router.CloseSideMenus();
-                                                //Router.Navigate("/conf-editor/" + tabindex + "/" + shortname + "/linux/_/_");
-                                            }}
-                                            bateditor={() => {
-                                                showModal(<BatEditor serverAPI={serverAPI} tabindex={0} shortname={shortname} />);
-                                            }}
-                                            hasDosConfig={(gameData.Content as GameDetailsContent).Details.HasDosConfig}
-                                            hasBatFiles={(gameData.Content as GameDetailsContent).Details.HasBatFiles} />
+                                        />
                                     </Focusable>
                                 </div>
                             </Panel>

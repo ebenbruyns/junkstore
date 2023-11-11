@@ -1,33 +1,38 @@
 import {
   PanelSection,
-  PanelSectionRow,
   Focusable,
   DialogButton,
   Marquee,
   ProgressBarWithInfo,
+  showContextMenu,
+  Menu,
+  MenuItem,
+  showModal,
+  ServerAPI,
 
 } from "decky-frontend-lib";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { VFC } from "react";
-import { FaCog, FaScroll } from "react-icons/fa";
-import { ProgressUpdate } from "./Types";
+import { FaCog } from "react-icons/fa";
+import { EditorAction, ProgressUpdate } from "./Types";
+import { ConfEditor } from "./ConfEditor";
+import { BatEditor } from "./BatEditor";
 //@ts-ignore
 
 const GameDisplay: VFC<{
+  serverApi: ServerAPI;
   name: string; closeModal?: any; images: string[]; installer: () => void;
   uninstaller: () => void;
   steamClientID: string;
   runner: () => void;
-  confeditor: () => void;
   description: string;
-  bateditor: () => void;
-  hasDosConfig: boolean;
-  hasBatFiles: boolean;
   installing: boolean;
   progress: ProgressUpdate;
+  editors: EditorAction[];
   cancelInstall: () => void;
 }> = (
   {
+    serverApi,
     closeModal,
     name,
     images,
@@ -37,18 +42,33 @@ const GameDisplay: VFC<{
     uninstaller,
     cancelInstall,
     runner,
-    confeditor,
     description,
     // @ts-ignore
     publisher,
-    bateditor,
-    hasDosConfig,
-    hasBatFiles,
     installing,
     progress,
-
+    editors
   }
 ) => {
+    const contextMenu = (e: any) => {
+      showContextMenu(
+        <Menu label="Configuration" cancelText="Cancel" onCancel={() => { }}>
+          {editors.map((editor) => {
+            return <MenuItem onSelected={
+              (e) => {
+                if (editor.Type == "IniEditor")
+                  showModal(<ConfEditor serverAPI={serverApi} tabindex={0} shortname={"shortname"} platform={"linux"} forkname={"_"} version={"_"} />);
+                if (editor.Type == "FileEditor")
+                  showModal(<BatEditor serverAPI={serverApi} tabindex={0} shortname={"shortname"} />)
+
+              }
+            }>{editor.Title}</MenuItem>
+          })}
+
+        </Menu>,
+        e.currentTarget ?? window
+      )
+    }
     return (
       <PanelSection>
         <h1>{name}</h1>
@@ -135,18 +155,7 @@ const GameDisplay: VFC<{
                     width: "168px", height: "40px", verticalAlign: "middle"
                   }}
                 >
-                  {/* <RiArrowRightSFill style={{
-                    width: "30px",
-                    height: "30px",
-                    minWidth: "30px",
-                    maxHeight: "30px",
-                    minHeight: "30px",
-                    position: "relative",
-                    margin: 0,
-                    padding: 0,
-                    transform: "translate(0px, -2px)",
-                    verticalAlign: "middle"
-                  }} /> */}
+
                   <span>Play Game</span>
                 </DialogButton>)}
               <div style={{ flexGrow: 1, flexShrink: 1 }}>
@@ -170,10 +179,10 @@ const GameDisplay: VFC<{
                   </>
                 )}
               </div>
-              {hasDosConfig && (
+              {editors.length > 0 && (
                 <DialogButton
-                  onClick={confeditor}
-                  onOKButton={confeditor}
+                  onClick={contextMenu}
+                  onOKButton={contextMenu}
                   style={{
                     width: "40px",
                     height: "40px",
@@ -193,32 +202,8 @@ const GameDisplay: VFC<{
                       transform: "translate(-50%,-50%)",
                     }}
                   />
-                </DialogButton>)}
-
-              {hasBatFiles && (
-                <DialogButton
-                  onClick={bateditor}
-                  onOKButton={bateditor}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    minWidth: "40px",
-                    maxHeight: "40px",
-                    minHeight: "40px",
-                    margin: "0",
-                    position: "relative",
-                    flexDirection: "column",
-                  }}
-                >
-                  <FaScroll
-                    style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: "50%",
-                      transform: "translate(-50%,-50%)",
-                    }}
-                  />
-                </DialogButton>)}
+                </DialogButton>)
+              }
 
             </Focusable>
           </PanelSection>
@@ -232,11 +217,7 @@ const GameDisplay: VFC<{
             <Focusable
               // @ts-ignore
               focusableIfNoChildren={true}
-              onCancel={(_) => {
-                //e.stopPropagation();
-                closeModal();
-                // Router.CloseSideMenus();
-              }}
+              onCancel={(_) => { closeModal(); }}
               onCancelActionDescription="Go back to Store" >
               <Panel focusable={true} noFocusRing={false} style={{ width: "100%" }}>
                 <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
