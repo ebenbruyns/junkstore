@@ -3,7 +3,6 @@ import os
 import json
 import shlex
 import decky_plugin
-import json
 
 
 class Helper:
@@ -32,8 +31,8 @@ class Helper:
             # await proc.wait()
             stdout = stdout.decode()
             stderr = stderr.decode()
-            decky_plugin.logger.info(
-                f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
+            # decky_plugin.logger.info(
+            #    f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
             return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
         except Exception as e:
             decky_plugin.logger.error(f"Error in pyexec_subprocess: {e}")
@@ -56,8 +55,8 @@ class Helper:
     @staticmethod
     async def call_script(cmd: str, *args, input_data=''):
         try:
-            decky_plugin.logger.info(
-                f"call_script: {cmd} {args} {input_data}")
+          #  decky_plugin.logger.info(
+          #      f"call_script: {cmd} {args} {input_data}")
             encoded_args = [shlex.quote(arg) for arg in args]
             decky_plugin.logger.info(
                 f"call_script: {cmd} {' '.join(encoded_args)}")
@@ -75,11 +74,8 @@ class Helper:
 
     @staticmethod
     def get_action(actionSet, actionName):
-        decky_plugin.logger.info(
-            f"get_command action_cache {Helper.action_cache}")
         result = None
         set = Helper.action_cache.get(actionSet)
-        decky_plugin.logger.info(f"set: {set}")
         if set:
             for action in set:
                 if action['Id'] == actionName:
@@ -97,9 +93,6 @@ class Helper:
                     for action in data:
                         if action['Id'] == actionName:
                             result = action
-        decky_plugin.logger.info(f"get_command command: {result}")
-        decky_plugin.logger.info(f"action_cache {Helper.action_cache}")
-
         return result
 
     @staticmethod
@@ -114,11 +107,11 @@ class Helper:
                     f"execute_action cmd: {cmd}")
                 decky_plugin.logger.info(
                     f"execute_action args: {args}")
-                decky_plugin.logger.info(
-                    f"execute_action input_data: {input_data}")
+                # decky_plugin.logger.info(
+                #    f"execute_action input_data: {input_data}")
                 result = await Helper.call_script(os.path.expanduser(cmd), *args, input_data=input_data)
-                decky_plugin.logger.info(
-                    f"execute_action result: {result}")
+                # decky_plugin.logger.info(
+                #    f"execute_action result: {result}")
                 try:
                     json_result = json.loads(result)
                     if action['Type'] == 'Init':
@@ -141,7 +134,6 @@ class Helper:
     @staticmethod
     def write_action_set_to_cache(setName, actionSet, writeToDisk: bool = False):
         Helper.action_cache[setName] = actionSet
-        decky_plugin.logger.info(f"action_cache updated {Helper.action_cache}")
         if writeToDisk:
             cache_dir = os.path.join(
                 decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache")
@@ -160,45 +152,6 @@ class Helper:
                 if action['Title'] == actionName:
                     return action['Command']
         return None
-
-    @staticmethod
-    async def build_cmd(tabindex, script_name, *args, input_data=''):
-        try:
-            if isinstance(tabindex, str):
-                tabindex = int(tabindex)
-            decky_plugin.logger.info(
-                f"build_cmd: tabindex: {tabindex} scriptname: {script_name} args: {args}")
-            encoded_args = [shlex.quote(arg) for arg in args]
-
-            # os.environ["PATH"] = "$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin"
-
-            script = os.path.expanduser(
-                Helper.get_scripts()['Scripts'][tabindex][script_name])
-            decky_plugin.logger.info(f"script: {script}")
-            cmd = f"{script} {' '.join(encoded_args)}"
-            platform = Helper.get_scripts()[
-                'Scripts'][tabindex]['TabName']
-            # decky_plugin.logger.info("command: " + cmd)
-            # print(f"input_data: {input_data}")
-            result = await Helper.pyexec_subprocess(cmd, input_data,
-                                                    env=Helper.get_environment())
-            return result['stdout']
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in _build_cmd: {e}")
-            return None
-
-    @staticmethod
-    async def get_json_output(tabindex: int, script_name, *args, input_data=''):
-        try:
-            decky_plugin.logger.info(
-                f"get_json_output: tabindex: {tabindex} scriptname: {script_name} args: {args}")
-            result = await Helper.build_cmd(
-                tabindex, script_name, *args, input_data=input_data)
-            # decky_plugin.logger.info(f"result: {result[:100]}")
-            return json.loads(result)
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in _get_json_output: {result}")
-            return json.dumps({'Type': 'Error', 'Message': 'Error in _get_json_output', 'Data': result})
 
 
 class Plugin:
@@ -221,47 +174,15 @@ class Plugin:
             decky_plugin.logger.info(f"execute_action args: {args}")
             decky_plugin.logger.info(f"execute_action kwargs: {kwargs}")
 
+            if isinstance(inputData, dict) or isinstance(inputData, list):
+                inputData = json.dumps(inputData)
+
             result = await Helper.execute_action(actionSet, actionName, *args, *kwargs.values(), input_data=inputData)
-           # decky_plugin.logger.info(f"execute_action result: {result}")
+            # decky_plugin.logger.info(f"execute_action result: {result}")
             return result
         except Exception as e:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
             return None
-
-    async def save_config(self, tabindex, shortname, platform, forkname, version, config_data):
-        if forkname == '_':
-            forkname = ''
-        if version == '_':
-            version = ''
-        decky_plugin.logger.info(
-            f"save_config: {shortname} {platform} {forkname} {version} {config_data} tabindex: {tabindex} self: {self}")
-        cmd = await Helper.build_cmd(tabindex, "save_config", shortname, platform,
-                                     forkname, version, input_data=json.dumps(config_data))
-        return cmd
-
-    async def get_config(self, tabindex, shortname, platform, forkname, version):
-        if forkname == '_':
-            forkname = ''
-        if version == '_':
-            version = ''
-        result = await Helper.get_json_output(tabindex,
-                                              "get_config", shortname, platform, forkname, version)
-        return result
-
-    async def get_game_bats(self, tabindex, shortname):
-        decky_plugin.logger.info(
-            f"get_game_bats: {shortname} tabindex: {tabindex} self: {self}")
-        result = await Helper.get_json_output(
-            tabindex, "get_game_bats", shortname)
-        return result
-
-    async def save_game_bats(self, tabindex, shortname, bats):
-        decky_plugin.logger.info(
-            f"save_game_bats: {shortname} {bats} tabindex: {tabindex} self: {self}")
-        decky_plugin.logger.info(f"save_game_bats: {bats}")
-        cmd = await Helper.build_cmd(tabindex, "save_game_bats",
-                                     shortname, input_data=json.dumps(bats))
-        return cmd
 
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")

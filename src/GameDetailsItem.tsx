@@ -235,7 +235,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             cancelInstall={cancelInstall}
                                             uninstaller={uninstall}
                                             editors={(gameData.Content as GameDetailsContent).Details.Editors}
-
+                                            initActionSet={initActionSet}
                                             runner={() => {
                                                 setTimeout(() => {
                                                     closeModal();

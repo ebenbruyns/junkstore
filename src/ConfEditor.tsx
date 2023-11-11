@@ -3,25 +3,27 @@ import {
     PanelSection, ServerAPI, Dropdown, ModalRoot
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair } from "./Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet } from "./Types";
 import { SectionEditor } from "./SectionEditor";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
+import Logger from "./logger";
 
 
 export const ConfEditor: VFC<{
     serverAPI: ServerAPI;
-    tabindex: number;
-    shortname: string;
-    platform: string;
-    forkname: string;
-    version: string;
+    initActionSet: string;
+    initAction: string;
+    contentId: string;
     closeModal?: any;
 }> = ({
-    serverAPI, tabindex, shortname, platform, forkname, version, closeModal
+    serverAPI, initActionSet, initAction, contentId, closeModal
 }) => {
+        const logger = new Logger("ConfEditor")
+        logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
         const [confData, setConfData] = useState({} as ConfData);
         const focusRef = useRef(null);
         const [modeLevel, setModeLevel] = useState(0 as number);
+        const [actionSetName, setActionSetName] = useState("" as string);
         const [helpText, setHelpText] = useState({
             Key: "",
             Description: "",
@@ -36,18 +38,30 @@ export const ConfEditor: VFC<{
         } as KeyValuePair);
         const [sectionHelpText, setSectionHelpText] = useState("" as string);
         useEffect(() => {
-            serverAPI
-                .callPluginMethod<{}, ConfData>("get_config", {
-                    tabindex: tabindex,
-                    shortname: shortname,
-                    platform: platform,
-                    version: version,
-                    forkname: forkname,
-                })
-                .then((data) => {
-                    setConfData(data.result as ConfData);
-                });
+            OnInit();
+
         }, []);
+        const OnInit = async () => {
+            logger.log(`OnInit: initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
+            const result = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
+                actionSet: initActionSet,
+                actionName: initAction,
+                content_id: contentId,
+            })
+            logger.log("result: ", result)
+            const setName = (result.result as ActionSet).SetName;
+            logger.log("SetName: ", setName)
+            setActionSetName(setName);
+            const data = await serverAPI
+                .callPluginMethod<{}, ConfData>("execute_action", {
+                    actionSet: setName,
+                    actionName: "GetContent",
+                    content_id: contentId,
+                })
+
+            setConfData(data.result as ConfData);
+
+        }
         const handleSectionChange = (section: Section) => {
             const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s
             );
@@ -75,15 +89,16 @@ export const ConfEditor: VFC<{
                                         flex: "1",
                                     }}
                                     onSecondaryActionDescription="Save config"
-                                    onSecondaryButton={(_) => {
-                                        serverAPI.callPluginMethod("save_config", {
-                                            tabindex: tabindex,
-                                            shortname: shortname,
-                                            platform: platform,
-                                            forkname: forkname,
-                                            version: version,
-                                            config_data: confData,
+                                    onSecondaryButton={async (_) => {
+                                        logger.log("Saving config: ", confData)
+                                        const result = await serverAPI.callPluginMethod("execute_action", {
+                                            actionSet: actionSetName,
+                                            actionName: "SaveContent",
+                                            content_id: contentId,
+                                            inputData: confData
+
                                         });
+                                        logger.log("Save result: ", result)
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                         closeModal();
                                     }}
@@ -93,7 +108,7 @@ export const ConfEditor: VFC<{
                                     }}
                                     onCancelActionDescription="Go back to Game Details"
                                 >
-                                    <PanelSection title={"Configuration: " + shortname}>
+                                    <PanelSection title={"Configuration: "}>
                                         <Dropdown
                                             rgOptions={[
                                                 { data: 0, label: "Basic" },

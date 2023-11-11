@@ -17,6 +17,7 @@ import { FaCog } from "react-icons/fa";
 import { EditorAction, ProgressUpdate } from "./Types";
 import { ConfEditor } from "./ConfEditor";
 import { BatEditor } from "./BatEditor";
+import Logger from "./logger";
 //@ts-ignore
 
 const GameDisplay: VFC<{
@@ -30,6 +31,7 @@ const GameDisplay: VFC<{
   progress: ProgressUpdate;
   editors: EditorAction[];
   cancelInstall: () => void;
+  initActionSet: string;
 }> = (
   {
     serverApi,
@@ -43,23 +45,24 @@ const GameDisplay: VFC<{
     cancelInstall,
     runner,
     description,
-    // @ts-ignore
-    publisher,
     installing,
     progress,
-    editors
+    editors,
+    initActionSet
   }
 ) => {
+    const logger = new Logger("GameDisplay");
+    logger.log(`initActionSet: ${initActionSet}`)
     const contextMenu = (e: any) => {
       showContextMenu(
         <Menu label="Configuration" cancelText="Cancel" onCancel={() => { }}>
           {editors.map((editor) => {
             return <MenuItem onSelected={
-              (e) => {
+              () => {
                 if (editor.Type == "IniEditor")
-                  showModal(<ConfEditor serverAPI={serverApi} tabindex={0} shortname={"shortname"} platform={"linux"} forkname={"_"} version={"_"} />);
+                  showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />);
                 if (editor.Type == "FileEditor")
-                  showModal(<BatEditor serverAPI={serverApi} tabindex={0} shortname={"shortname"} />)
+                  showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />)
 
               }
             }>{editor.Title}</MenuItem>
@@ -181,8 +184,44 @@ const GameDisplay: VFC<{
               </div>
               {editors.length > 0 && (
                 <DialogButton
-                  onClick={contextMenu}
-                  onOKButton={contextMenu}
+                  onClick={(e: any) => {
+                    showContextMenu(
+                      <Menu label="Configuration" cancelText="Cancel" onCancel={() => { }}>
+                        {editors.map((editor) => {
+                          return <MenuItem onSelected={
+                            () => {
+                              if (editor.Type == "IniEditor")
+                                showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />);
+                              if (editor.Type == "FileEditor")
+                                showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />)
+
+                            }
+                          }>{editor.Title}</MenuItem>
+                        })}
+
+                      </Menu>,
+                      e.currentTarget ?? window
+                    )
+                  }}
+                  onOKButton={(e: any) => {
+                    showContextMenu(
+                      <Menu label="Configuration" cancelText="Cancel" onCancel={() => { }}>
+                        {editors.map((editor) => {
+                          return <MenuItem onSelected={
+                            () => {
+                              if (editor.Type == "IniEditor")
+                                showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />);
+                              if (editor.Type == "FileEditor")
+                                showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />)
+
+                            }
+                          }>{editor.Title}</MenuItem>
+                        })}
+
+                      </Menu>,
+                      e.currentTarget ?? window
+                    )
+                  }}
                   style={{
                     width: "40px",
                     height: "40px",
