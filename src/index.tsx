@@ -6,7 +6,7 @@ import {
 import { FaBoxOpen } from "react-icons/fa";
 
 import { Page } from "./Page";
-import { Content } from "./Content";
+import { Content } from "./Page";
 
 
 //@ts-ignore
@@ -16,7 +16,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     () => <Page serverAPI={serverApi} />,
     {
       exact: true,
+
     }
+
   );
   serverApi.routerHook.addRoute(
     "/editor/:initActionSet/:initAction/:contentId",
