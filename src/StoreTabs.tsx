@@ -13,6 +13,7 @@ import { StorePage } from "./StorePage";
 import { ActionSet, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
+import { Loading } from "./Components/Loading";
 
 interface StoreTabsProperties {
     serverAPI: ServerAPI;
@@ -65,7 +66,7 @@ export const StoreTabs: VFC<StoreTabsProperties> = ({ serverAPI, tabs, initActio
                     id: index.toString(),
                 }))}
             />}
-            {content.Tabs.length === 0 && <div>Loading... </div>}
+            {content.Tabs.length === 0 && <Loading />}
         </div>
     );
 };

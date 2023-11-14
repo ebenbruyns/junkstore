@@ -3,7 +3,11 @@ import { ContentError } from "../Types/Types";
 export const ErrorDisplay = ({ error }: { error: ContentError; }) => {
     return (
         <div>
-            <div>{error.Message}</div>
+            <h1>Error</h1>
+            <div>ActionSet: {error.ActionSet}</div>
+            <div>ActionName:{error.ActionName}</div>
+
+            <div>Message: {error.Message}</div>
             <div>{error.Data}</div>
         </div>
     );
