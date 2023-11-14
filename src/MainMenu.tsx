@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow, Router } from "decky-frontend-lib";
+import { ButtonItem, Navigation, PanelSection, PanelSectionRow } from "decky-frontend-lib";
 import { VFC } from "react";
 import { StoreContent } from "./Types/Types";
 /**
@@ -19,8 +19,8 @@ export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initA
                             <ButtonItem
                                 layout="below"
                                 onClick={() => {
-                                    Router.CloseSideMenus();
-                                    Router.Navigate(`/store/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
+                                    Navigation.CloseSideMenus();
+                                    Navigation.Navigate(`/content/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
                                 }}
                             >
                                 {action.Title}
@@ -34,8 +34,8 @@ export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initA
                     <ButtonItem
                         layout="below"
                         onClick={() => {
-                            Router.CloseSideMenus();
-                            Router.Navigate("/support");
+                            Navigation.CloseSideMenus();
+                            Navigation.Navigate("/support");
                         }}
                     >
                         Support us

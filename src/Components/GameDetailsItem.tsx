@@ -1,12 +1,12 @@
 import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
-import GameDisplay from "./Components/GameDisplay";
-import { ContentResult, GameDetails, LaunchOptions, ProgressUpdate } from "./Types/Types";
-import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
-import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
-import Logger from "./Utils/logger";
-import { Loading } from "./Components/Loading";
-import { executeAction } from "./Utils/executeAction";
+import GameDisplay from "./GameDisplay";
+import { ContentResult, GameDetails, LaunchOptions, ProgressUpdate } from "../Types/Types";
+import { Panel, ScrollPanelGroup } from "./Scrollable";
+import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
+import Logger from "../Utils/logger";
+import { Loading } from "./Loading";
+import { executeAction } from "../Utils/executeAction";
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;

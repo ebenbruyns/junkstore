@@ -7,22 +7,23 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { ServerAPI, Tabs } from "decky-frontend-lib";
+import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, Tabs } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { StorePage } from "./StorePage";
 import { ActionSet, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
+import { Content } from "./Content";
 
-interface StoreTabsProperties {
+interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
     initActionSet: string;
     initAction: string;
+    layout: string;
 }
 
-export const StoreTabs: VFC<StoreTabsProperties> = ({ serverAPI, tabs, initAction, initActionSet }) => {
+export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initAction, initActionSet, layout }) => {
     const logger = new Logger("StoreTabs");
     const [currentTab, setCurrentTab] = useState("-1");
     const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
@@ -54,19 +55,31 @@ export const StoreTabs: VFC<StoreTabsProperties> = ({ serverAPI, tabs, initActio
             logger.error(`Error initializing StoreTabs: ${error}`);
         }
     };
+    const getContent = () => {
+        return content.Tabs.map((tab, index) => ({
+            title: tab.Title,
+            content: <Content serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} />,
+            id: index.toString(),
+        }));
+    }
+
 
     return (
-        <div style={{ marginTop: "40px", height: "calc(100% - 40px)", color: "white" }}>
-            {content.Tabs.length > 0 && <Tabs
-                activeTab={currentTab}
-                onShowTab={(tabID: string) => setCurrentTab(tabID)}
-                tabs={content.Tabs.map((tab, index) => ({
-                    title: tab.Title,
-                    content: <StorePage serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} />,
-                    id: index.toString(),
-                }))}
-            />}
+        <DialogBody>
+            {layout === "horizontal" && content.Tabs.length > 0 &&
+                <DialogControlsSection style={{ height: "calc(100% - 40px)", marginTop: "40px" }}>
+                    <Tabs
+                        activeTab={currentTab}
+                        onShowTab={(tabID: string) => setCurrentTab(tabID)}
+                        tabs={getContent()}
+                    />
+                </DialogControlsSection>}
+            {layout === "vertical" && content.Tabs.length > 0 &&
+                <DialogControlsSection style={{ height: "calc(100%)" }}>
+                    <SidebarNavigation pages={getContent()} showTitle disableRouteReporting />
+                </DialogControlsSection>
+            }
             {content.Tabs.length === 0 && <Loading />}
-        </div>
+        </DialogBody>
     );
 };
