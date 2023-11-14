@@ -1,7 +1,7 @@
 import { ServerAPI, showModal } from "decky-frontend-lib";
-import { ContentError, ContentResult } from "./Types/Types";
-import Logger from "./Utils/logger";
-import { ErrorModal } from "./ErrorModal";
+import { ContentError, ContentResult } from "../Types/Types";
+import Logger from "./logger";
+import { ErrorModal } from "../ErrorModal";
 
 
 export async function executeAction(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult> {

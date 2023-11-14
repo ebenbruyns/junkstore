@@ -13,7 +13,7 @@ import { ActionSet, ContentError, ContentResult, GameDataList } from "./Types/Ty
 import { ErrorDisplay } from "./Components/ErrorDisplay";
 import Logger from "./Utils/logger";
 import { Loading } from "./Components/Loading";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 interface StorePageProperties {
   serverAPI: ServerAPI;

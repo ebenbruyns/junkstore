@@ -6,7 +6,7 @@ import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
 import Logger from "./Utils/logger";
 import { Loading } from "./Components/Loading";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;

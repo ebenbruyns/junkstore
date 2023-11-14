@@ -5,7 +5,7 @@ import { ErrorDisplay } from "./Components/ErrorDisplay";
 import Logger from "./Utils/logger";
 import { StoreTabs } from "./StoreTabs";
 import { Loading } from "./Components/Loading";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 /**
  * Renders a page component that displays either a StoreTabs or an ErrorDisplay component based on the content received from the server.
  * @param {Object} props - The component props.

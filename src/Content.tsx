@@ -14,7 +14,7 @@ import { ErrorDisplay } from "./Components/ErrorDisplay";
 import { MainMenu } from "./MainMenu";
 import Logger from "./Utils/logger";
 import { Loading } from "./Components/Loading";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
     const logger = new Logger("index");

@@ -12,7 +12,7 @@ import { VFC, useEffect, useState } from "react";
 import { StorePage } from "./StorePage";
 import { ActionSet, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 interface StoreTabsProperties {
     serverAPI: ServerAPI;

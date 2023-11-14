@@ -8,7 +8,7 @@ import { SectionEditor } from "./Components/SectionEditor";
 import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 export interface ErrorModalProps extends ModalRootProps {
     Error: ContentError;

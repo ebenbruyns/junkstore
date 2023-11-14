@@ -6,7 +6,7 @@ import { VFC, useEffect, useState, useRef } from "react";
 import { ActionSet, FileData, FilesData } from "./Types/Types";
 import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { EditorProperties } from "./Types/EditorProperties";
-import { executeAction } from "./executeAction";
+import { executeAction } from "./Utils/executeAction";
 
 
 
