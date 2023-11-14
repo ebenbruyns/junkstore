@@ -18,6 +18,13 @@ export default definePlugin((serverApi: ServerAPI) => {
       exact: true,
     }
   );
+  serverApi.routerHook.addRoute(
+    "/editor/:initActionSet/:initAction/:contentId",
+    () => <Page serverAPI={serverApi} />,
+    {
+      exact: true,
+    }
+  );
 
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
@@ -25,7 +32,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/store/:initActionSet/:iniAction");
-
+      serverApi.routerHook.removeRoute(
+        "/editor/:initActionSet/:initAction/:contentId"
+      );
     },
   };
 });

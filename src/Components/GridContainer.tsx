@@ -1,7 +1,7 @@
 import GameImage from "./GameImage";
 import { Focusable, ServerAPI, showModal } from "decky-frontend-lib";
-import { GameData } from "./Types";
-import { GameDetailsItem } from "./GameDetailsItem";
+import { GameData } from "../Types/Types";
+import { GameDetailsItem } from "../GameDetailsItem";
 import { VFC } from "react";
 
 interface GridContainerProperties {

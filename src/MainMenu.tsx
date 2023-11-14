@@ -1,6 +1,6 @@
 import { ButtonItem, PanelSection, PanelSectionRow, Router } from "decky-frontend-lib";
 import { VFC } from "react";
-import { StoreContent } from "./Types";
+import { StoreContent } from "./Types/Types";
 /**
  * Renders the main menu of the Junk Store.
  * @param content - The content of the store.

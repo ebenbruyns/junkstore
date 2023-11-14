@@ -1,9 +1,11 @@
 import { ServerAPI, useParams } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, StoreTabsContent } from "./Types";
-import { ErrorDisplay } from "./ErrorDisplay";
-import Logger from "./logger";
+import { ActionSet, ContentError, ContentResult, StoreTabsContent } from "./Types/Types";
+import { ErrorDisplay } from "./Components/ErrorDisplay";
+import Logger from "./Utils/logger";
 import { StoreTabs } from "./StoreTabs";
+import { Loading } from "./Components/Loading";
+import { executeAction } from "./executeAction";
 /**
  * Renders a page component that displays either a StoreTabs or an ErrorDisplay component based on the content received from the server.
  * @param {Object} props - The component props.
@@ -17,12 +19,8 @@ export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const { initActionSet, initAction } = useParams<{ initActionSet: string; initAction: string; }>();
     logger.debug(`Action Set: ${initActionSet}, Init Action: ${initAction}`);
     const [content, setContent] = useState<ContentResult>({
-        Type: "Error",
-        Content: {
-            Title: "Error",
-            Message: "Error",
-            Data: "",
-        }
+        Type: "Empty",
+
     });
 
     useEffect(() => {
@@ -31,19 +29,19 @@ export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
     const onInit = async () => {
         logger.debug("init");
-        const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
-            actionSet: initActionSet,
-            actionName: initAction,
-            inputData: ""
-        });
+        const data = await executeAction(serverAPI, initActionSet,
+            initAction,
+            {
+                inputData: ""
+            });
         logger.debug(data);
-        const result = data.result as ActionSet;
-        const content = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-            actionSet: result.SetName,
-            actionName: "GetContent",
-            inputData: ""
-        });
-        setContent(content.result as ContentResult);
+        const result = data.Content as ActionSet;
+        const content = await executeAction(serverAPI, result.SetName,
+            "GetContent",
+            {
+                inputData: ""
+            });
+        setContent(content);
         logger.debug(content);
     };
 
@@ -51,6 +49,7 @@ export const Page: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         <>
             {content.Type === "StoreTabs" && <StoreTabs serverAPI={serverAPI} tabs={content.Content as StoreTabsContent} initAction={initAction} initActionSet={initActionSet} />}
             {content.Type === "Error" && <ErrorDisplay error={content.Content as ContentError} />}
+            {content.Type === "Empty" && <Loading></Loading>}
         </>
     );
 };

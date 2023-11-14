@@ -1,4 +1,4 @@
-import { ContentError } from "./Types";
+import { ContentError } from "../Types/Types";
 
 export const ErrorDisplay = ({ error }: { error: ContentError; }) => {
     return (

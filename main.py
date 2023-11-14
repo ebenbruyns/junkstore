@@ -114,22 +114,23 @@ class Helper:
                 #    f"execute_action result: {result}")
                 try:
                     json_result = json.loads(result)
-                    if action['Type'] == 'Init':
+                    if json_result['Type'] == 'ActionSet':
                         decky_plugin.logger.info(
-                            f"Init action set {json_result['SetName']}")
+                            f"Init action set {json_result['Content']['SetName']}")
                         Helper.write_action_set_to_cache(
-                            json_result['SetName'], json_result['Actions'])
+                            json_result['Content']['SetName'], json_result['Content']['Actions'])
                 except Exception as e:
                     decky_plugin.logger.info(
                         "Error parsing json result", e)
                     json_result = {'Type': 'Error',
-                                   'Message': f"Error parsing json result {e}", 'Data': result}
+                                   'Content': {
+                                       'Message': f"Error parsing json result {e}", 'Data': result, 'ActionName': actionName, 'ActionSet': actionSet}}
                 return json_result
-            return json.dumps({'Type': 'Error', 'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]})
+            return json.dumps({'Type': 'Error', 'Content': {'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]}, 'ActionName': actionName, 'ActionSet': actionSet})
 
         except Exception as e:
             decky_plugin.logger.error(f"Error executing action: {e}")
-            return json.dumps({'Type': 'Error', 'Message': 'Action not found', 'Data': str(e)})
+            return json.dumps({'Type': 'Error', 'Content': {'Message': 'Action not found', 'Data': str(e), 'ActionName': actionName, 'ActionSet': actionSet}})
 
     @staticmethod
     def write_action_set_to_cache(setName, actionSet, writeToDisk: bool = False):
@@ -144,14 +145,6 @@ class Helper:
             # if not os.path.exists(file_path):
             with open(file_path, 'w') as f:
                 json.dump(actionSet, f)
-
-    @staticmethod
-    def get_action_script(setName, actionName):
-        if setName in Helper.action_cache:
-            for action in Helper.action_cache[setName]['Actions']:
-                if action['Title'] == actionName:
-                    return action['Command']
-        return None
 
 
 class Plugin:

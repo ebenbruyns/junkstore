@@ -8,15 +8,17 @@
  */
 import { ServerAPI } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
-import { ActionSet, ContentError } from "./Types";
-import { ContentResult, StoreContent } from "./Types";
-import { ErrorDisplay } from "./ErrorDisplay";
+import { ActionSet, ContentError } from "./Types/Types";
+import { ContentResult, StoreContent } from "./Types/Types";
+import { ErrorDisplay } from "./Components/ErrorDisplay";
 import { MainMenu } from "./MainMenu";
-import Logger from "./logger";
+import Logger from "./Utils/logger";
+import { Loading } from "./Components/Loading";
+import { executeAction } from "./executeAction";
 
 export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
     const logger = new Logger("index");
-    const [content, setContent] = useState<ContentResult>({ Type: "", Content: {} });
+    const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState<string>("");
 
     useEffect(() => {
@@ -26,21 +28,21 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     const onInit = async () => {
         try {
             logger.debug("init");
-            const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
-                actionSet: initActionSet,
-                actionName: initAction,
-                inputData: ""
-            });
+            const data = await executeAction(serverAPI, initActionSet,
+                initAction,
+                {
+                    inputData: ""
+                });
             logger.debug("init result: ", data);
-            const result = data.result as ActionSet;
+            const result = data.Content as ActionSet;
             setActionSetName(result.SetName);
-            const content = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-                actionSet: result.SetName,
-                actionName: "GetContent",
-                inputData: ""
-            });
-            setContent(content.result as ContentResult);
-            logger.debug("GetContent result: ", content);
+            const menu = await executeAction(serverAPI, result.SetName,
+                "GetContent",
+                {
+                    inputData: ""
+                });
+            setContent(menu);
+            logger.debug("GetContent result: ", menu);
         } catch (error) {
             logger.error("OnInit: ", error);
         }
@@ -50,6 +52,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         <>
             {content.Type === "MainMenu" && <MainMenu content={content.Content as StoreContent} initActionSet={actionSetName} initAction="" />}
             {content.Type === "Error" && <ErrorDisplay error={content.Content as ContentError} />}
+            {content.Type === "Empty" && <Loading />}
         </>
     );
 };

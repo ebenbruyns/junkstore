@@ -1,8 +1,10 @@
+import { SteamSpinner } from "decky-frontend-lib";
 import { VFC } from "react";
 
 
 export const Loading: VFC = () => {
     return (
-        <div>Loading...</div>
+        <SteamSpinner />
+
     );
 };

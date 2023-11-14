@@ -8,11 +8,12 @@
  */
 import { Focusable, ServerAPI, TextField } from "decky-frontend-lib";
 import { useState, useEffect, VFC } from "react";
-import GridContainer from "./GridContainer";
-import { ActionSet, ContentError, ContentResult, GameDataContent } from "./Types";
-import { ErrorDisplay } from "./ErrorDisplay";
-import Logger from "./logger";
-import { Loading } from "./Loading";
+import GridContainer from "./Components/GridContainer";
+import { ActionSet, ContentError, ContentResult, GameDataList } from "./Types/Types";
+import { ErrorDisplay } from "./Components/ErrorDisplay";
+import Logger from "./Utils/logger";
+import { Loading } from "./Components/Loading";
+import { executeAction } from "./executeAction";
 
 interface StorePageProperties {
   serverAPI: ServerAPI;
@@ -35,14 +36,14 @@ export const StorePage: VFC<StorePageProperties> = ({
   const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
     if (!setName) return;
     try {
-      const data = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-        actionSet: setName,
-        actionName: "GetContent",
-        filter,
-        installed: String(installed),
-        limited: String(limited)
-      });
-      setContent(data.result as ContentResult);
+      const data = await executeAction(serverAPI, setName,
+        "GetContent",
+        {
+          filter,
+          installed: String(installed),
+          limited: String(limited)
+        });
+      setContent(data as ContentResult);
     } catch (error) {
       logger.error("GetContent: ", error);
     }
@@ -63,12 +64,12 @@ export const StorePage: VFC<StorePageProperties> = ({
   const onInit = async () => {
     if (!initActionSet || !initAction) return;
     try {
-      const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
-        actionSet: initActionSet,
-        actionName: initAction,
-        inputData: "",
-      });
-      const result = data.result as ActionSet;
+      const data = await executeAction(serverAPI, initActionSet,
+        initAction,
+        {
+          inputData: "",
+        });
+      const result = data.Content as ActionSet;
       setActionSetName(result.SetName);
       fetchData(result.SetName, "", filterInstalled, limited);
       logger.log(`Initialized with action set ${result.SetName} and action ${initAction}`);
@@ -99,7 +100,7 @@ export const StorePage: VFC<StorePageProperties> = ({
       {content.Type === "GameGrid" && (
         <GridContainer
           serverAPI={serverAPI}
-          games={(content.Content as GameDataContent).Games}
+          games={(content.Content as GameDataList).Games}
           limited={limited}
           limitFn={() => setLimited(!limited)}
           filterFn={() => setFilterInstalled(!filterInstalled)}

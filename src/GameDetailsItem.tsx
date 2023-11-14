@@ -1,11 +1,12 @@
 import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
-import GameDisplay from "./GameDisplay";
-import { ContentResult, GameDetailsContent, LaunchOptions, LaunchOptionsContent, ProgressUpdate } from "./Types";
-import { Panel, ScrollPanelGroup } from "./Scrollable";
-import { gameIDFromAppID } from "./gameIDFromAppID";
-import Logger from "./logger";
-import { Loading } from "./Loading";
+import GameDisplay from "./Components/GameDisplay";
+import { ContentResult, GameDetails, LaunchOptions, ProgressUpdate } from "./Types/Types";
+import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
+import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
+import Logger from "./Utils/logger";
+import { Loading } from "./Components/Loading";
+import { executeAction } from "./executeAction";
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;
@@ -58,18 +59,18 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const onInit = async () => {
         try {
             logger.debug("onInit starting");
-            const data = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-                actionSet: initActionSet,
-                actionName: "GetDetails",
-                shortname: shortname,
-                inputData: ""
-            });
-            logger.debug("onInit data", data);
-            const res = (data.result as ContentResult);
+            const res = await executeAction(serverAPI, initActionSet,
+                "GetDetails",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
+            logger.debug("onInit data", res);
+
             logger.debug("onInit res", res);
             setGameData(res);
             if (res.Type === "GameDetails")
-                setSteamClientID((res.Content as GameDetailsContent).Details.SteamClientID);
+                setSteamClientID((res.Content as GameDetails).SteamClientID);
             logger.debug("onInit finished");
         } catch (error) {
             logger.error(error);
@@ -82,27 +83,27 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             try {
                 logger.debug("updateProgress");
 
-                serverAPI.callPluginMethod<{}, ProgressUpdate>("execute_action", {
-                    actionSet: initActionSet,
-                    actionName: "GetProgress",
-                    shortname: shortname,
-                    inputData: ""
-                }).then((res) => {
-                    const progressUpdate = res.result as ProgressUpdate;
-                    if (progressUpdate != null) {
-                        logger.debug(progressUpdate);
-                        setProgress(progressUpdate);
-                        logger.debug(progressUpdate.Percentage);
-                        if (progressUpdate.Percentage >= 100) {
-                            setInstalling(false);
-                            logger.debug("setInstalling(false)");
-                            install();
-                            return;
+                executeAction(serverAPI, initActionSet,
+                    "GetProgress",
+                    {
+                        shortname: shortname,
+                        inputData: ""
+                    }).then((res) => {
+                        const progressUpdate = res.Content as ProgressUpdate;
+                        if (progressUpdate != null) {
+                            logger.debug(progressUpdate);
+                            setProgress(progressUpdate);
+                            logger.debug(progressUpdate.Percentage);
+                            if (progressUpdate.Percentage >= 100) {
+                                setInstalling(false);
+                                logger.debug("setInstalling(false)");
+                                install();
+                                return;
+                            }
                         }
-                    }
-                }).catch((e) => {
-                    logger.error('Error in progress updater', e);
-                });
+                    }).catch((e) => {
+                        logger.error('Error in progress updater', e);
+                    });
             } catch (e) {
                 logger.error('Error in progress updater', e);
             }
@@ -124,13 +125,12 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     }, [installing]);
     const uninstall = async () => {
         try {
-            await serverAPI.callPluginMethod<{}, {}
-            >("execute_action", {
-                actionSet: initActionSet,
-                actionName: "Uninstall",
-                shortname: shortname,
-                inputData: ""
-            });
+            await executeAction(serverAPI, initActionSet,
+                "Uninstall",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
             setSteamClientID("");
         } catch (error) {
@@ -140,12 +140,12 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const download = async () => {
         try {
             setInstalling(true);
-            await serverAPI.callPluginMethod<{}, {}>("execute_action", {
-                actionSet: initActionSet,
-                actionName: "Download",
-                shortname: shortname,
-                inputData: ""
-            });
+            await executeAction(serverAPI, initActionSet,
+                "Download",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
 
         } catch (error) {
             logger.error(error);
@@ -154,12 +154,12 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const cancelInstall = async () => {
         try {
             setInstalling(false);
-            await serverAPI.callPluginMethod<{}, {}>("execute_action", {
-                actionSet: initActionSet,
-                actionName: "CancelInstall",
-                shortname: shortname,
-                inputData: ""
-            });
+            await executeAction(serverAPI, initActionSet,
+                "CancelInstall",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
 
         } catch (error) {
             logger.error(error);
@@ -170,18 +170,18 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         //updateProgress();
         try {
             const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "target", "options");
-            const data = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
-                actionSet: initActionSet,
-                actionName: "Install",
-                shortname: shortname,
-                inputData: ""
-            });
-            if (data.success) {
-                if (data.result.Type === "LaunchOptions") {
+            const data = await executeAction(serverAPI, initActionSet,
+                "Install",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
+            if (data) {
+                if (data.Type === "LaunchOptions") {
 
-                    const lauchOptions = ((data.result as ContentResult).Content as LaunchOptionsContent).LaunchOptions as LaunchOptions;
+                    const lauchOptions = data.Content as LaunchOptions;
                     await SteamClient.Apps.SetAppLaunchOptions(id, lauchOptions.Options);
-                    await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetailsContent).Details.Name);
+                    await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
                     await SteamClient.Apps.SetShortcutExe(id, lauchOptions.Exe);
                     await SteamClient.Apps.SetShortcutStartDir(id, lauchOptions.WorkingDir);
                     setSteamClientID(id.toString());
@@ -224,9 +224,9 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
 
                                         <GameDisplay
                                             serverApi={serverAPI}
-                                            name={(gameData.Content as GameDetailsContent).Details.Name}
-                                            description={(gameData.Content as GameDetailsContent).Details.Description}
-                                            images={(gameData.Content as GameDetailsContent).Details.Images}
+                                            name={(gameData.Content as GameDetails).Name}
+                                            description={(gameData.Content as GameDetails).Description}
+                                            images={(gameData.Content as GameDetails).Images}
                                             steamClientID={steamClientID}
                                             closeModal={closeModal}
                                             installing={installing}
@@ -234,7 +234,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             progress={progress}
                                             cancelInstall={cancelInstall}
                                             uninstaller={uninstall}
-                                            editors={(gameData.Content as GameDetailsContent).Details.Editors}
+                                            editors={(gameData.Content as GameDetails).Editors}
                                             initActionSet={initActionSet}
                                             runner={() => {
                                                 setTimeout(() => {

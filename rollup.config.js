@@ -32,6 +32,7 @@ export default defineConfig({
       "react-dom": "SP_REACTDOM",
     },
     format: "iife",
+   // name: "JunkStorePlugin",
     exports: "default",
   },
 });

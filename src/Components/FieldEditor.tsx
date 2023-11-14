@@ -12,8 +12,8 @@ import {
   DialogButton,
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ValueType } from "./Types";
-import { KeyValuePair } from "./Types";
+import { ValueType } from "../Types/Types";
+import { KeyValuePair } from "../Types/Types";
 import { FaCog } from "react-icons/fa";
 
 type FieldProps = {

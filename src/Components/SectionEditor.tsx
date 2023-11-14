@@ -1,4 +1,4 @@
-import { Section, KeyValuePair } from "./Types";
+import { Section, KeyValuePair } from "../Types/Types";
 import { ButtonItem, Focusable, PanelSectionRow } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { FieldEditor } from "./FieldEditor";

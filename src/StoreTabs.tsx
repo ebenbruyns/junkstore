@@ -10,8 +10,9 @@
 import { ServerAPI, Tabs } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { StorePage } from "./StorePage";
-import { ActionSet, StoreTabsContent } from "./Types";
-import Logger from "./logger";
+import { ActionSet, StoreTabsContent } from "./Types/Types";
+import Logger from "./Utils/logger";
+import { executeAction } from "./executeAction";
 
 interface StoreTabsProperties {
     serverAPI: ServerAPI;
@@ -37,12 +38,13 @@ export const StoreTabs: VFC<StoreTabsProperties> = ({ serverAPI, tabs, initActio
                 logger.debug("initActionSet or initAction is empty");
                 return;
             }
-            const data = await serverAPI.callPluginMethod<{}, ActionSet>("execute_action", {
-                actionSet: initActionSet,
-                actionName: initAction,
-                inputData: "",
-            });
-            const result = data.result as ActionSet;
+            const data = await executeAction(serverAPI, initActionSet,
+                initAction,
+                {
+                    inputData: "",
+                }
+            );
+            const result = data.Content as ActionSet;
             setActionSetName(result.SetName);
             setContent(tabs);
             setCurrentTab("0");

@@ -25,7 +25,7 @@ export interface Section {
   Description: string;
   Options: KeyValuePair[];
 }
-export interface ConfData {
+export interface ConfData extends Content {
   Sections: Section[];
   Autoexec: string;
 }
@@ -36,7 +36,7 @@ export enum ValueType {
   Enum = "Enum",
   Boolean = "Boolean",
 }
-export interface GameDetails {
+export interface GameDetails extends Content {
   Name: string;
   Description: string;
   ApplicationPath: string;
@@ -59,7 +59,9 @@ export interface EditorAction {
   ContentId: string;
 }
 // Define the grid container
-
+export interface GameDataList extends Content {
+  Games: GameData[];
+}
 export interface GameData {
   ID: number;
   Name: string;
@@ -67,13 +69,15 @@ export interface GameData {
   ShortName: string;
   SteamClientID: string;
 }
-export interface LaunchOptions {
+export interface LaunchOptions extends Content {
   Exe: string;
   Options: string;
   WorkingDir: string;
 }
-
-export interface BatData {
+export interface FilesData extends Content {
+  Files: FileData[];
+}
+export interface FileData {
   Id: number;
   GameId: number;
   Path: string;
@@ -81,7 +85,7 @@ export interface BatData {
 }
 
 
-export interface ProgressUpdate {
+export interface ProgressUpdate extends Content {
   Percentage: number;
   Description: string;
 }
@@ -95,10 +99,14 @@ export interface GameData {
   image: string;
   shortname: string;
 }
-export interface ActionSet {
+// export interface ActionSetContent extends Content {
+//   ActionSet: ActionSet;
+
+export interface ActionSet extends Content {
   SetName: string;
   Actions: MenuActions[];
-}export interface MenuActions {
+}
+export interface MenuActions extends Content {
   ActionId: string;
   Title: string;
   Type: string;
@@ -109,9 +117,7 @@ export interface ContentResult {
   Content?: Content;
 }
 export interface Content { }
-export interface StoreContent extends Content {
-  Panels: Panel[];
-}
+
 export interface StoreTabsContent extends Content {
   Tabs: TabContent[];
 }
@@ -123,15 +129,12 @@ export interface TabContent {
 export interface ContentError extends Content {
   Message: string;
   Data: string;
+  ActionSet: string;
+  ActionName: string;
 }
-export interface GameDataContent extends Content {
-  Games: GameData[];
-}
-export interface LaunchOptionsContent extends Content {
-  LaunchOptions: LaunchOptions;
-}
-export interface GameDetailsContent extends Content {
-  Details: GameDetails;
+
+export interface StoreContent extends Content {
+  Panels: Panel[];
 }
 export interface Panel {
   Title: string;
