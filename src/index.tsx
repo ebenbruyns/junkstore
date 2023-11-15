@@ -2,32 +2,24 @@ import {
   definePlugin,
   ServerAPI,
   staticClasses,
+  useParams
 } from "decky-frontend-lib";
 import { FaBoxOpen } from "react-icons/fa";
 
-import { Page } from "./Page";
-import { Content } from "./Content";
-
+import { Content } from "./ContentTabs";
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute(
     "/content/:initActionSet/:initAction",
-    () => <Page serverAPI={serverApi} />
-    // ,
-    // {
-    //   exact: true,
-
-    // }
-
+    () => {
+      const { initActionSet, initAction } = useParams<{ initActionSet: string; initAction: string }>();
+      return <Content key={initActionSet + "_" + initAction} serverAPI={serverApi} initActionSet={initActionSet} initAction={initAction} />;
+    },
+    {
+      exact: true,
+    }
   );
-  // serverApi.routerHook.addRoute(
-  //   "/editor/:initActionSet/:initAction/:contentId",
-  //   () => <Page serverAPI={serverApi} />,
-  //   {
-  //     exact: true,
-  //   }
-  // );
 
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
@@ -35,9 +27,6 @@ export default definePlugin((serverApi: ServerAPI) => {
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/content/:initActionSet/:initAction");
-      // serverApi.routerHook.removeRoute(
-      //   "/editor/:initActionSet/:initAction/:contentId"
-      // );
     },
   };
 });
