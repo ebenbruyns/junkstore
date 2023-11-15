@@ -15,7 +15,8 @@ import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
 import GridContainer from "./Components/GridContainer";
-import { TextContent, HtmlContent } from "./Content";
+import { HtmlContent } from "./HtmlContent";
+import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
