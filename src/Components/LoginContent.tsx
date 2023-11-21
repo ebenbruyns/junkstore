@@ -1,9 +1,8 @@
-import { DialogButton, DialogLabel, Focusable, ServerAPI, sleep } from "decky-frontend-lib";
+import { DialogButton, DialogLabel, Focusable, ServerAPI } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, LaunchOptions, LoginStatus, SettingsData } from "../Types/Types";
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
-import { Loading } from "./Loading";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 
