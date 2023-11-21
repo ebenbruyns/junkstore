@@ -174,6 +174,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 "Install",
                 {
                     shortname: shortname,
+                    steamClientID: id.toString(),
                     inputData: ""
                 });
             if (data) {
@@ -184,6 +185,11 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                     await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
                     await SteamClient.Apps.SetShortcutExe(id, lauchOptions.Exe);
                     await SteamClient.Apps.SetShortcutStartDir(id, lauchOptions.WorkingDir);
+
+                    if (lauchOptions.Compatibility != null && lauchOptions.Compatibility) {
+                        const tools = await SteamClient.Apps.GetAvailableCompatTools(id)
+                        await SteamClient.Apps.SpecifyCompatTool(id, tools[0].strToolName);
+                    }
                     setSteamClientID(id.toString());
                     setInstalling(false);
                 }

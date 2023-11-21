@@ -36,7 +36,9 @@
     "rollup-plugin-import-assets": "^1.1.1",
     "shx": "^0.3.4",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "react-markdown": "^8.0.7",
+    "react-qr-code": "^2.0.12"
   },
   "dependencies": {
     "decky-frontend-lib": "^3.23.0",

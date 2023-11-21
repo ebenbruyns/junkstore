@@ -73,9 +73,19 @@ export interface LaunchOptions extends Content {
   Exe: string;
   Options: string;
   WorkingDir: string;
+  Name: string;
+  Compatibility?: boolean;
+}
+export interface LoginStatus extends Content {
+  Username: string;
+  LoggedIn: boolean;
 }
 export interface FilesData extends Content {
   Files: FileData[];
+}
+export interface SettingsData extends Content {
+  name: string;
+  value: string;
 }
 export interface FileData {
   Id: number;

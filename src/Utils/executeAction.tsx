@@ -6,7 +6,7 @@ import { ErrorModal } from "../ErrorModal";
 
 export async function executeAction(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult> {
     const logger = new Logger("executeAction");
-    logger.log(`OnInit: actionSet: ${actionSet}, actionName: ${actionName}, args: ${args}`);
+    logger.log(`actionSet: ${actionSet}, actionName: ${actionName}, args: ${args}`);
 
     const res = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
         actionSet: actionSet,

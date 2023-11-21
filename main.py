@@ -3,11 +3,15 @@ import os
 import json
 import shlex
 import decky_plugin
+import requests
+import zipfile
+import shutil
 
 
 class Helper:
 
     action_cache = {}
+    working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
 
     @staticmethod
     async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None):
@@ -25,6 +29,7 @@ class Helper:
                                                          stdin=asyncio.subprocess.PIPE,
                                                          shell=True,
                                                          env=env,
+                                                         cwd=Helper.working_directory
                                                          )
             # await proc.wait()
             stdout, stderr = await proc.communicate(input.encode())
@@ -82,7 +87,7 @@ class Helper:
                     result = action
         if not result:
             file_path = os.path.join(
-                decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, f"{actionSet}.json")
+                Helper.working_directory, f"{actionSet}.json")
             if not os.path.exists(file_path):
                 file_path = os.path.join(
                     decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, ".cache", f"{actionSet}.json")
@@ -151,6 +156,11 @@ class Plugin:
 
     async def _main(self):
         try:
+            if os.path.exists(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "init.json")):
+                Helper.working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+            else:
+                Helper.working_directory = decky_plugin.DECKY_PLUGIN_DIR
+
             decky_plugin.logger.info(
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
@@ -176,6 +186,42 @@ class Plugin:
         except Exception as e:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
             return None
+
+    async def download_custom_backend(self, url, backup: bool = False):
+        try:
+            runtime_dir = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+            if backup:
+                # Create a backup directory
+                backup_dir = os.path.join(runtime_dir, "backup")
+                os.makedirs(backup_dir, exist_ok=True)
+
+                # Move all files and directories in the runtime directory to the backup directory
+                for item in os.listdir(runtime_dir):
+                    item_path = os.path.join(runtime_dir, item)
+                    if os.path.isfile(item_path) or os.path.isdir(item_path):
+                        shutil.move(item_path, backup_dir)
+                        decky_plugin.logger.info(
+                            "Backup completed successfully")
+
+            decky_plugin.logger.info(f"Downloading file from {url}")
+            response = requests.get(url)
+            response.raise_for_status()
+
+            # Create a temporary file to save the downloaded zip file
+            temp_file = "/tmp/custom_backend.zip"
+            with open(temp_file, "wb") as f:
+                f.write(response.content)
+
+            # Extract the contents of the zip file to the runtime directory
+
+            with zipfile.ZipFile(temp_file, "r") as zip_ref:
+                zip_ref.extractall(runtime_dir)
+
+            decky_plugin.logger.info(
+                "Download and extraction completed successfully")
+
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in download_custom_backend: {e}")
 
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")

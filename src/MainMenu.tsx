@@ -29,16 +29,16 @@ export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initA
                     ))}
                 </PanelSection>
             ))}
-            <PanelSection title="About">
+            <PanelSection title="Download Custom Backend">
                 <PanelSectionRow>
                     <ButtonItem
                         layout="below"
                         onClick={() => {
                             Navigation.CloseSideMenus();
-                            Navigation.Navigate("/support");
+                            Navigation.Navigate("/custom-backend");
                         }}
                     >
-                        Support us
+                        Download
                     </ButtonItem>
                 </PanelSectionRow>
             </PanelSection>

@@ -6,7 +6,7 @@ import {
 } from "decky-frontend-lib";
 import { FaBoxOpen } from "react-icons/fa";
 
-import { Content } from "./ContentTabs";
+import { Content, DownloadCustomBackend } from "./ContentTabs";
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
@@ -20,6 +20,15 @@ export default definePlugin((serverApi: ServerAPI) => {
       exact: true,
     }
   );
+  serverApi.routerHook.addRoute(
+    "/custom-backend",
+    () => {
+      return <DownloadCustomBackend serverAPI={serverApi} />
+    },
+    {
+      exact: true,
+    }
+  );
 
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
@@ -27,6 +36,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     icon: <FaBoxOpen />,
     onDismount() {
       serverApi.routerHook.removeRoute("/content/:initActionSet/:initAction");
+      serverApi.routerHook.removeRoute("/custom-backend");
     },
   };
 });

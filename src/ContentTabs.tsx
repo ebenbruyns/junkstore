@@ -7,7 +7,7 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, GameDataList, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
@@ -18,6 +18,7 @@ import GridContainer from "./Components/GridContainer";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
+import { LoginContent } from "./Components/LoginContent";
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
@@ -98,6 +99,8 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
     );
 };
 
+
+
 export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
     const logger = new Logger("index");
     const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
@@ -176,6 +179,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)} />
                     </Focusable>
+                    <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
 
                     <GridContainer
                         serverAPI={serverAPI}
@@ -218,4 +222,33 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         </>
     );
 };
+
+export const DownloadCustomBackend: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
+    const [url, setUrl] = useState("");
+    const [backup, setBackup] = useState("false");
+    const download = async () => {
+        console.log("Download: ", url);
+        await serverAPI.callPluginMethod("DownloadCustomBackend", {
+            url: url,
+            backup: backup
+        })
+
+    }
+
+    return (
+        <DialogBody style={{ marginTop: "40px" }}>
+            <DialogControlsSection style={{ height: "calc(100%)" }}>
+                <div>Junk Store is a flexible and extensible frontend. You can use a custom backend to provide the content for the store.
+                    This does come with security concerns so beware of what you download. You can create your own custom backends too by following
+                    the instructions <a href="https://github.com/ebenbruyns/junkstore/wiki/Custom-Backends">here</a>.</div>
+                <br />
+
+                <TextField placeholder="Enter URL" value="" onChange={(e) => setUrl(e.target.value)} />
+                <ToggleField label="Backup" checked={backup === "true"}
+                    onChange={(newValue) => setBackup(newValue.toString())} />
+                <DialogButton onClick={download}>Download</DialogButton>
+            </DialogControlsSection>
+        </DialogBody>
+    )
+}
 

@@ -167,26 +167,27 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
                 <span>Play Game</span>
               </DialogButton>)}
+
+            {installing && (
+              <>
+                <DialogButton
+                  // @ts-ignore
+                  layout="flex"
+                  onClick={cancelInstall}
+                  onOKButton={cancelInstall}
+                  style={{
+                    width: "168px", height: "40px", verticalAlign: "middle"
+                  }}
+                >
+                  Cancel
+                </DialogButton>
+                <ProgressBarWithInfo
+                  nProgress={progress.Percentage}
+                  description={progress.Description}
+                />
+              </>
+            )}
             <div style={{ flexGrow: 1, flexShrink: 1 }}>
-              {installing && (
-                <>
-                  <DialogButton
-                    // @ts-ignore
-                    layout="below"
-                    onClick={cancelInstall}
-                    onOKButton={cancelInstall}
-                    style={{
-                      width: "168px", height: "40px", verticalAlign: "middle"
-                    }}
-                  >
-                    Cancel
-                  </DialogButton>
-                  <ProgressBarWithInfo
-                    nProgress={progress.Percentage}
-                    description={progress.Description}
-                  />
-                </>
-              )}
             </div>
             {editors.length > 0 && (
               <DialogButton
