@@ -179,8 +179,9 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)} />
                     </Focusable>
-                    <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
-
+                    {(content.Content as GameDataList).NeedsLogin === "true" && (
+                        <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                    )}
                     <GridContainer
                         serverAPI={serverAPI}
                         games={(content.Content as GameDataList).Games}

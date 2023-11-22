@@ -424,7 +424,7 @@ def get_game_data(db_file, shortname, image_prefix, urlencode):
         return None
 
 
-def get_games_with_images(db_file, image_prefix, filter_str, installed, isLimited, urlencode):
+def get_games_with_images(db_file, image_prefix, filter_str, installed, isLimited, urlencode, needsLogin):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     limited_clause = ""
@@ -460,7 +460,7 @@ def get_games_with_images(db_file, image_prefix, filter_str, installed, isLimite
         result.append({'ID': game_id, 'Name': title,
                       'Images': image_files, 'ShortName': shortname, 'SteamClientID': steam_client_id})
     conn.close()
-    return json.dumps({'Type': 'GameGrid', 'Content':  {'Games': result}})
+    return json.dumps({'Type': 'GameGrid', 'Content':  {'NeedsLogin': needsLogin, 'Games': result}})
 
 
 def read_json_from_stdin():
@@ -686,8 +686,9 @@ def main():
             filter = args.getgameswithimages[1]
             installed = args.getgameswithimages[2]
             isLimited = args.getgameswithimages[3]
+            needsLogin = args.getgameswithimages[4]
         print(get_games_with_images(args.dbfile,
-              args.getgameswithimages[0], filter, installed, isLimited, urlencode))
+              args.getgameswithimages[0], filter, installed, isLimited, urlencode, needsLogin))
     if args.getgamedata:
         urlencode = False
         if (args.urlencode):

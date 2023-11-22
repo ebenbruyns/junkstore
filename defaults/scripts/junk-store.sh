@@ -22,7 +22,7 @@ function getgames(){
         LIMIT="${3}"
     fi
     IMAGE_PATH=""
-    TEMP=$($DOSCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" --dbfile $DBFILE)
+    TEMP=$($DOSCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
    
     echo $TEMP
 }

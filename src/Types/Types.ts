@@ -60,6 +60,7 @@ export interface EditorAction {
 }
 // Define the grid container
 export interface GameDataList extends Content {
+  NeedsLogin?: string;
   Games: GameData[];
 }
 export interface GameData {
