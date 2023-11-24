@@ -3,9 +3,10 @@ import os
 import json
 import shlex
 import decky_plugin
-import requests
+# import requests
 import zipfile
 import shutil
+import aiohttp
 
 
 class Helper:
@@ -156,6 +157,7 @@ class Plugin:
 
     async def _main(self):
         try:
+            Helper.action_cache = {}
             if os.path.exists(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "init.json")):
                 Helper.working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
             else:
@@ -169,7 +171,22 @@ class Plugin:
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
 
-    # , *args, input_data):
+    async def reload(self):
+        try:
+            Helper.action_cache = {}
+            if os.path.exists(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "init.json")):
+                Helper.working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+            else:
+                Helper.working_directory = decky_plugin.DECKY_PLUGIN_DIR
+
+            decky_plugin.logger.info(
+                f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
+            # pass cmd argument to _call_script method
+            result = await Helper.execute_action("init", "init")
+           # decky_plugin.logger.info(f"init result: {result}")
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in _main: {e}")
+
     async def execute_action(self, actionSet, actionName, inputData='', *args, **kwargs):
         try:
             decky_plugin.logger.info(
@@ -191,31 +208,50 @@ class Plugin:
         try:
             runtime_dir = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
             if backup:
-                # Create a backup directory
+                # Find the latest backup folder
                 backup_dir = os.path.join(runtime_dir, "backup")
-                os.makedirs(backup_dir, exist_ok=True)
+                backup_count = 1
+                while os.path.exists(f"{backup_dir} {backup_count}"):
+                    backup_count += 1
+                latest_backup_dir = f"{backup_dir} {backup_count}"
 
-                # Move all files and directories in the runtime directory to the backup directory
+                # Create the latest backup folder
+                os.makedirs(latest_backup_dir, exist_ok=True)
+
+                # Move non-backup files to the latest backup folder
                 for item in os.listdir(runtime_dir):
                     item_path = os.path.join(runtime_dir, item)
                     if os.path.isfile(item_path) or os.path.isdir(item_path):
-                        shutil.move(item_path, backup_dir)
-                        decky_plugin.logger.info(
-                            "Backup completed successfully")
+                        if not item.startswith("backup"):
+                            shutil.move(item_path, latest_backup_dir)
+                            decky_plugin.logger.info(
+                                "Backup completed successfully")
 
             decky_plugin.logger.info(f"Downloading file from {url}")
-            response = requests.get(url)
-            response.raise_for_status()
+            self.reload()
 
             # Create a temporary file to save the downloaded zip file
             temp_file = "/tmp/custom_backend.zip"
-            with open(temp_file, "wb") as f:
-                f.write(response.content)
-
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    assert response.status == 200
+                    with open(temp_file, "wb") as f:
+                        while True:
+                            chunk = await response.content.readany()
+                            if not chunk:
+                                break
+                            f.write(chunk)
+            print(f"Downloaded {temp_file} from {url}")
             # Extract the contents of the zip file to the runtime directory
 
             with zipfile.ZipFile(temp_file, "r") as zip_ref:
                 zip_ref.extractall(runtime_dir)
+                scripts_dir = os.path.join(
+                    decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "scripts")
+                for root, dirs, files in os.walk(scripts_dir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        os.chmod(file_path, 0o755)
 
             decky_plugin.logger.info(
                 "Download and extraction completed successfully")

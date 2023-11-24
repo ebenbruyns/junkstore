@@ -77,7 +77,7 @@ function getgamedetails(){
     exit 0
 }
 function getbats(){
-    TEMP=$($DOSCONF --getjsonbats "${1}" --dbfile $DBFILE)
+    TEMP=$($DOSCONF --getjsonbats "${1}" --dbfile $DBFILE --dbfile $DBFILE)
     echo $TEMP
 }
 function savebats(){
@@ -85,11 +85,11 @@ function savebats(){
 }
 function getprogress()
 {
-    TEMP=$($EPICCONF --getprogress "${DECKY_PLUGIN_LOG_DIR}/${1}.progress")
+    TEMP=$($EPICCONF --getprogress "${DECKY_PLUGIN_LOG_DIR}/${1}.progress" --dbfile $DBFILE)
     echo $TEMP
 }
 function loginstatus(){
-    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE)
+    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE)
     echo $TEMP
 
 }

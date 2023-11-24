@@ -6,7 +6,8 @@ import {
 } from "decky-frontend-lib";
 import { FaBoxOpen } from "react-icons/fa";
 
-import { Content, DownloadCustomBackend } from "./ContentTabs";
+import { Content } from "./ContentTabs";
+import { DownloadCustomBackend } from "./DownloadCustomBackend";
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {

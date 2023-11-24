@@ -1,6 +1,6 @@
 import {
     Focusable,
-    PanelSection, Dropdown, ModalRoot, ModalRootProps
+    PanelSection, Dropdown, ModalRootProps
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";

@@ -7,7 +7,7 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, ToggleField } from "decky-frontend-lib";
+import { DialogBody, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, GameDataList, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
@@ -62,7 +62,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
     const getContent = () => {
         return content.Tabs.map((tab, index) => ({
             title: tab.Title,
-            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} />,
+            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
             id: index.toString()
         }));
     }
@@ -80,7 +80,8 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
     return (
         <DialogBody key={initActionSet + "_" + initAction}>
             {layout === "horizontal" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} style={{ height: "calc(100% - 40px)", marginTop: "40px" }}>
+                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} style={{ height: "calc(100% - 40px)" }}>
+                    <div style={{ marginBottom: "40px" }} />
                     <Tabs key="0"
                         activeTab={currentTab}
                         onShowTab={(tabID: string) => setCurrentTab(tabID)}
@@ -101,7 +102,8 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
 
 
 
-export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
+export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; padTop?: boolean; }> = ({
+    serverAPI, initActionSet, initAction, padTop = true }) => {
     const logger = new Logger("index");
     const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState<string>("");
@@ -165,10 +167,14 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
 
             {content.Type === "GameGrid" && (
                 <>
+
+
+                    {padTop && <div style={{ marginBottom: "50px" }} />}
                     <Focusable //key={initActionSet + "_" + initAction}
                         // @ts-ignore
                         focusableIfNoChildren
                         style={{ marginBottom: "20px" }}
+
                         onSecondaryActionDescription="Toggle Installed Filter"
                         onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
                         onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
@@ -191,65 +197,53 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                         initActionSet={actionSetName}
                         initAction="" />
                 </>
-            )}
-            {content.Type === "StoreTabs" &&
+            )
+            }
+            {
+                content.Type === "StoreTabs" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="horizontal"
                     initAction={initAction}
-                    initActionSet={initActionSet} />}
-            {content.Type === "SideBarPage" &&
+                    initActionSet={initActionSet} />
+            }
+            {
+                content.Type === "SideBarPage" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="vertical"
                     initAction={initAction}
-                    initActionSet={initActionSet} />}
-            {content.Type === "MainMenu" &&
+                    initActionSet={initActionSet} />
+            }
+            {
+                content.Type === "MainMenu" &&
                 <MainMenu //key={initActionSet + "_" + initAction} 
+                    serverApi={serverAPI}
                     content={content.Content as StoreContent}
-                    initActionSet={actionSetName} initAction="" />}
-            {content.Type === "Text" &&
+                    initActionSet={actionSetName} initAction="" />
+            }
+            {
+                content.Type === "Text" &&
                 <TextContent //key={initActionSet + "_" + initAction} 
-                    content={content.Content as string} />}
-            {content.Type === "Html" &&
+                    content={content.Content as string} />
+            }
+            {
+                content.Type === "Html" &&
                 <HtmlContent //key={initActionSet + "_" + initAction}
-                    content={content.Content as string} />}
+                    content={content.Content as string} />
+            }
 
-            {content.Type === "Error" &&
+            {
+                content.Type === "Error" &&
                 <ErrorDisplay //key={initActionSet + "_" + initAction}
-                    error={content.Content as ContentError} />}
-            {content.Type === "Empty" &&
-                <Loading />}
+                    error={content.Content as ContentError} />
+            }
+            {
+                content.Type === "Empty" &&
+                <Loading />
+            }
         </>
     );
 };
 
-export const DownloadCustomBackend: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    const [url, setUrl] = useState("");
-    const [backup, setBackup] = useState("false");
-    const download = async () => {
-        console.log("Download: ", url);
-        await serverAPI.callPluginMethod("DownloadCustomBackend", {
-            url: url,
-            backup: backup
-        })
-
-    }
-
-    return (
-        <DialogBody style={{ marginTop: "40px" }}>
-            <DialogControlsSection style={{ height: "calc(100%)" }}>
-                <div>Junk Store is a flexible and extensible frontend. You can use a custom backend to provide the content for the store.
-                    This does come with security concerns so beware of what you download. You can create your own custom backends too by following
-                    the instructions <a href="https://github.com/ebenbruyns/junkstore/wiki/Custom-Backends">here</a>.</div>
-                <br />
-
-                <TextField placeholder="Enter URL" value="" onChange={(e) => setUrl(e.target.value)} />
-                <ToggleField label="Backup" checked={backup === "true"}
-                    onChange={(newValue) => setBackup(newValue.toString())} />
-                <DialogButton onClick={download}>Download</DialogButton>
-            </DialogControlsSection>
-        </DialogBody>
-    )
-}
 

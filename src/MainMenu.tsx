@@ -1,4 +1,4 @@
-import { ButtonItem, DialogButton, Field, Focusable, ModalRoot, Navigation, PanelSection, PanelSectionRow, showModal } from "decky-frontend-lib";
+import { Button, ButtonItem, DialogButton, Field, Focusable, ModalRoot, Navigation, PanelSection, PanelSectionRow, ServerAPI, showModal } from "decky-frontend-lib";
 import { SiBitcoin, SiDiscord, SiEthereum, SiGithub, SiGithubsponsors, SiMonero } from "react-icons/si";
 import { VFC } from "react";
 import { StoreContent } from "./Types/Types";
@@ -35,7 +35,12 @@ export const showQrModal = (url: string) => {
     );
 };
 
-export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initAction: string }> = ({ content, initAction, initActionSet }) => {
+export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initActionSet: string; initAction: string }> = ({
+    serverApi,
+    content,
+    // @ts-ignore
+    initAction,
+    initActionSet }) => {
     const socialLinks = [
         {
             label: "Discord",
@@ -148,6 +153,10 @@ export const MainMenu: VFC<{ content: StoreContent; initActionSet: string; initA
 
                 </PanelSection>
                 <PanelSectionRow>
+                    <ButtonItem layout="below"
+                        onClick={async () => {
+                            await serverApi.callPluginMethod("reload", {})
+                        }}>Re-initialize</ButtonItem>
                     <ButtonItem
                         layout="below"
                         onClick={() => {

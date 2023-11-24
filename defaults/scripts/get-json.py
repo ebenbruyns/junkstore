@@ -25,6 +25,33 @@ json_fragments = {
             ]
         }
     },
+    "junk-store-actions-no-tabs": {
+        "Type": "ActionSet",
+        "Content": {
+            "SetName": "JunkStoreActions",
+            "Actions": [
+                {
+                    "Id": "GetEpicActions",
+                    "Title": "Get Epic store actions",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-actions"
+                },
+                {
+                    "Id": "GetContent",
+                    "Title": "Get content",
+                    "Type": "TabPage",
+                    "Command": "./scripts/junk-store.sh getgames"
+                },
+                {
+                    "Id": "GetLoginActions",
+                    "Title": "Get login status",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-games-login-actions"
+                }
+
+            ]
+        }
+    },
     "main-menu-actions": {
         "Type": "ActionSet",
         "Content": {
@@ -41,7 +68,19 @@ json_fragments = {
                     "Title": "Content",
                     "Type": "Init",
                     "Command": "./scripts/get-json.py junk-store-actions"
-                }
+                },
+                {
+                    "Id": "JunkStoreInitNoTabs",
+                    "Title": "Content",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py junk-store-actions-no-tabs"
+                },
+                {
+                    "Id": "GetEpicActionsNoTabs",
+                    "Title": "Get Epic store actions",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-actions"
+                },
             ]
         }
     },
@@ -64,6 +103,11 @@ json_fragments = {
                         {
                             "ActionId": "JunkStoreInit",
                             "Title": "Epic Games",
+                            "Type": "Page"
+                        },
+                        {
+                            "ActionId": "JunkStoreInitNoTabs",
+                            "Title": "Epic Games (no tabs)",
                             "Type": "Page"
                         }
                     ]
