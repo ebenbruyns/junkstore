@@ -7,12 +7,12 @@ import {
 import { FaBoxOpen } from "react-icons/fa";
 
 import { Content } from "./ContentTabs";
-import { DownloadCustomBackend } from "./DownloadCustomBackend";
+import { About } from "./About";
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute(
-    "/content/:initActionSet/:initAction",
+    "/junk-store-content/:initActionSet/:initAction",
     () => {
       const { initActionSet, initAction } = useParams<{ initActionSet: string; initAction: string }>();
       return <Content key={initActionSet + "_" + initAction} serverAPI={serverApi} initActionSet={initActionSet} initAction={initAction} />;
@@ -22,9 +22,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     }
   );
   serverApi.routerHook.addRoute(
-    "/custom-backend",
+    "/about-junk-store",
     () => {
-      return <DownloadCustomBackend serverAPI={serverApi} />
+      return <About serverAPI={serverApi} />
     },
     {
       exact: true,
@@ -36,8 +36,8 @@ export default definePlugin((serverApi: ServerAPI) => {
     content: <Content serverAPI={serverApi} initActionSet="init" initAction="InitActions" />,
     icon: <FaBoxOpen />,
     onDismount() {
-      serverApi.routerHook.removeRoute("/content/:initActionSet/:initAction");
-      serverApi.routerHook.removeRoute("/custom-backend");
+      serverApi.routerHook.removeRoute("/junk-store-content/:initActionSet/:initAction");
+      serverApi.routerHook.removeRoute("/about-junk-store");
     },
   };
 });

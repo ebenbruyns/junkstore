@@ -41,44 +41,7 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
     // @ts-ignore
     initAction,
     initActionSet }) => {
-    const socialLinks = [
-        {
-            label: "Discord",
-            icon: <SiDiscord />,
-            link: "https://discord.gg/uqemZ6cfHe",
-            buttonText: "Join Us",
-        },
-        {
-            label: "GitHub",
-            icon: <SiGithub />,
-            link: "https://github.com/ebenbruyns/junkstore",
-            buttonText: "Report issues",
-        },
-        {
-            label: "Sponsor on GitHub",
-            icon: <SiGithubsponsors />,
-            link: "https://github.com/sponsors/ebenbruyns",
-            buttonText: "Sponsor",
-        },
-        {
-            label: "Bitcoin",
-            icon: <SiBitcoin />,
-            link: "",
-            buttonText: "Donate Bitcoin",
-        },
-        {
-            label: "Etherium",
-            icon: <SiEthereum />,
-            link: "",
-            buttonText: "Donate Etherium",
-        },
-        {
-            label: "Monero",
-            icon: <SiMonero />,
-            link: "",
-            buttonText: "Donate Monero",
-        }
-    ];
+
 
     return (
         <>
@@ -90,7 +53,7 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
                                 layout="below"
                                 onClick={() => {
                                     Navigation.CloseSideMenus();
-                                    Navigation.Navigate(`/content/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
+                                    Navigation.Navigate(`/junk-store-content/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
                                 }}
                             >
                                 {action.Title}
@@ -99,72 +62,18 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
                     ))}
                 </PanelSection>
             ))}
-            <PanelSection title="About">
-                <PanelSection>
-                    <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                        {socialLinks.map((linkInfo, index) => (
-                            <Field
-                                key={index}
-                                label={linkInfo.label}
-                                icon={linkInfo.icon}
-                                bottomSeparator={"none"}
-                                padding={"none"}
-                            >
-                                <Focusable
-                                    style={{
-                                        marginLeft: "auto",
-                                        boxShadow: "none",
-                                        display: "flex",
-                                        justifyContent: "right",
-                                        padding: "4px",
-                                    }}
-                                >
-                                    <DialogButton
-                                        onClick={() => {
-                                            Navigation.NavigateToExternalWeb(linkInfo.link);
-                                        }}
-                                        style={{
-                                            padding: "10px",
-                                            fontSize: "14px",
-                                        }}
-                                    >
-                                        {linkInfo.buttonText}
-                                    </DialogButton>
-                                    <DialogButton
-                                        onClick={() => {
-                                            showQrModal(linkInfo.link);
-                                        }}
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            padding: "10px",
-                                            maxWidth: "40px",
-                                            minWidth: "auto",
-                                            marginLeft: ".5em",
-                                        }}
-                                    >
-                                        <HiOutlineQrCode />
-                                    </DialogButton>
-                                </Focusable>
-                            </Field>
-                        ))}
-                    </Focusable>
+            <PanelSection title="">
 
-                </PanelSection>
                 <PanelSectionRow>
-                    <ButtonItem layout="below"
-                        onClick={async () => {
-                            await serverApi.callPluginMethod("reload", {})
-                        }}>Re-initialize</ButtonItem>
+
                     <ButtonItem
                         layout="below"
                         onClick={() => {
                             Navigation.CloseSideMenus();
-                            Navigation.Navigate("/custom-backend");
+                            Navigation.Navigate("/about-junk-store");
                         }}
                     >
-                        Download
+                        About
                     </ButtonItem>
                 </PanelSectionRow>
             </PanelSection>

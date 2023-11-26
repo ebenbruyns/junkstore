@@ -1,9 +1,10 @@
 import asyncio
 import os
 import json
+
+from aiohttp import web
 import shlex
 import decky_plugin
-# import requests
 import zipfile
 import shutil
 import aiohttp
@@ -15,15 +16,13 @@ class Helper:
     working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
 
     @staticmethod
-    async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None):
+    async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None, websocket=None, stream_output: bool = False):
         try:
             if unprivilege:
                 cmd = f'sudo -u {decky_plugin.DECKY_USER} {cmd}'
             decky_plugin.logger.info("running cmd: " + cmd)
-            # decky_plugin.logger.info(f'[{moduleName}.pyexec_subprocess]: "{cmd}"')
-            if env == None:
+            if env is None:
                 env = Helper.get_environment()
-            # decky_plugin.logger.info(f"env: {env}")
             proc = await asyncio.create_subprocess_shell(cmd,
                                                          stdout=asyncio.subprocess.PIPE,
                                                          stderr=asyncio.subprocess.PIPE,
@@ -32,14 +31,32 @@ class Helper:
                                                          env=env,
                                                          cwd=Helper.working_directory
                                                          )
-            # await proc.wait()
-            stdout, stderr = await proc.communicate(input.encode())
-            # await proc.wait()
-            stdout = stdout.decode()
-            stderr = stderr.decode()
-            # decky_plugin.logger.info(
-            #    f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
-            return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
+            if stream_output:
+                while True:
+                    stdout = await proc.stdout.readline()
+                    stderr = await proc.stderr.readline()
+                    if stdout:
+                        stdout = stdout.decode()
+                        if stream_output:
+                            await websocket.send_str(stdout)
+                    if stderr:
+                        stderr = stderr.decode()
+                        if stream_output:
+                            await websocket.send_str(stderr)
+                    if proc.stdout.at_eof() and proc.stderr.at_eof():
+                        break
+                await proc.wait()
+                return {'returncode': proc.returncode}
+            else:
+                # await proc.wait()
+                stdout, stderr = await proc.communicate(input.encode())
+                # await proc.wait()
+                stdout = stdout.decode()
+                stderr = stderr.decode()
+                # decky_plugin.logger.info(
+                #    f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
+                return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
+
         except Exception as e:
             decky_plugin.logger.error(f"Error in pyexec_subprocess: {e}")
             return None
@@ -152,6 +169,39 @@ class Helper:
             with open(file_path, 'w') as f:
                 json.dump(actionSet, f)
 
+    @staticmethod
+    async def ws_handler(request):
+        websocket = web.WebSocketResponse()
+        await websocket.prepare(request)
+
+        try:
+            async for message in websocket:
+                decky_plugin.logger.info(f"ws_handler message: {message.data}")
+                data = json.loads(message.data)
+                if (data['action'] == 'install_dependencies'):
+                    await Helper.pyexec_subprocess("./scripts/install_deps.sh", websocket=websocket, stream_output=True)
+
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in ws_handler: {e}")
+
+    async def start_ws_server():
+        try:
+            app = web.Application()
+            app.router.add_get('/ws', Helper.ws_handler)
+            runner = web.AppRunner(app)
+            await runner.setup()
+            site = web.TCPSite(runner, 'localhost', 8765)
+            await site.start()
+
+            decky_plugin.logger.info("WebSocket server started")
+            while True:
+                await asyncio.sleep(10)
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in start_ws_server: {e}")
+
+
+# import requests
+
 
 class Plugin:
 
@@ -167,7 +217,9 @@ class Plugin:
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
             result = await Helper.execute_action("init", "init")
-           # decky_plugin.logger.info(f"init result: {result}")
+            # decky_plugin.logger.info(f"init result: {result}")
+            await Helper.start_ws_server()
+
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
 
@@ -228,11 +280,11 @@ class Plugin:
                                 "Backup completed successfully")
 
             decky_plugin.logger.info(f"Downloading file from {url}")
-            self.reload()
 
             # Create a temporary file to save the downloaded zip file
             temp_file = "/tmp/custom_backend.zip"
-            async with aiohttp.ClientSession() as session:
+            # disabling ssl verfication for testing, github doesn't seem to have a valid ssl cert, seems wrong
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
                 async with session.get(url) as response:
                     assert response.status == 200
                     with open(temp_file, "wb") as f:
