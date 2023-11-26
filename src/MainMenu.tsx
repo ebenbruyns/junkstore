@@ -1,9 +1,7 @@
-import { Button, ButtonItem, DialogButton, Field, Focusable, ModalRoot, Navigation, PanelSection, PanelSectionRow, ServerAPI, showModal } from "decky-frontend-lib";
-import { SiBitcoin, SiDiscord, SiEthereum, SiGithub, SiGithubsponsors, SiMonero } from "react-icons/si";
+import { ButtonItem, ModalRoot, Navigation, PanelSection, PanelSectionRow, ServerAPI, showModal } from "decky-frontend-lib";
 import { VFC } from "react";
 import { StoreContent } from "./Types/Types";
 import QRCode from "react-qr-code";
-import { HiOutlineQrCode } from "react-icons/hi2";
 /**
  * Renders the main menu of the Junk Store.
  * @param content - The content of the store.
@@ -36,6 +34,7 @@ export const showQrModal = (url: string) => {
 };
 
 export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initActionSet: string; initAction: string }> = ({
+    // @ts-ignore
     serverApi,
     content,
     // @ts-ignore
