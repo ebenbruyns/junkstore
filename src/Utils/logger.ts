@@ -1,4 +1,5 @@
 export const log = (name: string) => {
+    if(false)
     return console.info.bind(
         window.console,
         `%c Junk Store %c ${name} %c`,
@@ -6,16 +7,17 @@ export const log = (name: string) => {
         'background: #1abc9c; color: black;',
         'background: transparent;',
     );
+    else return function (..._: any[]) { }
 };
 
 export const debug = (name: string) => {
-    //if (process.env.RELEASE_TYPE === 'development')
+    if (false)
     return console.debug.bind(window.console,
         `%c Junk Store %c ${name} %c`,
         'background: #16a085; color: black;',
         'background: #1abc9c; color: black;',
         'color: blue;');
-    // else return function (..._: any[]) { }
+     else return function (..._: any[]) { }
 }
 
 export const error = (name: string) => {
