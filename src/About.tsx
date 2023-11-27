@@ -7,7 +7,8 @@ import Logger from "./Utils/logger";
 
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    const [url, setUrl] = useState("https://github.com/ebenbruyns/junk-scripts/releases/download/Beta-0.1/Junk-Scripts-0.1.zip");
+    //const [url, setUrl] = useState("https://github.com/ebenbruyns/junk-scripts/releases/download/Beta-0.1/Junk-Scripts-0.1.zip");
+    const [url, setUrl] = useState("");
     const [backup, setBackup] = useState("false");
     const logger = new Logger("About");
     const download = async () => {
