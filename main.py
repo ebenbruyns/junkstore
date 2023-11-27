@@ -38,12 +38,13 @@ class Helper:
                     if stdout:
                         stdout = stdout.decode()
                         if stream_output:
-                            await websocket.send_str(stdout)
+                            await websocket.send_str(json.dumps({'status': 'open', 'data': stdout}))
                     if stderr:
                         stderr = stderr.decode()
                         if stream_output:
-                            await websocket.send_str(stderr)
+                            await websocket.send_str(json.dumps({'status': 'open', 'data': stderr}))
                     if proc.stdout.at_eof() and proc.stderr.at_eof():
+                        await websocket.send_str(json.dumps({'status': 'closed', 'data': ''}))
                         break
                 await proc.wait()
                 return {'returncode': proc.returncode}
@@ -259,6 +260,23 @@ class Plugin:
     async def download_custom_backend(self, url, backup: bool = False):
         try:
             runtime_dir = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+            decky_plugin.logger.info(f"Downloading file from {url}")
+
+            # Create a temporary file to save the downloaded zip file
+            temp_file = "/tmp/custom_backend.zip"
+            # disabling ssl verfication for testing, github doesn't seem to have a valid ssl cert, seems wrong
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+                async with session.get(url) as response:
+                    assert response.status == 200
+                    with open(temp_file, "wb") as f:
+                        while True:
+                            chunk = await response.content.readany()
+                            if not chunk:
+                                break
+                            f.write(chunk)
+            print(f"Downloaded {temp_file} from {url}")
+            # Extract the contents of the zip file to the runtime directory
+
             if backup:
                 # Find the latest backup folder
                 backup_dir = os.path.join(runtime_dir, "backup")
@@ -278,23 +296,6 @@ class Plugin:
                             shutil.move(item_path, latest_backup_dir)
                             decky_plugin.logger.info(
                                 "Backup completed successfully")
-
-            decky_plugin.logger.info(f"Downloading file from {url}")
-
-            # Create a temporary file to save the downloaded zip file
-            temp_file = "/tmp/custom_backend.zip"
-            # disabling ssl verfication for testing, github doesn't seem to have a valid ssl cert, seems wrong
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
-                async with session.get(url) as response:
-                    assert response.status == 200
-                    with open(temp_file, "wb") as f:
-                        while True:
-                            chunk = await response.content.readany()
-                            if not chunk:
-                                break
-                            f.write(chunk)
-            print(f"Downloaded {temp_file} from {url}")
-            # Extract the contents of the zip file to the runtime directory
 
             with zipfile.ZipFile(temp_file, "r") as zip_ref:
                 zip_ref.extractall(runtime_dir)

@@ -15,15 +15,18 @@ export interface ErrorModalProps extends ModalRootProps {
 
 }
 
+// Not used yet, but there are future plans for this.
 export const SettingsEditor: VFC<EditorProperties> = ({
     serverAPI, initActionSet, initAction, contentId
 }) => {
     const logger = new Logger("SettingsEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
     const [confData, setConfData] = useState({} as ConfData);
+    // @ts-ignore
     const focusRef = useRef(null);
     const [modeLevel, setModeLevel] = useState(0 as number);
     const [actionSetName, setActionSetName] = useState("" as string);
+    // @ts-ignore
     const [helpText, setHelpText] = useState({
         Key: "",
         Description: "",
@@ -36,6 +39,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
         Parents: [],
         EnumValues: [],
     } as KeyValuePair);
+    // @ts-ignore
     const [sectionHelpText, setSectionHelpText] = useState("" as string);
     useEffect(() => {
         OnInit();

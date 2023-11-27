@@ -188,7 +188,11 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
 
                     if (lauchOptions.Compatibility != null && lauchOptions.Compatibility) {
                         const tools = await SteamClient.Apps.GetAvailableCompatTools(id)
-                        await SteamClient.Apps.SpecifyCompatTool(id, tools[0].strToolName);
+                        const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
+                        if (protonTool) {
+                            await SteamClient.Apps.SpecifyCompatTool(id, protonTool.strToolName);
+                        }
+                        //await SteamClient.Apps.SpecifyCompatTool(id, tools[0].strToolName);
                     }
                     setSteamClientID(id.toString());
                     setInstalling(false);
