@@ -1,7 +1,7 @@
 import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, Panel, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiBitcoin, SiDiscord, SiEthereum, SiGithub, SiGithubsponsors, SiMonero } from "react-icons/si";
+import { SiDiscord, SiGithub, SiGithubsponsors } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
 
