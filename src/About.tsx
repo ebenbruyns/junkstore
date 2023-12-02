@@ -7,10 +7,7 @@ import Logger from "./Utils/logger";
 
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    // to help with testing
-    const [url, setUrl] = useState("https://github.com/ebenbruyns/junk-scripts/releases/download/Beta-0.1/Junk-Scripts-0.1.zip");
-    //enable for production
-    //const [url, setUrl] = useState("");
+    const [url, setUrl] = useState("");
     const [backup, setBackup] = useState("false");
     const [reloading, setReloading] = useState(false);
     const logger = new Logger("About");
@@ -48,24 +45,6 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             icon: <SiGithubsponsors />,
             link: "https://github.com/sponsors/ebenbruyns",
             buttonText: "Sponsor",
-        },
-        {
-            label: "Bitcoin",
-            icon: <SiBitcoin />,
-            link: "12saVtAXKwm8XdqD7WvMH61mP52nnTVnHA",
-            buttonText: "Donate Bitcoin",
-        },
-        {
-            label: "Etherium",
-            icon: <SiEthereum />,
-            link: "0x7c7d1a0a3f7627f2951639d901427d8e241ec62d",
-            buttonText: "Donate Etherium",
-        },
-        {
-            label: "Monero",
-            icon: <SiMonero />,
-            link: "82bGCPczfeMZjAGpNXwwBV1KnZx54mSuWCxFRuJ7xDjziUkRuBwciHFGENsWZBZ97veMdJyYDbLuqgeKL1LsFoXv6gQkaRb",
-            buttonText: "Donate Monero",
         }
     ];
     useEffect(() => {
