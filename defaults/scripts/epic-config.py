@@ -71,7 +71,7 @@ def get_lauch_options(game_id, args_script, name):
             'Content':
             {
                 'Exe': f"\"{result['game_executable']}\"",
-                'Options': f"$({args_script} {game_id})",
+                'Options': f"{args_script}",
                 'WorkingDir': result['working_directory'],
                 'Compatibility': True,
                 'Name': name

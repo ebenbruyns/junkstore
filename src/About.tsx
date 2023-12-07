@@ -1,7 +1,7 @@
 import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, Panel, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiDiscord, SiGithub, SiGithubsponsors } from "react-icons/si";
+import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
 
@@ -33,6 +33,12 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             icon: <SiDiscord />,
             link: "https://discord.gg/uqemZ6cfHe",
             buttonText: "Join Us",
+        },
+        {
+            label: "Ko-Fi",
+            icon: <SiKofi />,
+            link: "https://ko-fi.com/junkrunner",
+            buttonText: "Buy me a coffee",
         },
         {
             label: "GitHub",

@@ -165,6 +165,33 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             logger.error(error);
         }
     };
+    const runner = async () => {
+
+        setTimeout(async () => {
+            closeModal();
+            let gid = gameIDFromAppID(parseInt(steamClientID));
+            const result = await executeAction(serverAPI, initActionSet, "GetLaunchOptions", {
+                shortname: shortname,
+                inputData: ""
+            });
+            if (result.Type === "LaunchOptions") {
+                const launchOptions = result.Content as LaunchOptions;
+                await SteamClient.Apps.SetAppLaunchOptions(gid, launchOptions.Options);
+                await SteamClient.Apps.SetShortcutName(gid, (gameData.Content as GameDetails).Name);
+                await SteamClient.Apps.SetShortcutExe(gid, launchOptions.Exe);
+                await SteamClient.Apps.SetShortcutStartDir(gid, launchOptions.WorkingDir);
+                // if (launchOptions.Compatibility != null && launchOptions.Compatibility) {
+                //     const tools = await SteamClient.Apps.GetAvailableCompatTools(gid)
+                //     const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
+                //     if (protonTool) {
+                //         await SteamClient.Apps.SpecifyCompatTool(gid, protonTool.strToolName);
+                //     }
+                // }
+            }
+            SteamClient.Apps.RunGame(gid, "", -1, 100);
+        }, 500);
+    };
+
     const install = async () => {
 
         //updateProgress();
@@ -246,14 +273,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             uninstaller={uninstall}
                                             editors={(gameData.Content as GameDetails).Editors}
                                             initActionSet={initActionSet}
-                                            runner={() => {
-                                                setTimeout(() => {
-                                                    closeModal();
-                                                    let gid = gameIDFromAppID(parseInt(steamClientID));
-                                                    SteamClient.Apps.RunGame(gid, "", -1, 100);
-                                                }, 500);
-                                                //SteamClient.Apps.RunGame(parseInt(gameData.SteamClientID), "", -1, 100)
-                                            }}
+                                            runner={runner}
 
                                         />
                                     </Focusable>
@@ -265,4 +285,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
 
         </>
     );
+
+
 };

@@ -20,6 +20,59 @@ json_fragments = {
                     "Title": "Get content",
                     "Type": "TabPage",
                     "Command": "./scripts/get-json.py junk-store-tabs"
+                }, {
+                    "Id": "GetContent",
+                    "Title": "Get Epic games list",
+                    "Type": "GameGrid",
+                    "Command": "./scripts/junk-store.sh getgames"
+                },
+                {
+                    "Id": "GetDetails",
+                    "Title": "Get game details",
+                    "Type": "GameDetails",
+                    "Command": "./scripts/junk-store.sh getgamedetails"
+                },
+                {
+                    "Id": "Install",
+                    "Title": "Install game",
+                    "Type": "Install",
+                    "Command": "./scripts/junk-store.sh install"
+                },
+                {
+                    "Id": "Download",
+                    "Title": "Download game",
+                    "Type": "Download",
+                    "Command": "./scripts/junk-store.sh download"
+                },
+                {
+                    "Id": "Uninstall",
+                    "Title": "Uninstall game",
+                    "Type": "Uninstall",
+                    "Command": "./scripts/junk-store.sh uninstall"
+                },
+                {
+                    "Id": "GetProgress",
+                    "Title": "Get install progress",
+                    "Type": "GetProgress",
+                    "Command": "./scripts/junk-store.sh getprogress"
+                },
+                {
+                    "Id": "CancelInstall",
+                    "Title": "Cancel install",
+                    "Type": "CancelInstall",
+                    "Command": "./scripts/junk-store.sh cancelinstall"
+                },
+                {
+                    "Id": "GetLoginActions",
+                    "Title": "Get login status",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-games-login-actions"
+                },
+                {
+                    "Id": "GetLaunchOptions",
+                    "Title": "Get launch options",
+                    "Type": "GetLaunchOptions",
+                    "Command": "./scripts/junk-store.sh getlaunchoptions"
                 }
 
             ]
@@ -205,6 +258,12 @@ json_fragments = {
                     "Title": "Get login status",
                     "Type": "Init",
                     "Command": "./scripts/get-json.py epic-games-login-actions"
+                },
+                {
+                    "Id": "GetLaunchOptions",
+                    "Title": "Get launch options",
+                    "Type": "GetLaunchOptions",
+                    "Command": "./scripts/junk-store.sh getlaunchoptions"
                 }
             ]
         }

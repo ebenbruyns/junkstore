@@ -57,7 +57,15 @@ function install(){
     RESULT=$($DOSCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
     #WORKING_DIR=$($EPICCONF --get-working-dir "${1}")
     mkdir -p "${HOME}/.compat/${1}"
-    TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS_SCRIPT}" "" --dbfile $DBFILE)
+    ARGS=$($ARGS_SCRIPT "${1}")
+    TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE)
+    echo $TEMP
+    exit 0
+}
+
+function getlaunchoptions(){
+    ARGS=$($ARGS_SCRIPT "${1}")
+    TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE)
     echo $TEMP
     exit 0
 }
@@ -171,6 +179,9 @@ case $ACTION in
     savesetting)
         savesetting "${@}"
         ;; 
+    getlaunchoptions)
+        getlaunchoptions "${@}"
+        ;;
      *)
         echo "Unknown command: ${ACTION}"
         exit 1
