@@ -62,16 +62,18 @@ def get_parameters(game_id):
     return args
 
 
-def get_lauch_options(game_id, args_script, name):
+def get_lauch_options(game_id, steam_command, name):
     result = execute_shell(os.path.expanduser(
         f"/bin/flatpak run com.github.derrod.legendary launch {game_id} --json"))
+    script_path = os.path.expanduser(
+        "~/homebrew/plugins/Junk-Store/scripts/epic-launcher.sh")
     return json.dumps(
         {
             'Type': 'LaunchOptions',
             'Content':
             {
-                'Exe': f"\"{result['game_executable']}\"",
-                'Options': f"{args_script}",
+                'Exe': f"\\\"{result['game_executable']}\\\"",
+                'Options': f"{script_path} {game_id}%command%",
                 'WorkingDir': result['working_directory'],
                 'Compatibility': True,
                 'Name': name
