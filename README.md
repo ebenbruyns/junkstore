@@ -6,6 +6,23 @@
 
 This is a very simple plugin that builds it's content from a set of scripts.
 
+Everything is loaded from the init.json file. Once the actions are cached they frontend can call them using the ActionSet and the Action name.
+
+# Junk Store plugin [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
+[Junk Store Discord server](https://discord.gg/Dy7JUNc44A)
+
+[See it in action here!](https://www.youtube.com/watch?v=dzoQzM_xExU)
+
+This is a very simple plugin that builds its content from a set of scripts.
+
+## Customizing Scripts
+
+The plugin allows users to customize the scripts by modifying the `init.json` file. This file contains a list of scripts, each with a set of actions associated with it. Here's an example of the `init.json` file:
+```js
+
+```
+
+
 Place scripts.json in ~/homebrew/data/junk-store/
 
 ```js

@@ -168,19 +168,20 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const runner = async () => {
 
         setTimeout(async () => {
-            closeModal();
-            let gid = gameIDFromAppID(parseInt(steamClientID));
+            let id = parseInt(steamClientID)
+            let gid = gameIDFromAppID(id);
             const result = await executeAction(serverAPI, initActionSet, "GetLaunchOptions", {
                 shortname: shortname,
                 inputData: ""
             });
             if (result.Type === "LaunchOptions") {
                 const launchOptions = result.Content as LaunchOptions;
-                await SteamClient.Apps.SetAppLaunchOptions(gid, launchOptions.Options);
-                await SteamClient.Apps.SetShortcutName(gid, (gameData.Content as GameDetails).Name);
-                await SteamClient.Apps.SetShortcutExe(gid, launchOptions.Exe);
-                await SteamClient.Apps.SetShortcutStartDir(gid, launchOptions.WorkingDir);
-                // if (launchOptions.Compatibility != null && launchOptions.Compatibility) {
+                //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
+                await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
+                // await SteamClient.Apps.SetShortcutName(gid, (gameData.Content as GameDetails).Name);
+                // await SteamClient.Apps.SetShortcutExe(gid, launchOptions.Exe);
+                // await SteamClient.Apps.SetShortcutStartDir(gid, launchOptions.WorkingDir);
+                // // if (launchOptions.Compatibility != null && launchOptions.Compatibility) {
                 //     const tools = await SteamClient.Apps.GetAvailableCompatTools(gid)
                 //     const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
                 //     if (protonTool) {
@@ -188,7 +189,8 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 //     }
                 // }
             }
-            SteamClient.Apps.RunGame(gid, "", -1, 100);
+            await SteamClient.Apps.RunGame(gid, "", -1, 100);
+            closeModal();
         }, 500);
     };
 
