@@ -74,7 +74,7 @@ def get_lauch_options(game_id, steam_command, name):
             {
                 'Exe': f"\\\"{result['game_executable']}\\\"",
                 'Options': f"{script_path} {game_id}%command%",
-                'WorkingDir': result['working_directory'],
+                'WorkingDir': result['game_directory'],
                 'Compatibility': True,
                 'Name': name
             }

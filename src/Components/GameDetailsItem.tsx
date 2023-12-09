@@ -178,9 +178,9 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 const launchOptions = result.Content as LaunchOptions;
                 //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
                 await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
-                // await SteamClient.Apps.SetShortcutName(gid, (gameData.Content as GameDetails).Name);
-                // await SteamClient.Apps.SetShortcutExe(gid, launchOptions.Exe);
-                // await SteamClient.Apps.SetShortcutStartDir(gid, launchOptions.WorkingDir);
+                await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+                await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
+                await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
                 // // if (launchOptions.Compatibility != null && launchOptions.Compatibility) {
                 //     const tools = await SteamClient.Apps.GetAvailableCompatTools(gid)
                 //     const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
