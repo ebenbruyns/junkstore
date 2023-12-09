@@ -72,9 +72,9 @@ def get_lauch_options(game_id, steam_command, name):
             'Type': 'LaunchOptions',
             'Content':
             {
-                'Exe': f"\\\"{result['game_executable']}\\\"",
+                'Exe': f"\\\"{os.path.join(result['game_directory'], result['game_executable'])}\\\"",
                 'Options': f"{script_path} {game_id}%command%",
-                'WorkingDir': result['game_directory'],
+                'WorkingDir': result['working_directory'],
                 'Compatibility': True,
                 'Name': name
             }
