@@ -44,33 +44,7 @@ class StateStack {
     }
 }
 
-// Usage example:
-// const stateStack = StateStack.getInstance();
-// stateStack.pushState({ key: "value" });
-// console.log(stateStack.popState()); // { key: "value" }
-// console.log(stateStack.getStackSize()); // 0
 
-
-// function updateRunningGames(update: GameStateUpdate) {
-//     const logger = new Logger("updateRunningGames");
-//     logger.log("update: ", update);
-//     if (update.bRunning) {
-//         SteamUIStore.OnGameRunStateChanged()
-//     } else {
-
-//     }
-// }
-// function showKeyboard() {
-//     const logger = new Logger("executeAction");
-//     logger.log("showKeyboard");
-//     // 
-// }
-
-// function hideKeyboard() {
-//     const logger = new Logger("executeAction");
-//     logger.log("hideKeyboard");
-//     // SteamUIStore.MainRunningApp.local_per_client_data.display_status = 11
-// }
 export async function runApp(id: number) {
     setTimeout(() => {
 
@@ -81,20 +55,9 @@ export async function runApp(id: number) {
 
 export async function configureShortcut(id: Number, launchOptions: LaunchOptions) {
     const logger = new Logger("configureShortcut");
-    // @ts-ignore
-    // const apps = appStore.allApps.filter(app => app.display_name == launchOptions.Name && app.app_type == 1073741824 && app.appid != id)
-    // for (const app of apps) {
-    //     logger.debug("removing shortcut", app.appid)
-    //     await SteamClient.Apps.RemoveShortcut(app.appid);
-    // }
-
-
-
 
     if (launchOptions) {
-        //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
         await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
-        //await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
         await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
         await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
         //@ts-ignore
@@ -115,57 +78,21 @@ const cleanupIds = async () => {
 }
 
 export async function executeAction(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult> {
-    //let currentWindowID = SteamUIStore.WindowStore.GetAppFocusedWindowID()
 
     const logger = new Logger("executeAction");
-    // if args has appId, get the existing launch options and pass a copy to the closerin REgisterForGameActionTaskChange
-
-    // SteamClient.Apps.RegisterForGameActionTaskChange((data, a) => {
-    //     logger.log("task change: ", data)
-    //     logger.log("task change: ", a)
-
-    //     // if (data.action === "launch") {
-    //     //     SteamUIStore.MainRunningApp.local_per_client_data.display_status = 11
-    //     //     SteamUIStore.WindowStore.SetAppFocusedWindowID(0, currentWindowID)
-    //     // }
-    // }
     logger.log(`actionSet: ${actionSet}, actionName: ${actionName},, args: ${args}`);
-    // const unregisterGameUpdates = SteamClient.GameSessions.RegisterForAppLifetimeNotifications(updateRunningGames);
-    // const unregisterOpenKeyboard = SteamClient.Input.RegisterForUserKeyboardMessages(showKeyboard)
-    // const unregisterCloseKeyboard = SteamClient.Input.RegisterForUserDismissKeyboardMessages(hideKeyboard)
-    // logger.log("Setting Timeout for 1 second to navigate to running app")
-    // setTimeout(() => {
-    //     if (SteamUIStore.MainRunningApp && SteamUIStore.MainRunningApp.appid != 0) {
-    //         logger.log("Navigating to running app")
-    //         if (SteamUIStore.WindowStore.m_mapAppWindows.size > 1) {
-    //             SteamUIStore.NavigateToRunningApp();
-    //             SteamUIStore.MainRunningApp.local_per_client_data.display_status = 4
-
-    //         }
-    //     }
-    // }, 2000)
-    // logger.log("running login app")
     const res = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
         actionSet: actionSet,
         actionName: actionName,
         ...args
     });
-    // if (SteamUIStore.MainRunningApp) {
-    //     SteamUIStore.MainRunningApp.local_per_client_data.display_status = 11
-    //     let w = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
-    //     w.NavigateBack();
-
-    // }
-
-    // if (typeof unregisterGameUpdates === 'function') {
-    //     unregisterGameUpdates();
-    // }
 
     if ((res.result as ContentResult).Type === 'RunExe') {
 
         const newLaunchOptions = (res.result as ContentResult).Content as LaunchOptions;
-
+        // @ts-ignore
         if (args.appId) {
+            // @ts-ignore
             const id = parseInt(args.appId);
             const details = await getAppDetails(id)
             const oldLaunchOptions = {
@@ -183,10 +110,12 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
             const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
                 logger.log("data: ", data)
                 if (!data.bRunning) {
-                    let w = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
-                    if (w) {
+                    // This might not work in desktop mode.
+                    // @ts-ignore
+                    let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                    if (gamepadWindowInstance) {
                         setTimeout(async () => {
-                            w.NavigateBack();
+                            gamepadWindowInstance.NavigateBack();
                             unregister();
                             await configureShortcut(id, oldLaunchOptions);
 

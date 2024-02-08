@@ -80,6 +80,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         };
     }, []);
     const getRuntimeId = (name: string) => {
+        // @ts-ignore
         const app = appStore.allApps.filter(a => a.display_name.startsWith(name))
         if (app.length === 0) {
             return -1
@@ -90,7 +91,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
     const isRuntimeInstalled = (name: string) => {
 
-
+        // @ts-ignore
         return appStore.GetAppOverviewByAppID(getRuntimeId(name)).local_per_client_data.installed
 
     }

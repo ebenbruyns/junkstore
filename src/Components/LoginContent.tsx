@@ -51,6 +51,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         else {
             const id = parseInt(SteamClientId);
             logger.debug("Shortcut configured: ", id);
+            // @ts-ignore
             const app = appStore.allApps.find(a => { a.appid == id })
             if (app) {
                 logger.debug("Shortcut found: ", id);
@@ -74,12 +75,6 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             const launchOptions = data.Content as LaunchOptions
             setContent(data as ContentResult);
             const id = await getSteamClientId(launchOptions)
-            // else
-            //     runLogin(parseInt(SteamClientId));
-
-            // setTimeout(() => {
-            //     SteamClient.Apps.RemoveShortcut(id);
-            // }, 10000);
             const gameId = gameIDFromAppID(id)
 
             await executeAction(serverAPI, actionSetName,
