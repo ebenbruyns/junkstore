@@ -1,5 +1,6 @@
+const enableLogger = false;
 export const log = (name: string) => {
-    if(false)
+    if(enableLogger)
     return console.info.bind(
         window.console,
         `%c Junk Store %c ${name} %c`,
@@ -11,7 +12,7 @@ export const log = (name: string) => {
 };
 
 export const debug = (name: string) => {
-    if (false)
+    if (enableLogger)
     return console.debug.bind(window.console,
         `%c Junk Store %c ${name} %c`,
         'background: #16a085; color: black;',
