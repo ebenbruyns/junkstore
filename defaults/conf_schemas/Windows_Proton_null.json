@@ -1,0 +1,122 @@
+{
+  "Sections": [
+    {
+      "Name": "Runtimes",
+      "Visible": true,
+      "Description": "Additional runtimes to use",
+      "ModeLevel": 0,
+      "Options": [
+        {
+          "Key": "EasyAntiCheat",
+          "Description": "Enable steam easy anti-cheat runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "BattleEye",
+          "Description": "Enable BattleEye runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "ESYNC",
+          "Description": "Enable ESYNC. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "FSYNC",
+          "Description": "Enable FSYNC. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "VKD3D",
+          "Description": "Enable VKD3D. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "VKD3D_PROTON",
+          "Description": "Enable VKD3D-Proton. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "FSR_STRENGTH",
+          "Description": "Enable FidelityFX Super Resolution. This can help with performance in some games, but can also cause issues in others. 0 = Off, 1 = Ultra Performance, 2 = Performance, 3 = Balanced, 4 = Quality, 5 = Ultra Quality",
+          "DefaultValue": "0",
+          "Value": "0",
+          "Type": "Range",
+          "Min": 0,
+          "Max": 5,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "LIMIT_FRAMERATE",
+          "Description": "Enable Framerate limiter",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "FRAME_RATE",
+          "Description": "Set Frame rate limiter",
+          "DefaultValue": "60",
+          "Value": "60",
+          "Type": "Range",
+          "Min": 0,
+          "Max": 90,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        }
+      ]
+    }
+  ],
+  "Autoexec": "",
+  "AutoexecEnabled": false
+}

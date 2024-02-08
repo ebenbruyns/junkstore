@@ -8,8 +8,6 @@ import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
 
-
-
 export const BatEditor: VFC<EditorProperties> = ({
     serverAPI,
     initActionSet,
@@ -58,7 +56,9 @@ export const BatEditor: VFC<EditorProperties> = ({
             <ModalRoot
                 bAllowFullSize={true}
                 // @ts-ignore
-                bAllowFullSizeMobile={true}>
+                bAllowFullSizeMobile={true}
+                closeModal={closeModal}
+            >
                 <ScrollPanelGroup focusable={false} style={{ margin: "0px" }}>
                     <Panel style={{ background: "inherit" }}>
 

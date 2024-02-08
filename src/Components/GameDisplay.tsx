@@ -13,14 +13,17 @@ import {
 } from "decky-frontend-lib";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { VFC } from "react";
-import { FaCog } from "react-icons/fa";
-import { EditorAction, ProgressUpdate } from "../Types/Types";
+import { FaCog, FaSlidersH } from "react-icons/fa";
+import { EditorAction, MenuAction, ProgressUpdate } from "../Types/Types";
 import { ConfEditor } from "../ConfEditor";
 import { BatEditor } from "../BatEditor";
 import Logger from "../Utils/logger";
+import { ExeRunner } from "../ExeRunner";
+import { getAppDetails } from "../Utils/executeAction";
 interface GameDisplayProperties {
   serverApi: ServerAPI;
   name: string;
+  shortName: string;
   closeModal?: any;
   images: string[];
   installer: () => void;
@@ -33,6 +36,10 @@ interface GameDisplayProperties {
   editors: EditorAction[];
   cancelInstall: () => void;
   initActionSet: string;
+  actions: MenuAction[];
+  resetLaunchOptions: () => void;
+  updater: () => void;
+  scriptRunner: (actionSet: string, actionId: string, args: any) => void;
 }
 
 //@ts-ignore
@@ -42,6 +49,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     serverApi,
     closeModal,
     name,
+    shortName,
     images,
     steamClientID,
     installer,
@@ -53,7 +61,10 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     installing,
     progress,
     editors,
-    initActionSet
+    initActionSet,
+    actions,
+    resetLaunchOptions,
+    scriptRunner
   }
 ) => {
   const logger = new Logger("GameDisplay");
@@ -78,6 +89,79 @@ const GameDisplay: VFC<GameDisplayProperties> = (
       e.currentTarget ?? window
     )
   }
+
+  const actionsMenu = (e: any) => {
+    showContextMenu(
+      <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
+        {steamClientID !== "" &&
+          <MenuItem onSelected={
+            () => {
+
+              logger.debug("show exe list")
+              showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} />)
+
+            }
+          }>Run exe in Game folder</MenuItem>}
+        {steamClientID !== "" &&
+          <>
+            <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
+            <MenuItem onSelected={uninstaller}>Uninstall Game</MenuItem>
+          </>
+        }
+
+        {actions && actions.length > 0 && actions.map((action) => {
+
+          const installed = steamClientID != "";
+          const mustBeInstalled = action.InstalledOnly != undefined && action.InstalledOnly == true;
+          const show = installed || !mustBeInstalled;
+
+          if (show)
+            return <MenuItem onSelected={
+              async () => {
+                const args = {
+                  shortname: shortName,
+                  steamClientID: "",
+                  startDir: "",
+                  compatToolName: "",
+                  inputData: "",
+                  gameId: "",
+                  appId: ""
+                }
+                if (steamClientID != "") {
+                  logger.debug("steamClientID: ", steamClientID)
+                  //@ts-ignore
+                  const id = parseInt(steamClientID)
+                  const details = await getAppDetails(id)
+                  // @ts-ignore
+                  if (details == null) {
+                    logger.error("details is null"); return;
+
+                  }
+                  else {
+                    logger.debug("details: ", details)
+                    const compatToolName = details.strCompatToolName
+                    //@ts-ignore
+                    const startDir = details.strShortcutStartDir
+                    args.startDir = startDir;
+                    args.compatToolName = compatToolName;
+                    args.steamClientID = steamClientID;
+                    args.gameId = String(steamClientID);
+                    args.appId = String(id);
+                  }
+                }
+                scriptRunner(initActionSet, action.ActionId, args)
+              }
+            }>{action.Title}</MenuItem>
+          else
+            return null;
+
+        })}
+
+      </Menu>,
+      e.currentTarget ?? window
+    )
+  }
+
   return (
     <PanelSection>
       <h1>{name}</h1>
@@ -137,6 +221,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
               marginTop: "1em"
             }}
           >
+
             {steamClientID == "" && !installing && (
 
               <DialogButton
@@ -191,6 +276,32 @@ const GameDisplay: VFC<GameDisplayProperties> = (
               )}
 
             </div>
+            {/* actions.length > 0 && ( */}
+            <DialogButton
+              onClick={actionsMenu}
+              onOKButton={actionsMenu}
+              style={{
+                width: "40px",
+                height: "40px",
+                minWidth: "40px",
+                maxHeight: "40px",
+                minHeight: "40px",
+                margin: "0",
+                position: "relative",
+                flexDirection: "column",
+              }}
+            >
+              <FaSlidersH
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%,-50%)",
+                }}
+              />
+            </DialogButton>
+            {/* ) */}
+
             {editors.length > 0 && (
               <DialogButton
                 onClick={contextMenu}

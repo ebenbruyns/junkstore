@@ -144,28 +144,31 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                             return null;
                                     })}
                                 </PanelSection>
-                                <PanelSection title="[Autoexec]">
-                                    <Focusable
-                                        // @ts-ignore
-                                        focusableIfNoChildren={true}
-                                        noFocusRing={true}
-                                        onFocusCapture={() => {
-                                            if (focusRef && focusRef.current != null)
-                                                // @ts-ignore
-                                                focusRef.current.focus();
-                                        }}
-                                        onOKButton={() => { }}
-                                    >
-                                        <textarea
-                                            className=""
-                                            ref={focusRef}
-                                            style={{ width: "100%", height: "200px" }}
-                                            value={confData.Autoexec}
-                                            onChange={(e) => {
-                                                setConfData({ ...confData, Autoexec: e.target.value });
-                                            }} />
-                                    </Focusable>
-                                </PanelSection>
+                                {confData.AutoexecEnabled && confData.Autoexec && (
+                                    <PanelSection title="[Autoexec]">
+                                        <Focusable
+                                            // @ts-ignore
+                                            focusableIfNoChildren={true}
+                                            noFocusRing={true}
+                                            onFocusCapture={() => {
+                                                if (focusRef && focusRef.current != null)
+                                                    // @ts-ignore
+                                                    focusRef.current.focus();
+                                            }}
+                                            onOKButton={() => { }}
+                                        >
+                                            
+                                            <textarea
+                                                className=""
+                                                ref={focusRef}
+                                                style={{ width: "100%", height: "200px" }}
+                                                value={confData.Autoexec}
+                                                onChange={(e) => {
+                                                    setConfData({ ...confData, Autoexec: e.target.value });
+                                                }} />
+                                        </Focusable>
+                                    </PanelSection>
+                                )}
                             </Focusable>
                             <Focusable
                                 focusWithinClassName="gpfocuswithin"

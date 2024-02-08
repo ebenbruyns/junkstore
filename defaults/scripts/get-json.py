@@ -20,68 +20,20 @@ json_fragments = {
                     "Title": "Get content",
                     "Type": "TabPage",
                     "Command": "./scripts/get-json.py junk-store-tabs"
-                }, {
-                    "Id": "GetContent",
-                    "Title": "Get Epic games list",
-                    "Type": "GameGrid",
-                    "Command": "./scripts/junk-store.sh getgames"
-                },
-                {
-                    "Id": "GetDetails",
-                    "Title": "Get game details",
-                    "Type": "GameDetails",
-                    "Command": "./scripts/junk-store.sh getgamedetails"
-                },
-                {
-                    "Id": "Install",
-                    "Title": "Install game",
-                    "Type": "Install",
-                    "Command": "./scripts/junk-store.sh install"
-                },
-                {
-                    "Id": "Download",
-                    "Title": "Download game",
-                    "Type": "Download",
-                    "Command": "./scripts/junk-store.sh download"
-                },
-                {
-                    "Id": "Uninstall",
-                    "Title": "Uninstall game",
-                    "Type": "Uninstall",
-                    "Command": "./scripts/junk-store.sh uninstall"
-                },
-                {
-                    "Id": "GetProgress",
-                    "Title": "Get install progress",
-                    "Type": "GetProgress",
-                    "Command": "./scripts/junk-store.sh getprogress"
-                },
-                {
-                    "Id": "CancelInstall",
-                    "Title": "Cancel install",
-                    "Type": "CancelInstall",
-                    "Command": "./scripts/junk-store.sh cancelinstall"
                 },
                 {
                     "Id": "GetLoginActions",
                     "Title": "Get login status",
                     "Type": "Init",
                     "Command": "./scripts/get-json.py epic-games-login-actions"
-                },
-                {
-                    "Id": "GetLaunchOptions",
-                    "Title": "Get launch options",
-                    "Type": "GetLaunchOptions",
-                    "Command": "./scripts/junk-store.sh getlaunchoptions"
                 }
-
             ]
         }
     },
     "junk-store-actions-no-tabs": {
         "Type": "ActionSet",
         "Content": {
-            "SetName": "JunkStoreActions",
+            "SetName": "JunkStoreActionsNoTabs",
             "Actions": [
                 {
                     "Id": "GetEpicActions",
@@ -129,7 +81,7 @@ json_fragments = {
                     "Command": "./scripts/get-json.py junk-store-actions-no-tabs"
                 },
                 {
-                    "Id": "GetEpicActionsNoTabs",
+                    "Id": "GetEpicActions",
                     "Title": "Get Epic store actions",
                     "Type": "Init",
                     "Command": "./scripts/get-json.py epic-actions"
@@ -157,12 +109,12 @@ json_fragments = {
                             "ActionId": "JunkStoreInit",
                             "Title": "Epic Games",
                             "Type": "Page"
-                        },
-                        {
-                            "ActionId": "JunkStoreInitNoTabs",
-                            "Title": "Epic Games (no tabs)",
-                            "Type": "Page"
-                        }
+                        }  # ,
+                        # {
+                        #     "ActionId": "JunkStoreInitNoTabs",
+                        #     "Title": "Epic Games (no tabs)",
+                        #     "Type": "Page"
+                        # }
                     ]
                 }
             ]
@@ -178,6 +130,12 @@ json_fragments = {
                         "Title": "Login",
                         "Type": "Login",
                         "Command": "./scripts/junk-store.sh login"
+                    },
+                    {
+                        "Id": "LoginLaunchOptions",
+                        "Title": "Login",
+                        "Type": "Login",
+                        "Command": "./scripts/junk-store.sh login-launch-options"
                     },
                     {
                         "Id": "Logout",
@@ -206,6 +164,104 @@ json_fragments = {
                 ]
         }
     },
+    "epic-script-actions": {
+        "Type": "ScriptSet",
+        "Content": {
+
+            "Actions": [
+                {
+                    "ActionId": "Update",
+                    "Title": "Update Game",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                },
+                {
+                    "ActionId": "Verify",
+                    "Title": "Verify Game",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                },
+                {
+                    "ActionId": "Repair",
+                    "Title": "Repair Game",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                },
+                # {
+                #     "ActionId": "Import",
+                #     "Title": "Import Game",
+                #     "Type": "ScriptAction",
+                #     "InstalledOnly": False
+                # },
+                {
+                    "ActionId": "ProtonTricks",
+                    "Title": "Proton Tricks",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                }
+            ]
+        }
+    },
+    "epic-exe-actions": {
+        "Type": "ActionSet",
+        "Content": {
+            "SetName": "EpicExeActions",
+            "Actions": [
+                {
+                    "Id": "RunBinary",
+                    "Title": "Run executable in game folder",
+                    "Type": "ScriptAction",
+                    "Command": "./scripts/junk-store.sh run-exe"
+                },
+                {
+                    "Id": "GetContent",
+                    "Title": "Get executable list",
+                    "Type": "Content",
+                    "Command": "./scripts/junk-store.sh get-exe-list"
+                }
+            ]
+        }
+    },
+    "epic-config-actions": {
+        "Type": "ActionSet",
+        "Content": {
+            "SetName": "DosboxConfigFileActions",
+            "Actions": [
+                {
+                    "Id": "GetContent",
+                    "Title": "Get the ini files as json",
+                    "Type": "IniEditor",
+                    "Command": "./scripts/junk-store.sh getconfig"
+                },
+                {
+                    "Id": "SaveContent",
+                    "Title": "Save the ini files as json",
+                    "Type": "IniEditor",
+                    "Command": "./scripts/junk-store.sh saveconfig"
+                }
+            ]
+        }
+    },
+    "epic-tab-config-actions": {
+        "Type": "ActionSet",
+        "Content": {
+            "SetName": "EpicTabConfigEditor",
+            "Actions": [
+                {
+                    "Id": "GetContent",
+                    "Title": "Get the ini files as json",
+                    "Type": "IniEditor",
+                    "Command": "./scripts/junk-store.sh gettabconfig"
+                },
+                {
+                    "Id": "SaveContent",
+                    "Title": "Save the ini files as json",
+                    "Type": "IniEditor",
+                    "Command": "./scripts/junk-store.sh savetabconfig"
+                }
+            ]
+        }
+    },
     "epic-actions": {
         "Type": "ActionSet",
         "Content": {
@@ -224,6 +280,12 @@ json_fragments = {
                     "Command": "./scripts/junk-store.sh getgamedetails"
                 },
                 {
+                    "Id": "GetJsonImages",
+                    "Title": "Get game images as json",
+                    "Type": "GameImages",
+                    "Command": "./scripts/junk-store.sh getjsonimages"
+                },
+                {
                     "Id": "Install",
                     "Title": "Install game",
                     "Type": "Install",
@@ -236,10 +298,40 @@ json_fragments = {
                     "Command": "./scripts/junk-store.sh download"
                 },
                 {
+                    "Id": "Update",
+                    "Title": "Update game",
+                    "Type": "Update",
+                    "Command": "./scripts/junk-store.sh update"
+                },
+                {
+                    "Id": "Repair",
+                    "Title": "Repair game",
+                    "Type": "Update",
+                    "Command": "./scripts/junk-store.sh repair"
+                },
+                {
+                    "Id": "Verify",
+                    "Title": "Veirfy game",
+                    "Type": "Verify",
+                    "Command": "./scripts/junk-store.sh verify"
+                },
+                {
+                    "Id": "Import",
+                    "Title": "Import game",
+                    "Type": "Import",
+                    "Command": "./scripts/junk-store.sh import"
+                },
+                {
                     "Id": "Uninstall",
                     "Title": "Uninstall game",
                     "Type": "Uninstall",
                     "Command": "./scripts/junk-store.sh uninstall"
+                },
+                {
+                    "Id": "ProtonTricks",
+                    "Title": "Proton Tricks",
+                    "Type": "Executable",
+                    "Command": "./scripts/junk-store.sh protontricks"
                 },
                 {
                     "Id": "GetProgress",
@@ -264,6 +356,30 @@ json_fragments = {
                     "Title": "Get launch options",
                     "Type": "GetLaunchOptions",
                     "Command": "./scripts/junk-store.sh getlaunchoptions"
+                },
+                {
+                    "Id": "GetExeActions",
+                    "Title": "Get executable action set to run exe's in game dir",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-exe-actions"
+                },
+                {
+                    "Id": "GetScriptActions",
+                    "Title": "",
+                    "Type": "ScriptActions",
+                    "Command": "./scripts/get-json.py epic-script-actions"
+                },
+                {
+                    "Id": "GetDosboxConfigFileActions",
+                    "Title": "Get dosbox config file actions",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-config-actions"
+                },
+                {
+                    "Id": "GetTabConfigActions",
+                    "Title": "Get epic tab config file actions",
+                    "Type": "Init",
+                    "Command": "./scripts/get-json.py epic-tab-config-actions"
                 }
             ]
         }

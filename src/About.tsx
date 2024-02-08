@@ -1,7 +1,7 @@
 import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, Panel, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
+import { SiDiscord, SiElsevier, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
 
@@ -79,6 +79,21 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             }
         };
     }, []);
+    const getRuntimeId = (name: string) => {
+        const app = appStore.allApps.filter(a => a.display_name.startsWith(name))
+        if (app.length === 0) {
+            return -1
+        }
+        else
+            return app[0].appid
+    }
+
+    const isRuntimeInstalled = (name: string) => {
+
+
+        return appStore.GetAppOverviewByAppID(getRuntimeId(name)).local_per_client_data.installed
+
+    }
 
     return (
         <DialogBody>
@@ -154,6 +169,25 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                     }}>
                                     {reloading == true ? "Reloading Scripts..." : "Reload scripts"}
                                 </DialogButton>
+                            </PanelSection>
+                            <PanelSection>
+                                <DialogButton
+                                    disabled={isRuntimeInstalled("Proton EasyAntiCheat Runtime")}
+                                    onClick={async () => {
+                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton EasyAntiCheat Runtime")]);
+                                    }
+                                    }>Install Proton Easy Anti Cheat</DialogButton>
+
+                            </PanelSection>
+
+                            <PanelSection>
+                                <DialogButton
+                                    disabled={isRuntimeInstalled("Proton BattlEye Runtime")}
+                                    onClick={async () => {
+                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
+                                    }
+                                    }>Install Proton BattlEye Runtime</DialogButton>
+
                             </PanelSection>
                         </>
                     },

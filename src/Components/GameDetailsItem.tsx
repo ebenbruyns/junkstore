@@ -1,7 +1,7 @@
 import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, GameDetails, LaunchOptions, ProgressUpdate } from "../Types/Types";
+import { ContentResult, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
 import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
@@ -25,12 +25,14 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
 
     const logger = new Logger("GameDetailsItem");
     logger.log("GameDetailsItem startup");
+    const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
     const [gameData, setGameData] = useState<ContentResult>({ Type: "Empty", Content: { Details: {} } } as ContentResult);
     logger.log("GameDetailsItem gameData", gameData);
     const [steamClientID, setSteamClientID] = useState("");
     logger.log("GameDetailsItem steamClientID", steamClientID);
     const [installing, setInstalling] = useState(false);
     logger.log("GameDetailsItem installing", installing);
+
     const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
         Description: ""
@@ -72,6 +74,19 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             if (res.Type === "GameDetails")
                 setSteamClientID((res.Content as GameDetails).SteamClientID);
             logger.debug("onInit finished");
+            const actionRes = await executeAction(serverAPI, initActionSet,
+                "GetScriptActions",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                }) as ContentResult;
+            logger.debug("onInit actionRes", actionRes);
+            if (actionRes.Type === "ScriptSet") {
+                const scriptActions = actionRes.Content as ScriptActions;
+                logger.debug("onInit scriptActions", scriptActions);
+                setScriptActions(scriptActions.Actions);
+            }
+
         } catch (error) {
             logger.error(error);
         }
@@ -139,18 +154,41 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     };
     const download = async () => {
         try {
-            setInstalling(true);
-            await executeAction(serverAPI, initActionSet,
+
+            const result = await executeAction(serverAPI, initActionSet,
                 "Download",
                 {
                     shortname: shortname,
                     inputData: ""
                 });
+            if (result.Type == "Progress")
+                setInstalling(true);
+        } catch (error) {
+            logger.error(error);
+        }
+    };
+    const update = async () => {
+        try {
+
+            const result = await executeAction(serverAPI, initActionSet,
+                "Update",
+                {
+                    shortname: shortname,
+                    inputData: ""
+                });
+            if (result.Type == "Progress")
+                setInstalling(true);
 
         } catch (error) {
             logger.error(error);
         }
     };
+    const runScript = async (actionSet: string, actionId: string, args: any) => {
+        const result = await executeAction(serverAPI, actionSet, actionId, args)
+        if (result.Type == "Progress")
+            setInstalling(true);
+
+    }
     const cancelInstall = async () => {
         try {
             setInstalling(false);
@@ -170,63 +208,116 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         setTimeout(async () => {
             let id = parseInt(steamClientID)
             let gid = gameIDFromAppID(id);
-            const result = await executeAction(serverAPI, initActionSet, "GetLaunchOptions", {
-                shortname: shortname,
-                inputData: ""
-            });
-            if (result.Type === "LaunchOptions") {
-                const launchOptions = result.Content as LaunchOptions;
-                //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
-                await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
-                await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
-                await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
-                await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-                // // if (launchOptions.Compatibility != null && launchOptions.Compatibility) {
-                //     const tools = await SteamClient.Apps.GetAvailableCompatTools(gid)
-                //     const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
-                //     if (protonTool) {
-                //         await SteamClient.Apps.SpecifyCompatTool(gid, protonTool.strToolName);
-                //     }
-                // }
-            }
+
             await SteamClient.Apps.RunGame(gid, "", -1, 100);
             closeModal();
         }, 500);
     };
+    const checkid = async () => {
+        let id = parseInt(steamClientID)
+        logger.debug("checkid", id)
+        // @ts-ignore
+        const apps = appStore.allApps.filter(app => app.appid == id)
+        if (apps.length == 0)
+            return await getSteamId()
+        else
+            return id;
+    }
 
-    const install = async () => {
+    const resetLaunchOptions = async () => {
 
-        //updateProgress();
-        try {
-            const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "target", "options");
-            const data = await executeAction(serverAPI, initActionSet,
-                "Install",
-                {
-                    shortname: shortname,
-                    steamClientID: id.toString(),
-                    inputData: ""
-                });
-            if (data) {
-                if (data.Type === "LaunchOptions") {
+        let id = await checkid()
+        logger.debug("resetLaunchOptions id:", id)
+        configureShortcut(id);
 
-                    const lauchOptions = data.Content as LaunchOptions;
-                    await SteamClient.Apps.SetAppLaunchOptions(id, lauchOptions.Options);
-                    await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
-                    await SteamClient.Apps.SetShortcutExe(id, lauchOptions.Exe);
-                    await SteamClient.Apps.SetShortcutStartDir(id, lauchOptions.WorkingDir);
+    }
+    const configureShortcut = async (id: Number) => {
+        setSteamClientID(id.toString());
+        const result = await executeAction(serverAPI, initActionSet,
+            "Install",
+            {
+                shortname: shortname,
+                steamClientID: id.toString(),
+                inputData: ""
+            });
+        const name = (gameData.Content as GameDetails).Name;
+        // @ts-ignore
+        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.appid != id)
+        for (const app of apps) {
+            logger.debug("removing shortcut", app.appid)
+            await SteamClient.Apps.RemoveShortcut(app.appid);
+        }
+        await cleanupIds();
+        
+        const imageResult = await executeAction(serverAPI, initActionSet,
+            "GetJsonImages",
+            {
+                shortname: shortname,
+                inputData: ""
+            });
+        if (imageResult.Type == "Images") {
+            const images = imageResult.Content as GameImages
+            logger.debug("images", images);
+            if (images.Grid !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
+            if (images.Hero !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
+            if (images.Logo !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
+            if (images.GridH !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
+        }
+        if (result.Type === "LaunchOptions") {
+            const launchOptions = result.Content as LaunchOptions;
+            //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
+            await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
+            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+            await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
+            await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
+            //@ts-ignore
+            const defaultProton = settingsStore.settings.strCompatTool;
 
-                    if (lauchOptions.Compatibility != null && lauchOptions.Compatibility) {
-                        const tools = await SteamClient.Apps.GetAvailableCompatTools(id)
-                        const protonTool = tools.find(tool => tool.strToolName.includes("Proton"));
-                        if (protonTool) {
-                            await SteamClient.Apps.SpecifyCompatTool(id, protonTool.strToolName);
-                        }
-                        //await SteamClient.Apps.SpecifyCompatTool(id, tools[0].strToolName);
-                    }
-                    setSteamClientID(id.toString());
-                    setInstalling(false);
+            if (defaultProton) {
+                await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
+            }
+            setInstalling(false);
+
+        }
+
+    }
+
+    const cleanupIds = async () => {
+        // @ts-ignore
+        const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824)
+        for (const app of apps) {
+            await SteamClient.Apps.RemoveShortcut(app.appid);
+        }
+    }
+
+    const getSteamId = async () => {
+
+        const name = (gameData.Content as GameDetails).Name;
+        // @ts-ignore
+        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824)
+        await cleanupIds();
+        if (apps.length > 0) {
+            const id = apps[0].appid;
+            if (apps.length > 1) {
+                for (let i = 1; i < apps.length; i++) {
+                    await SteamClient.Apps.RemoveShortcut(apps[i].appid);
                 }
             }
+            return id;
+
+        }
+        else {
+            const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "", "");
+            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+            return id;
+        }
+    }
+    const install = async () => {
+        //updateProgress();
+        try {
+            const id = await getSteamId();
+            configureShortcut(id);
+
         } catch (error) {
             logger.error(error);
         }
@@ -256,14 +347,13 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                     <Focusable onOptionsButton={install}
                                         // @ts-ignore
                                         focusableIfNoChildren={true}
-                                        onOptionsActionDescription="Reinstall Game"
-                                        onSecondaryActionDescription="Remove Game"
-                                        onSecondaryButton={uninstall}
+
                                     >
 
                                         <GameDisplay
                                             serverApi={serverAPI}
                                             name={(gameData.Content as GameDetails).Name}
+                                            shortName={(gameData.Content as GameDetails).ShortName}
                                             description={(gameData.Content as GameDetails).Description}
                                             images={(gameData.Content as GameDetails).Images}
                                             steamClientID={steamClientID}
@@ -276,7 +366,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             editors={(gameData.Content as GameDetails).Editors}
                                             initActionSet={initActionSet}
                                             runner={runner}
-
+                                            actions={scriptActions}
+                                            resetLaunchOptions={resetLaunchOptions}
+                                            updater={update}
+                                            scriptRunner={runScript}
                                         />
                                     </Focusable>
                                 </div>

@@ -7,7 +7,7 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, GameDataList, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
@@ -19,6 +19,8 @@ import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
 import { LoginContent } from "./Components/LoginContent";
+import { ConfEditor } from "./ConfEditor";
+import { FaCog } from "react-icons/fa";
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
@@ -161,6 +163,9 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
             logger.error("OnInit: ", error);
         }
     };
+    const configEditor = () => {
+        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
+    }
 
     return (
         <>
@@ -169,11 +174,23 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 <>
 
 
-                    {padTop && <div style={{ marginBottom: "50px" }} />}
+                    {padTop && <div style={{ marginBottom: "50px", width: "100%" }} />}
                     <Focusable //key={initActionSet + "_" + initAction}
+
                         // @ts-ignore
-                        focusableIfNoChildren
-                        style={{ marginBottom: "20px" }}
+                        focusableIfNoChildren={true}
+
+                        style={{
+                            display: "flex",
+                            marginLeft: "0px",
+                            marginBottom: "1em",
+                            color: "white",
+
+                            //justifyContent: "space-between",
+                            //flexFlow: "row ",
+                            flex: "1",
+                            alignItems: "flex-end",
+                        }}
 
                         onSecondaryActionDescription="Toggle Installed Filter"
                         onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
@@ -183,7 +200,37 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                         <TextField
                             placeholder="Search"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)} />
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                minWidth: "725px",
+                                flexGrow: "10",
+                            }}
+                        />
+                        <DialogButton
+                            onClick={configEditor}
+                            onOKButton={configEditor}
+                            style={{
+
+                                width: "40px",
+                                height: "40px",
+                                minWidth: "40px",
+                                maxHeight: "40px",
+                                minHeight: "40px",
+                                margin: "0",
+                                position: "relative",
+
+
+                            }}
+                        >
+                            <FaCog
+                                style={{
+                                    position: "absolute",
+                                    left: "50%",
+                                    top: "50%",
+                                    transform: "translate(-50%,-50%)",
+                                }}
+                            />
+                        </DialogButton>
                     </Focusable>
                     {(content.Content as GameDataList).NeedsLogin === "true" && (
                         <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />

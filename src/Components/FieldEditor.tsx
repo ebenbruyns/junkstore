@@ -145,7 +145,9 @@ export const FieldEditor: VFC<{
   };
   //
   return (
-    <PanelSectionRow style={{ display: "flex", flexDirection: "row" }}>
+    <PanelSectionRow
+      //@ts-ignore
+      style={{ display: "flex", flexDirection: "row" }}>
       <style>
         {`
             .DialogInputLabelGroup {

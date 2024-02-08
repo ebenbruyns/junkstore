@@ -49,8 +49,6 @@
             },
             "problemMatcher": []
         },
-    
-        
         {
             "label": "build",
             "group": {
@@ -86,18 +84,6 @@
             "problemMatcher": []
         },
         {
-            "label": "extractzip-local",
-            "detail": "",
-            "type": "shell",
-            "group": "none",
-            "command": "echo '${config:deckdir}/homebrew/plugins/out/${config:pluginname}.zip' && sudo cp \"${workspaceFolder}/out/${config:pluginname}.zip\" \"$(echo \"${config:deckdir}/homebrew/plugins/\" | sed \"s| |-|\")\" && sudo -S mkdir 755 -p \"$(echo \"${config:deckdir}/homebrew/plugins/${config:pluginname}\" | sed \"s| |-|\")\" && sudo -S chown ${config:deckuser}:${config:deckuser} \"$(echo \"${config:deckdir}/homebrew/plugins/${config:pluginname}\" | sed \"s| |-|\")\" &&  sudo -S bsdtar -xzpf \"${config:deckdir}/homebrew/plugins/${config:pluginname}.zip\" -C \"$(echo \"${config:deckdir}/homebrew/plugins/${config:pluginname}\" | sed \"s| |-|g\")\" --strip-components=1 --fflags ",
-            "dependsOn": [
-                "chmodplugins-local",
-                "build"
-            ],
-            "problemMatcher": []
-        },
-        {
             "label": "deploy",
             "dependsOrder": "sequence",
             "group": "none",
@@ -107,28 +93,15 @@
             ],
             "problemMatcher": []
         },
-        {
-            "label": "Restart plugin loader",
-            "type": "shell",
-            "group": "none",
-            "detail": "Restart plugin loader",
-            "command": "sudo systemctl restart plugin_loader",
-            "problemMatcher":[]
-        },
-      
-        {
-            "label": "open-last-log",
-            "type": "shell",
-            "group": "none",
-            "detail": "Open the last modified log file in the editor",
-            "command": "code-insiders \"$(find ~/homebrew/logs/junk-store/ -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)\"",
-            "problemMatcher": []
-        },
-        {
+        {   
             "label": "builddeploy",
+            "group":{
+                "kind": "test",
+                "isDefault": true
+            },
             "detail": "Builds plugin and deploys to deck",
             "dependsOrder": "sequence",
-            "group": "none",
+          
             "dependsOn": [
                 "build",
                 "deploy"
@@ -148,15 +121,29 @@
             "detail": "chmods plugins folder to prevent perms issues",
             "type": "shell",
             "group": "none",
-            "command": "ssh ${config:deckuser}@${config:deckip} -p ${config:deckport} ${config:deckkey} 'echo '${config:deckpass}' | sudo -S chmod -R ug+rw ${config:deckdir}/homebrew/plugins/'",
+            "command": "ssh ${config:deckuser}@${config:deckip} -p ${config:deckport} ${config:deckkey} 'echo '${config:deckpass}' | sudo -S chmod -R ug+rw ${config:deckdir}/homebrew/plugins/ ; echo '${config:deckpass}' | sudo -S chmod -R ug+rxw ${config:deckdir}/homebrew/plugins/Junk-Store/scripts/' ",
             "problemMatcher": []
-        },{
-            "label": "chmodplugins-local",
-            "detail": "chmods plugins folder to prevent perms issues",
+        },
+        {
+            "label": "restart-decky",
+            "detail": "Restart decky",
             "type": "shell",
             "group": "none",
-            "command": "sudo -S chmod -R ug+rw ${config:deckdir}/homebrew/&& sudo chown -R ${config:deckuser}:${config:deckuser} ${config:deckdir}/homebrew/",
+            "command": "ssh ${config:deckuser}@${config:deckip} -p ${config:deckport} ${config:deckkey} 'echo '${config:deckpass}' | sudo -S systemctl restart plugin_loader.service' ",
             "problemMatcher": []
+        },
+        {
+            "label": "deploy-restart-decky",
+            "detail": "Deploy and restart decky",
+            "group": "none",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "builddeploy",
+                "restart-decky"
+            ],
+            "problemMatcher": []
+
         }
     ]
 }
+

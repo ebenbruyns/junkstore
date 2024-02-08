@@ -2,7 +2,7 @@ import { Section, KeyValuePair } from "../Types/Types";
 import { ButtonItem, Focusable, PanelSectionRow } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { FieldEditor } from "./FieldEditor";
-import { VFC, useState } from "react";
+import { VFC, useEffect, useState } from "react";
 export const SectionEditor: VFC<{
   section: Section;
   updateHelpText: (helpText: KeyValuePair) => void;
@@ -20,11 +20,27 @@ export const SectionEditor: VFC<{
     setOptions(newOptions);
     onChange({ ...section, Options: newOptions });
   };
+  const OnInit = () => {
+    if (section.Visible)
+      setCollapsed(!section.Visible)
+  }
+  useEffect(() => {
+    OnInit();
 
+  }, []);
   return (
     <PanelSectionRow
+      //@ts-ignore
       style={{ display: "flex", flexDirection: "column", gap: "1em" }}
     >
+      <style>
+        {`
+            .DialogInputLabelGroup {
+                margin-bottom: 0;
+            }
+            
+        `}
+      </style>
       <Focusable>
         <ButtonItem
           label={`[${section.Name}]`}

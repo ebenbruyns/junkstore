@@ -7,3 +7,9 @@ export interface EditorProperties {
     contentId: string;
     closeModal?: any;
 }
+export interface ExeRunnerProperties extends EditorProperties {
+
+    shortName: string;
+    closeParent: () => void;
+
+}

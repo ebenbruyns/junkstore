@@ -28,34 +28,70 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         setContent(result);
         logger.debug("Login status: ", result);
     }
+    const createShortcut = async (launchOptions: LaunchOptions) => {
+        logger.debug("Creating shortcut for login");
+        const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "")
+        setSteamClientId(id.toString())
+        await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options)
+        await SteamClient.Apps.SetAppHidden(id, false);
+        await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
+        await executeAction(serverAPI, actionSetName,
+            "SaveSetting",
+            {
+                name: "LoginSteamClientId",
+                value: id.toString()
+            });
+        return id;
+    }
+    const getSteamClientId = async (launchOptions: LaunchOptions) => {
+        if (SteamClientId === "") {
+            logger.debug("No Shortcut found, creating one...");
+            return await createShortcut(launchOptions);
+        }
+        else {
+            const id = parseInt(SteamClientId);
+            logger.debug("Shortcut configured: ", id);
+            const app = appStore.allApps.find(a => { a.appid == id })
+            if (app) {
+                logger.debug("Shortcut found: ", id);
+                return id;
+            }
+            else {
+                logger.debug("Shortcut not found, creating one...");
+                return await createShortcut(launchOptions);
+            }
+
+        }
+    }
     const login = async () => {
         try {
             const data = await executeAction(serverAPI, actionSetName,
-                "Login",
+                "LoginLaunchOptions",
                 {
                     inputData: ""
                 });
+
             const launchOptions = data.Content as LaunchOptions
-            //setContent(data as ContentResult);
-            if (SteamClientId === "") {
-                const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "")
-                await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options)
-                await SteamClient.Apps.SetAppHidden(id, true);
-                await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
-                await executeAction(serverAPI, actionSetName,
-                    "SaveSetting",
-                    {
-                        name: "LoginSteamClientId",
-                        value: id.toString()
-                    });
-                runLogin(id);
-            }
-            else
-                runLogin(parseInt(SteamClientId));
+            setContent(data as ContentResult);
+            const id = await getSteamClientId(launchOptions)
+            // else
+            //     runLogin(parseInt(SteamClientId));
 
             // setTimeout(() => {
             //     SteamClient.Apps.RemoveShortcut(id);
             // }, 10000);
+            const gameId = gameIDFromAppID(id)
+
+            await executeAction(serverAPI, actionSetName,
+                "Login",
+                {
+                    inputData: "",
+                    appId: String(id),
+                    gameId: String(gameId)
+
+                });
+
+
             setLoggedIn("true");
 
         } catch (error) {

@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   decky-frontend-lib:
-    specifier: ^3.24.0
-    version: 3.24.0
+    specifier: ^3.24.5
+    version: 3.24.5
   react-icons:
     specifier: ^4.4.0
     version: 4.9.0
@@ -486,8 +486,8 @@ packages:
       ms: 2.1.2
     dev: true
 
-  /decky-frontend-lib@3.24.0:
-    resolution: {integrity: sha512-Bi6On7w48PDKRarVMiyHpd9UruCb8BPr153sYXSI8UEQiF4cdE6pG+5HZpSnHQd7bLa/Dgh8hCIsETLtJsKS5Q==}
+  /decky-frontend-lib@3.24.5:
+    resolution: {integrity: sha512-eYlbKDOOcIBPI0b76Rqvlryq2ym/QNiry4xf2pFrXmBa1f95dflqbQAb2gTq9uHEa5gFmeV4lUcMPGJ3M14Xqw==}
     dev: false
 
   /decode-named-character-reference@1.0.2:

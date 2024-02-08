@@ -20,6 +20,7 @@ export interface KeyValuePair {
   EnumValues: EnumStrings[];
 }
 export interface Section {
+  Visible?: boolean;
   Name: string;
   ModeLevel: number;
   Description: string;
@@ -28,6 +29,7 @@ export interface Section {
 export interface ConfData extends Content {
   Sections: Section[];
   Autoexec: string;
+  AutoexecEnabled?: boolean;
 }
 export enum ValueType {
   Number = "Number",
@@ -58,6 +60,10 @@ export interface EditorAction {
   Description: string;
   ContentId: string;
 }
+export interface ScriptActions extends Content {
+  Actions: MenuAction[];
+}
+
 // Define the grid container
 export interface GameDataList extends Content {
   NeedsLogin?: string;
@@ -76,6 +82,7 @@ export interface LaunchOptions extends Content {
   WorkingDir: string;
   Name: string;
   Compatibility?: boolean;
+  CompatToolName?: string;
 }
 export interface LoginStatus extends Content {
   Username: string;
@@ -100,6 +107,12 @@ export interface ProgressUpdate extends Content {
   Percentage: number;
   Description: string;
 }
+export interface GameImages extends Content {
+  Grid: string;
+  GridH: string;
+  Hero: string;
+  Logo: string;
+}
 export interface SectionEditorProps {
   section: Section;
   onChange: (section: Section) => void;
@@ -115,12 +128,13 @@ export interface GameData {
 
 export interface ActionSet extends Content {
   SetName: string;
-  Actions: MenuActions[];
+  Actions: MenuAction[];
 }
-export interface MenuActions extends Content {
+export interface MenuAction extends Content {
   ActionId: string;
   Title: string;
   Type: string;
+  InstalledOnly?: boolean;
 }
 
 export interface ContentResult {
@@ -150,6 +164,6 @@ export interface StoreContent extends Content {
 export interface Panel {
   Title: string;
   Type: string;
-  Actions: MenuActions[];
+  Actions: MenuAction[];
 }
 
