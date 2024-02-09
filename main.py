@@ -331,6 +331,12 @@ class Plugin:
                 with open(file_path, "r") as f:
                     content = f.read()
                     log_files.append({"FileName": file, "Content": content})
+        log_files.sort(key=lambda x: x['FileName'], reverse=True)
+        with open(os.path.join(decky_plugin.DECKY_USER_HOME, ".local/share/Steam/logs/console_log.txt"), "r") as f:
+            content = f.read()
+            log_files.append(
+                {"FileName": "console_log.txt", "Content": content})
+
         return log_files
 
     async def _unload(self):

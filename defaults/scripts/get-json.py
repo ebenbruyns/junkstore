@@ -164,7 +164,7 @@ json_fragments = {
                 ]
         }
     },
-    "epic-script-actions": {
+    "epic-game-script-actions": {
         "Type": "ScriptSet",
         "Content": {
 
@@ -213,6 +213,19 @@ json_fragments = {
                 }
             ]
         }
+    },
+    "epic-script-actions": {
+        "Type": "ScriptSet",
+        "Content": {
+
+            "Actions": [
+                {
+                    "ActionId": "Refresh",
+                    "Title": "Refresh Games List",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": False
+                }
+            ]}
     },
     "epic-exe-actions": {
         "Type": "ActionSet",
@@ -391,6 +404,12 @@ json_fragments = {
                     "Id": "GetGameScriptActions",
                     "Title": "",
                     "Type": "ScriptActions",
+                    "Command": "./scripts/get-json.py epic-game-script-actions"
+                },
+                {
+                    "Id": "GetScriptActions",
+                    "Title": "",
+                    "Type": "ScriptActions",
                     "Command": "./scripts/get-json.py epic-script-actions"
                 },
                 {
@@ -403,7 +422,14 @@ json_fragments = {
                     "Id": "GetTabConfigActions",
                     "Title": "Get epic tab config file actions",
                     "Type": "Init",
+
                     "Command": "./scripts/get-json.py epic-tab-config-actions"
+                },
+                {
+                    "Id": "Refresh",
+                    "Title": "Refresh Games List",
+                    "Type": "Refresh",
+                    "Command": "./scripts/junk-store.sh init"
                 }
             ]
         }
