@@ -187,6 +187,18 @@ json_fragments = {
                     "Type": "ScriptAction",
                     "InstalledOnly": True
                 },
+                {
+                    "ActionId": "EnableEOSoverlay",
+                    "Title": "Enable EOS overlay",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                },
+                {
+                    "ActionId": "DisableEOSoverlay",
+                    "Title": "Disable EOS overlay",
+                    "Type": "ScriptAction",
+                    "InstalledOnly": True
+                },
                 # {
                 #     "ActionId": "Import",
                 #     "Title": "Import Game",
@@ -328,6 +340,18 @@ json_fragments = {
                     "Command": "./scripts/junk-store.sh uninstall"
                 },
                 {
+                    "Id": "EnableEOSoverlay",
+                    "Title": "Enable EOS overlay",
+                    "Type": "Executable",
+                    "Command": "./scripts/junk-store.sh  enable-eos-overlay"
+                },
+                {
+                    "Id": "DisableEOSoverlay",
+                    "Title": "Disable EOS overlay",
+                    "Type": "Executable",
+                    "Command": "./scripts/junk-store.sh disable-eos-overlay"
+                },
+                {
                     "Id": "ProtonTricks",
                     "Title": "Proton Tricks",
                     "Type": "Executable",
@@ -364,7 +388,7 @@ json_fragments = {
                     "Command": "./scripts/get-json.py epic-exe-actions"
                 },
                 {
-                    "Id": "GetScriptActions",
+                    "Id": "GetGameScriptActions",
                     "Title": "",
                     "Type": "ScriptActions",
                     "Command": "./scripts/get-json.py epic-script-actions"

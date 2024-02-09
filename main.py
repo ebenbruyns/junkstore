@@ -322,6 +322,17 @@ class Plugin:
         except Exception as e:
             decky_plugin.logger.error(f"Error in download_custom_backend: {e}")
 
+    async def get_logs(self):
+        log_dir = decky_plugin.DECKY_PLUGIN_LOG_DIR
+        log_files = []
+        for file in os.listdir(log_dir):
+            if file.endswith(".log"):
+                file_path = os.path.join(log_dir, file)
+                with open(file_path, "r") as f:
+                    content = f.read()
+                    log_files.append({"FileName": file, "Content": content})
+        return log_files
+
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")
 

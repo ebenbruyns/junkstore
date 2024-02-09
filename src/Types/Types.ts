@@ -3,6 +3,10 @@ export interface EnumStrings {
   Key: string;
   Description: string;
 }
+export interface LogFile {
+  FileName: string;
+  Content: string;
+}
 export interface ParentValue {
   Parent: string;
   Value: string;

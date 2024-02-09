@@ -4,6 +4,7 @@ import { HiOutlineQrCode } from "react-icons/hi2";
 import { SiDiscord, SiElsevier, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
+import { LogViewer } from "./LogViewer";
 
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
@@ -331,6 +332,10 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                             </PanelSection>
 
                         </>
+                    },
+                    {
+                        title: "Logs",
+                        content: <LogViewer serverAPI={serverAPI}></LogViewer>
                     }
                 ]}
 
