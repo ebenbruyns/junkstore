@@ -7,9 +7,9 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, GameDataList, StoreContent, StoreTabsContent } from "./Types/Types";
+import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
@@ -20,7 +20,7 @@ import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
 import { LoginContent } from "./Components/LoginContent";
 import { ConfEditor } from "./ConfEditor";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaSlidersH } from "react-icons/fa";
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
@@ -112,6 +112,8 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     const [searchQuery, setSearchQuery] = useState("");
     const [filterInstalled, setFilterInstalled] = useState(false);
     const [limited, setLimited] = useState(true);
+    const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
+
 
     const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
         if (!setName) return;
@@ -159,12 +161,58 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 });
             setContent(menu);
             logger.debug("GetContent result: ", menu);
+            const actionRes = await executeAction(serverAPI, result.SetName,
+                "GetScriptActions",
+                {
+                    inputData: ""
+                }) as ContentResult;
+            logger.debug("onInit actionRes", actionRes);
+            if (actionRes.Type === "ScriptSet") {
+                const scriptActions = actionRes.Content as ScriptActions;
+                logger.debug("onInit scriptActions", scriptActions);
+                setScriptActions(scriptActions.Actions);
+            }
         } catch (error) {
             logger.error("OnInit: ", error);
         }
     };
     const configEditor = () => {
         showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
+    }
+    const runScript = async (actionSet: string, actionId: string, args: any) => {
+        const result = await executeAction(serverAPI, actionSet, actionId, args)
+        logger.debug("runScript result", result);
+
+    }
+    const actionsMenu = (e: any) => {
+        showContextMenu(
+            <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
+                {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
+
+
+                    return (<MenuItem onSelected={
+                        async () => {
+                            const args = {
+                                shortname: "",
+                                steamClientID: "",
+                                startDir: "",
+                                compatToolName: "",
+                                inputData: "",
+                                gameId: "",
+                                appId: ""
+                            }
+
+                            runScript(initActionSet, action.ActionId, args)
+
+                        }}
+                    >{action.Title}</MenuItem>)
+
+                })}
+
+
+            </Menu>,
+            e.currentTarget ?? window
+        )
     }
 
     return (
@@ -202,10 +250,33 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
-                                minWidth: "725px",
+                                minWidth: "685px",
                                 flexGrow: "10",
                             }}
                         />
+                        <DialogButton
+                            onClick={actionsMenu}
+                            onOKButton={actionsMenu}
+                            style={{
+                                width: "40px",
+                                height: "40px",
+                                minWidth: "40px",
+                                maxHeight: "40px",
+                                minHeight: "40px",
+                                margin: "0",
+                                position: "relative",
+                                flexDirection: "column",
+                            }}
+                        >
+                            <FaSlidersH
+                                style={{
+                                    position: "absolute",
+                                    left: "50%",
+                                    top: "50%",
+                                    transform: "translate(-50%,-50%)",
+                                }}
+                            />
+                        </DialogButton>
                         <DialogButton
                             onClick={configEditor}
                             onOKButton={configEditor}

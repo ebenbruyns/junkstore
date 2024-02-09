@@ -75,7 +75,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 setSteamClientID((res.Content as GameDetails).SteamClientID);
             logger.debug("onInit finished");
             const actionRes = await executeAction(serverAPI, initActionSet,
-                "GetScriptActions",
+                "GetGameScriptActions",
                 {
                     shortname: shortname,
                     inputData: ""
@@ -248,7 +248,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             await SteamClient.Apps.RemoveShortcut(app.appid);
         }
         await cleanupIds();
-        
+
         const imageResult = await executeAction(serverAPI, initActionSet,
             "GetJsonImages",
             {

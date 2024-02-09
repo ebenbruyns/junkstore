@@ -9,6 +9,7 @@ export const ErrorDisplay = ({ error }: { error: ContentError; }) => {
 
             <div>Message: {error.Message}</div>
             <div>{error.Data}</div>
+            <div>If you haven't installed the dependencies you can do so form the about menu.</div>
         </div>
     );
 };
