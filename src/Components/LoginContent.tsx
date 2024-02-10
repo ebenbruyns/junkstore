@@ -75,27 +75,13 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             const launchOptions = data.Content as LaunchOptions
             setContent(data as ContentResult);
             const id = await getSteamClientId(launchOptions)
-            const gameId = gameIDFromAppID(id)
-
-            await executeAction(serverAPI, actionSetName,
-                "Login",
-                {
-                    inputData: "",
-                    appId: String(id),
-                    gameId: String(gameId)
-
-                });
-
-
-            setLoggedIn("true");
-
+            await runLogin(id);
         } catch (error) {
             logger.error("Login: ", error);
         }
     };
     const runLogin = async (id: number) => {
-        setTimeout(() => {
-
+        setTimeout(async () => {
             let gid = gameIDFromAppID(id);
             SteamClient.Apps.RunGame(gid, "", -1, 100);
         }, 500);
