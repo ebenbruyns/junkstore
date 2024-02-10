@@ -249,20 +249,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
         await cleanupIds();
 
-        const imageResult = await executeAction(serverAPI, initActionSet,
-            "GetJsonImages",
-            {
-                shortname: shortname,
-                inputData: ""
-            });
-        if (imageResult.Type == "Images") {
-            const images = imageResult.Content as GameImages
-            logger.debug("images", images);
-            if (images.Grid !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
-            if (images.Hero !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
-            if (images.Logo !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
-            if (images.GridH !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
-        }
         if (result.Type === "LaunchOptions") {
             const launchOptions = result.Content as LaunchOptions;
             //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
@@ -277,7 +263,22 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
             }
             setInstalling(false);
+        }
 
+        const imageResult = await executeAction(serverAPI, initActionSet,
+            "GetJsonImages",
+            {
+                shortname: shortname,
+                inputData: ""
+            });
+
+        if (imageResult.Type == "Images") {
+            const images = imageResult.Content as GameImages
+            logger.debug("images", images);
+            if (images.Grid !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
+            if (images.Hero !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
+            if (images.Logo !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
+            if (images.GridH !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
         }
 
     }
