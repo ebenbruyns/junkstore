@@ -1,6 +1,23 @@
-const enableLogger = false;
+const isLoggerEnabled = () => { return localStorage.getItem('enableLogger') === 'true' || false };
+
+declare global {
+    interface Window {
+        JunkStoreLoggerEnable(): void;
+        JunkStoreLoggerDisable(): void;
+    }
+}
+
+window.JunkStoreLoggerEnable = () => {
+    localStorage.setItem('enableLogger', 'true');
+};
+
+
+window.JunkStoreLoggerDisable = () => {
+    localStorage.setItem('enableLogger', 'false');
+};
+
 export const log = (name: string) => {
-    if(enableLogger)
+    if(isLoggerEnabled())
     return console.info.bind(
         window.console,
         `%c Junk Store %c ${name} %c`,
@@ -12,7 +29,7 @@ export const log = (name: string) => {
 };
 
 export const debug = (name: string) => {
-    if (enableLogger)
+    if (isLoggerEnabled())
     return console.debug.bind(window.console,
         `%c Junk Store %c ${name} %c`,
         'background: #16a085; color: black;',

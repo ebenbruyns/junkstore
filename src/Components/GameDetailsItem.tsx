@@ -6,7 +6,7 @@ import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
-import { executeAction } from "../Utils/executeAction";
+import { GameStateUpdate, executeAction } from "../Utils/executeAction";
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;
@@ -14,13 +14,15 @@ interface GameDetailsItemProperties {
     initActionSet: string;
     initAction: string;
     closeModal?: any;
+    clearActiveGame: () => void;
 }
 
 
 export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     serverAPI, shortname, closeModal, initActionSet,
     // @ts-ignore
-    initAction
+    initAction,
+    clearActiveGame
 }) => {
 
     const logger = new Logger("GameDetailsItem");
@@ -208,6 +210,22 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         setTimeout(async () => {
             let id = parseInt(steamClientID)
             let gid = gameIDFromAppID(id);
+            const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
+                logger.log("data: ", data)
+                if (!data.bRunning) {
+                    // This might not work in desktop mode.
+                    // @ts-ignore
+                    let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                    if (gamepadWindowInstance) {
+                        setTimeout(async () => {
+                            gamepadWindowInstance.NavigateBack();
+                            unregister();
+
+
+                        }, 1000)
+                    }
+                }
+            })
 
             await SteamClient.Apps.RunGame(gid, "", -1, 100);
             closeModal();
@@ -249,6 +267,30 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
         await cleanupIds();
 
+
+
+        if (result.Type === "LaunchOptions") {
+            const launchOptions = result.Content as LaunchOptions;
+            //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
+            await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
+            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+            await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
+            await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
+            //@ts-ignore
+            const defaultProton = settingsStore.settings.strCompatTool;
+            if (launchOptions.Compatibility && launchOptions.Compatibility == true) {
+                logger.debug("Setting compatibility", launchOptions.CompatToolName);
+                if (defaultProton) {
+                    await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
+                }
+            }
+            else {
+                logger.debug("Setting compatibility to empty string");
+                await SteamClient.Apps.SpecifyCompatTool(id, "");
+            }
+            setInstalling(false);
+
+        }
         const imageResult = await executeAction(serverAPI, initActionSet,
             "GetJsonImages",
             {
@@ -262,22 +304,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             if (images.Hero !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
             if (images.Logo !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
             if (images.GridH !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
-        }
-        if (result.Type === "LaunchOptions") {
-            const launchOptions = result.Content as LaunchOptions;
-            //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
-            await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
-            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
-            await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
-            await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-            //@ts-ignore
-            const defaultProton = settingsStore.settings.strCompatTool;
-
-            if (defaultProton) {
-                await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
-            }
-            setInstalling(false);
-
         }
 
     }
@@ -370,6 +396,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                             resetLaunchOptions={resetLaunchOptions}
                                             updater={update}
                                             scriptRunner={runScript}
+                                            clearActiveGame={clearActiveGame}
                                         />
                                     </Focusable>
                                 </div>

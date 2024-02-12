@@ -21,6 +21,7 @@ import { MainMenu } from "./MainMenu";
 import { LoginContent } from "./Components/LoginContent";
 import { ConfEditor } from "./ConfEditor";
 import { FaCog, FaSlidersH } from "react-icons/fa";
+import { GameDetailsItem } from "./Components/GameDetailsItem";
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
@@ -28,15 +29,69 @@ interface ContentTabsProperties {
     initAction: string;
     layout: string;
 }
+export interface StoreTabsState {
+    currentTab: string;
+}
+
+export const parseTabsState = (state: string | null): StoreTabsState => {
+    if (!state || state === "") {
+        return {
+            currentTab: "-1"
+        };
+    }
+    return JSON.parse(state) as StoreTabsState;
+}
 
 export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initAction, initActionSet, layout }) => {
     const logger = new Logger("StoreTabs");
-    const [currentTab, setCurrentTab] = useState("-1");
+    const state = localStorage.getItem(`${initActionSet}_${initAction}_tabs`)
+    const savedState = parseTabsState(state);
+    logger.debug("Initial Saved state: ", savedState);
+    const [currentTab, setCurrentTab] = useState(savedState ? savedState?.currentTab : "-1");
     const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
     const [actionSetName, setActionSetName] = useState("");
 
+    const saveState = () => {
+        if (currentTab !== undefined) {
+            const state = {
+                currentTab
+            };
+            logger.debug("Saving state: ", state);
+            localStorage.setItem(`${initActionSet}_${initAction}_tabs`, JSON.stringify(state));
+        }
+
+    };
+
+    const loadState = () => {
+        const savedState = localStorage.getItem(`${initActionSet}_${initAction}_tabs`);
+        logger.debug("Loading state: ", savedState);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            setCurrentTab(state.currentTab);
+        }
+    };
+    useEffect(() => {
+        saveState();
+    }, [currentTab]);
+    useEffect(() => {
+
+
+        loadState();
+
+        const handleBeforeUnload = () => {
+            saveState();
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [initActionSet, initAction]);
+
     useEffect(() => {
         onInit();
+        loadState();
     }, []);
 
     const onInit = async () => {
@@ -55,7 +110,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
             const result = data.Content as ActionSet;
             setActionSetName(result.SetName);
             setContent(tabs);
-            setCurrentTab("0");
+            //setCurrentTab("0");
             logger.debug(`StoreTabs initialized with actionSetName: ${result.SetName}`);
         } catch (error) {
             logger.error(`Error initializing StoreTabs: ${error}`);
@@ -102,18 +157,90 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
     );
 };
 
+export interface ContentState {
+    searchQuery: string;
+    filterInstalled: boolean;
+    limited: boolean;
+    activeGame: string;
+};
 
+export const parseContentState = (state: string | null): ContentState => {
+    if (!state || state === "") {
+        return {
+            searchQuery: "",
+            filterInstalled: true,
+            limited: true,
+            activeGame: ""
+        };
+    }
+    return JSON.parse(state) as ContentState;
+}
 
 export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; padTop?: boolean; }> = ({
     serverAPI, initActionSet, initAction, padTop = true }) => {
-    const logger = new Logger("index");
+    const logger = new Logger("Content");
+    const state = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`)
+    const savedState = parseContentState(state);
     const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState<string>("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterInstalled, setFilterInstalled] = useState(false);
-    const [limited, setLimited] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(savedState ? savedState?.searchQuery : "");
+    const [filterInstalled, setFilterInstalled] = useState(savedState ? savedState?.filterInstalled : true);
+    const [limited, setLimited] = useState(savedState ? savedState?.limited : true);
     const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
+    const [activeGame, setActiveGame] = useState(savedState ? savedState?.activeGame : "");
+    const saveState = () => {
+        logger.debug("Saving state");
+        const state = {
+            searchQuery,
+            filterInstalled,
+            limited,
+            activeGame
+        };
+        logger.debug("State: ", state);
+        localStorage.setItem(`${initActionSet}_${initAction}_searchquery`, JSON.stringify(state));
+    };
 
+    const loadState = () => {
+        logger.debug("Loading state");
+        const savedState = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`);
+        logger.debug("Saved state: ", savedState);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            setSearchQuery(state.searchQuery);
+            setFilterInstalled(state.filterInstalled);
+            setLimited(state.limited);
+            setActiveGame(state.activeGame);
+        }
+    };
+    const activeGameSetter = (shortname: string) => {
+        logger.debug("Setting active game: ", shortname);
+        setActiveGame(shortname);
+    }
+    const clearActiveGame = () => {
+        logger.debug("Clearing active game");
+        setActiveGame("");
+    }
+    useEffect(() => {
+        logger.debug("Saving state on useEffect");
+        saveState();
+    }
+        , [searchQuery, filterInstalled, limited, activeGame]);
+
+    useEffect(() => {
+
+
+        loadState();
+
+        const handleBeforeUnload = () => {
+            saveState();
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [initActionSet, initAction]);
 
     const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
         if (!setName) return;
@@ -132,6 +259,15 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     };
     useEffect(() => {
         logger.log("Content: ", content);
+        if (content.Type !== "Empty" && content.Type !== "Error") {
+            if (activeGame && activeGame !== "") {
+                logger.debug("activeGame: ", activeGame);
+                showModal(<GameDetailsItem serverAPI={serverAPI} shortname={activeGame} initActionSet={actionSetName} initAction="" clearActiveGame={clearActiveGame} />)
+            }
+            else {
+                logger.debug("No active game");
+            }
+        }
     }, [content]);
 
     useEffect(() => {
@@ -141,6 +277,8 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
 
     useEffect(() => {
         onInit();
+        loadState();
+
     }, []);
 
     const onInit = async () => {
@@ -172,6 +310,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 logger.debug("onInit scriptActions", scriptActions);
                 setScriptActions(scriptActions.Actions);
             }
+
         } catch (error) {
             logger.error("OnInit: ", error);
         }
@@ -313,7 +452,10 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                         limitFn={() => setLimited(!limited)}
                         filterFn={() => setFilterInstalled(!filterInstalled)}
                         initActionSet={actionSetName}
-                        initAction="" />
+                        initAction=""
+                        setActiveGame={activeGameSetter}
+                        clearActiveGame={clearActiveGame}
+                    />
                 </>
             )
             }

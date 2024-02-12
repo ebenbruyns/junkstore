@@ -3,6 +3,7 @@ import { Focusable, ServerAPI, showModal } from "decky-frontend-lib";
 import { GameData } from "../Types/Types";
 import { GameDetailsItem } from "./GameDetailsItem";
 import { VFC } from "react";
+import Logger from "../Utils/logger";
 
 interface GridContainerProperties {
   games: GameData[];
@@ -12,9 +13,12 @@ interface GridContainerProperties {
   serverAPI: ServerAPI;
   initActionSet: string;
   initAction: string;
+  setActiveGame: (shortname: string) => void;
+  clearActiveGame: () => void;
 }
 
-const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterFn, limitFn, limited, initActionSet, initAction }) => {
+const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterFn, limitFn, limited, initActionSet, initAction, setActiveGame, clearActiveGame }) => {
+  const logger = new Logger("GridContainer");
   return (
     <Focusable
       style={{
@@ -42,7 +46,10 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
             src={game.Images.length > 0 ? game.Images[0] : ""}
             alt={game.Name}
             onClick={() => {
-              showModal(<GameDetailsItem serverAPI={serverAPI} shortname={game.ShortName} initActionSet={initActionSet} initAction="" />)
+              logger.debug("onClick game: ", game);
+              logger.debug("setActiveGame", game.ShortName);
+              setActiveGame(game.ShortName);
+              showModal(<GameDetailsItem serverAPI={serverAPI} shortname={game.ShortName} initActionSet={initActionSet} initAction="" clearActiveGame={clearActiveGame} />)
               //Router.CloseSideMenus();
               //Router.Navigate("/game/" + tabindex + "/" + game.ShortName);
             }}

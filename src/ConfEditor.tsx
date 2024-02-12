@@ -144,7 +144,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                             return null;
                                     })}
                                 </PanelSection>
-                                {confData.AutoexecEnabled && confData.Autoexec && (
+                                {confData.AutoexecEnabled !== undefined && confData.AutoexecEnabled == true && (
                                     <PanelSection title="[Autoexec]">
                                         <Focusable
                                             // @ts-ignore
@@ -157,7 +157,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                             }}
                                             onOKButton={() => { }}
                                         >
-                                            
+
                                             <textarea
                                                 className=""
                                                 ref={focusRef}

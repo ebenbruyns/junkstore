@@ -78,6 +78,7 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                     ref={focusRef}
                                     style={{ width: "calc( 100% - 10px )", height: "200px " }}
                                     value={logContent}
+                                    readOnly={true}
 
                                 />
                             </Focusable>

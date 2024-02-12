@@ -64,6 +64,15 @@ def create_empty_config_set(shortname, forkname, version, platform, conn):
         conn.commit()
 
 
+def add_missing_config_sets(name, db_file):
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    query = "insert into config_set (ShortName, forkname, version, platform) select Game.ShortName, '', '', 'dos' from Game LEFT JOIN config_set ON Game.ShortName = config_set.ShortName AND config_set.platform = 'dos' WHERE config_set.id IS NULL"
+    c.execute(query)
+    conn.commit()
+    conn.close()
+
+
 def get_config(shortnames, forkname, version, platform, db_file):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
@@ -191,15 +200,27 @@ def generate_bash_env_settings(config_json):
     return script
 
 
+def get_schema_file(dir, schema):
+    return os.path.join(dir, f"conf_schemas/{schema}.json")
+
+
 def get_config_json(shortnames, forkname, version, platform, db_file):
     try:
         config_schema = f"{platform}_{forkname}_{version}"
+        runtime_dir = os.environ.get('DECKY_PLUGIN_RUNTIME_DIR', "")
+        plugin_dir = os.environ.get('DECKY_PLUGIN_DIR', "")
         WorkingDir = os.environ.get('WORKING_DIR', "")
+        filepath = ""
+        if os.path.exists(get_schema_file(runtime_dir, config_schema)):
+            filepath = get_schema_file(runtime_dir, config_schema)
+        elif os.path.exists(get_schema_file(plugin_dir, config_schema)):
+            filepath = get_schema_file(plugin_dir, config_schema)
+        else:
+            filepath = get_schema_file(WorkingDir, config_schema)
+       # print(f"filepath: {filepath}")
         config_data = load_conf_data_from_json(
             os.path.expanduser(
-                os.path.join(
-                    WorkingDir,
-                    f"conf_schemas/{config_schema}.json")))
+                filepath))
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
 
@@ -259,13 +280,18 @@ def find_option(section, key):
     return None
 
 
-def get_base64_images(game_id, db_file):
+def get_base64_images(game_id, db_file, image_prefix="", url_encode=True):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     c.execute("SELECT ImagePath FROM Images join Game on Game.ID = Images.GameID WHERE ShortName=? order by Images.SortOrder", (game_id,))
     images = []
+
     for row in c.fetchall():
-        images.append(download(row[0]))
+        url = f"{image_prefix}{row[0]}"
+        if url_encode:
+            url = f"{image_prefix}{urllib.parse.quote(row[0])}"
+
+        images.append(download(url))
 
     conn.close()
     tallImage = images[0]

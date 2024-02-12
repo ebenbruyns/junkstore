@@ -40,6 +40,7 @@ interface GameDisplayProperties {
   resetLaunchOptions: () => void;
   updater: () => void;
   scriptRunner: (actionSet: string, actionId: string, args: any) => void;
+  clearActiveGame: () => void;
 }
 
 //@ts-ignore
@@ -64,7 +65,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     initActionSet,
     actions,
     resetLaunchOptions,
-    scriptRunner
+    scriptRunner,
+    clearActiveGame
   }
 ) => {
   const logger = new Logger("GameDisplay");
@@ -179,6 +181,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         }}
         onCancel={(_) => {
           //e.stopPropagation();
+          clearActiveGame();
           closeModal();
           // Router.CloseSideMenus();
         }}

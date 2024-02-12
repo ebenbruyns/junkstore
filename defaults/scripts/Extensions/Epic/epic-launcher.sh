@@ -8,7 +8,7 @@ ID=$1
 echo $1
 shift
 
-source "${HOME}/homebrew/plugins/Junk-Store/scripts/settings.sh"
+source "${HOME}/homebrew/plugins/Junk-Store/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
 SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE)
@@ -62,7 +62,7 @@ fi
 #export PROTON_EAC_RUNTIME="${HOME}/.steam/root/steamapps/common/Proton EasyAntiCheat Runtime/"
 
 CMD=$@
-ARGS=$("${HOME}/homebrew/plugins/Junk-Store/scripts/get-epic-args.sh" $ID)
+ARGS=$("${ARGS_SCRIPT}" $ID)
 eval "${CMD} ${ARGS}" # &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # echo "#!/bin/bash" > run.sh
 # echo "${CMD} ${ARGS}" >> run.sh
