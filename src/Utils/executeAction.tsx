@@ -50,7 +50,7 @@ export async function runApp(id: number) {
 
         let gid = gameIDFromAppID(id);
         SteamClient.Apps.RunGame(gid, "", -1, 100);
-    }, 1000);
+    }, 1500);
 }
 
 export async function configureShortcut(id: Number, launchOptions: LaunchOptions) {
@@ -112,20 +112,21 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
                 if (!data.bRunning) {
                     // This might not work in desktop mode.
                     // @ts-ignore
-                    let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
-                    if (gamepadWindowInstance) {
-                        setTimeout(async () => {
-                            gamepadWindowInstance.NavigateBack();
-                            unregister();
-                            await configureShortcut(id, oldLaunchOptions);
+                    // let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                    // if (gamepadWindowInstance) {
+                    //     setTimeout(async () => {
+                    //         gamepadWindowInstance.NavigateBack();
+                    //         unregister();
+                    //         await configureShortcut(id, oldLaunchOptions);
 
-                        }, 1000)
-                    }
+                    //     }, 1000)
+                    // }
                 }
             })
             await configureShortcut(id, newLaunchOptions);
             logger.debug("running app: ", id);
-            runApp(id);
+            SteamClient.UI.
+                runApp(id);
         }
 
         return {} as ContentResult;

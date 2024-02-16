@@ -8,7 +8,7 @@ ID=$1
 echo $1
 shift
 
-source "${HOME}/homebrew/plugins/Junk-Store/scripts/Extensions/Epic/settings.sh"
+source "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
 SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE)

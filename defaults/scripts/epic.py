@@ -15,7 +15,7 @@ import re
 
 cols = database.cols
 
-legendary_cmd = "/bin/flatpak run com.github.derrod.legendary"
+legendary_cmd = os.environ['LEGENDARY']
 
 
 def execute_shell(cmd):
@@ -77,7 +77,7 @@ def get_parameters(game_id, offline):
         offline_switch = "--offline"
 
     result = execute_shell(os.path.expanduser(
-        f"/bin/flatpak run com.github.derrod.legendary launch {game_id} --json {offline_switch} "))
+        f"{legendary_cmd} launch {game_id} --json {offline_switch} "))
     args = " ".join(result['egl_parameters'])
     return args
 
@@ -88,7 +88,7 @@ def has_updates(game_id, offline):
         offline_switch = "--offline"
 
     result = execute_shell(os.path.expanduser(
-        f"/bin/flatpak run com.github.derrod.legendary info {game_id} --json {offline_switch}"))
+        f"{legendary_cmd} info {game_id} --json {offline_switch}"))
     json_result = json.loads(result)
     if json_result['game']['version'] != json_result['install']['version']:
         return json.dumps({'Type': 'UpdateAvailable', 'Content': True})
@@ -100,9 +100,10 @@ def get_lauch_options(game_id, steam_command, name, offline):
     if offline:
         offline_switch = "--offline"
     result = execute_shell(os.path.expanduser(
-        f"/bin/flatpak run com.github.derrod.legendary launch {game_id} --json {offline_switch}"))
+        f"{legendary_cmd} launch {game_id} --json {offline_switch}"))
+    launcher = os.environ['LAUNCHER']
     script_path = os.path.expanduser(
-        "~/homebrew/plugins/Junk-Store/scripts/Plugins/Epic/epic-launcher.sh")
+        launcher)
     return json.dumps(
         {
             'Type': 'LaunchOptions',

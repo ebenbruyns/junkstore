@@ -186,7 +186,25 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
     };
     const runScript = async (actionSet: string, actionId: string, args: any) => {
+        const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
+            logger.log("runscript game state update: ", data)
+            if (data.bRunning) {
+                // This might not work in desktop mode.
+                // @ts-ignore
+                // let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                // if (gamepadWindowInstance) {
+                //     closeModal();
+                setTimeout(async () => {
+
+                    unregister();
+
+
+                }, 1000)
+                // }
+            }
+        })
         const result = await executeAction(serverAPI, actionSet, actionId, args)
+
         if (result.Type == "Progress")
             setInstalling(true);
 

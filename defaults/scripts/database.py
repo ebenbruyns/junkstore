@@ -280,7 +280,7 @@ def find_option(section, key):
     return None
 
 
-def get_base64_images(game_id, db_file, image_prefix="", url_encode=True):
+def get_base64_images(game_id, db_file, image_prefix="", url_encode=False):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     c.execute("SELECT ImagePath FROM Images join Game on Game.ID = Images.GameID WHERE ShortName=? order by Images.SortOrder", (game_id,))
