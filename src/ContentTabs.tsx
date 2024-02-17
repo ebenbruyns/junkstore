@@ -222,7 +222,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 <>
 
 
-                    {padTop && <div style={{ marginBottom: "50px", width: "100%" }} />}
+                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />}
                     <Focusable //key={initActionSet + "_" + initAction}
 
                         // @ts-ignore

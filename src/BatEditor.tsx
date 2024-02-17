@@ -1,10 +1,10 @@
 import {
     Focusable,
-    PanelSection, Dropdown, ModalRoot
+    PanelSection, Dropdown, ModalRoot, ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ActionSet, FileData, FilesData } from "./Types/Types";
-import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
+// import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
 
@@ -59,8 +59,13 @@ export const BatEditor: VFC<EditorProperties> = ({
                 bAllowFullSizeMobile={true}
                 closeModal={closeModal}
             >
-                <ScrollPanelGroup focusable={false} style={{ margin: "0px" }}>
-                    <Panel style={{ background: "inherit" }}>
+                <ScrollPanelGroup
+                    // @ts-ignore
+                    focusable={false}
+                    style={{ margin: "0px" }}>
+                    <Focusable
+                        // @ts-ignore
+                        style={{ background: "inherit" }}>
 
                         <Focusable
 
@@ -137,7 +142,7 @@ export const BatEditor: VFC<EditorProperties> = ({
                             </PanelSection>
                         </Focusable>
 
-                    </Panel>
+                    </Focusable>
                 </ScrollPanelGroup>
             </ModalRoot>
         </>

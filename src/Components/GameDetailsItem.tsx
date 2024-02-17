@@ -1,8 +1,8 @@
-import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
+import { Focusable, ServerAPI, ModalRoot, sleep, ScrollPanelGroup, Panel, ModalPosition, SimpleModal } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
 import { ContentResult, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
-import { Panel, ScrollPanelGroup } from "./Scrollable";
+// import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
@@ -323,62 +323,83 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
     };
     return (
-        <>
 
-            <>
-                <style>
-                    {`
+        <>
+            <style>
+                {`
                             .GenericConfirmDialog {
                                 width: 100% !important;
+                                height: 100% !important;
+                                padding: 0px !important;
+                                margin: 0px !important;
+                            }
+                            .ModalPosition {
+                                scroll-padding: 0px !important;
+                                padding: 0px !important;
+                                margin: -10px !important;
                             }
                         `}
-                </style>
-                <ModalRoot
-                    // @ts-ignore
-                    style={{ width: 800 }}
-                    onCancel={closeModal}
-                    onEscKeypress={closeModal}
-                    closeModal={closeModal}>
-                    {gameData.Type === "Empty" && <Loading />}
-                    {gameData.Type === "GameDetails" &&
-                        <ScrollPanelGroup focusable={false} style={{ background: parent }}>
-                            <Panel>
-                                <div style={{ margin: "0px", color: "white" }}>
-                                    <Focusable onOptionsButton={install}
-                                        // @ts-ignore
-                                        focusableIfNoChildren={true}
+            </style>
 
-                                    >
+            <ModalRoot
+                // @ts-ignore
+                style={{ width: 800, height: "100%", padding: "0px", margin: "0px", background: parent }}
+                onCancel={closeModal}
+                onEscKeypress={closeModal}
+                closeModal={closeModal} bAllowFullSize={true}>
+                <ModalPosition>
+                    <Focusable>
+                        {gameData.Type === "Empty" && <Loading />}
+                        {gameData.Type === "GameDetails" &&
 
-                                        <GameDisplay
-                                            serverApi={serverAPI}
-                                            name={(gameData.Content as GameDetails).Name}
-                                            shortName={(gameData.Content as GameDetails).ShortName}
-                                            description={(gameData.Content as GameDetails).Description}
-                                            images={(gameData.Content as GameDetails).Images}
-                                            steamClientID={steamClientID}
-                                            closeModal={closeModal}
-                                            installing={installing}
-                                            installer={download}
-                                            progress={progress}
-                                            cancelInstall={cancelInstall}
-                                            uninstaller={uninstall}
-                                            editors={(gameData.Content as GameDetails).Editors}
-                                            initActionSet={initActionSet}
-                                            runner={runner}
-                                            actions={scriptActions}
-                                            resetLaunchOptions={resetLaunchOptions}
-                                            updater={update}
-                                            scriptRunner={runScript}
-                                        />
-                                    </Focusable>
-                                </div>
-                            </Panel>
-                        </ScrollPanelGroup>}
-                </ModalRoot>
-            </>
+
+                            <ScrollPanelGroup
+                                // @ts-ignore
+                                focusable={false}
+                                style={{
+                                    background: parent, height: "100%",
+                                    padding: "0px",
+                                    margin: "0px"
+                                }}>
+                                {/* <Focusable style={{ margin: "0px", color: "white", height: "100%", padding: "0px" }} onOptionsButton={install}
+                                // @ts-ignore
+                                focusableIfNoChildren={true}
+
+                            > */}
+
+                                <GameDisplay
+                                    serverApi={serverAPI}
+                                    name={(gameData.Content as GameDetails).Name}
+                                    shortName={(gameData.Content as GameDetails).ShortName}
+                                    description={(gameData.Content as GameDetails).Description}
+                                    images={(gameData.Content as GameDetails).Images}
+                                    steamClientID={steamClientID}
+                                    closeModal={closeModal}
+                                    installing={installing}
+                                    installer={download}
+                                    progress={progress}
+                                    cancelInstall={cancelInstall}
+                                    uninstaller={uninstall}
+                                    editors={(gameData.Content as GameDetails).Editors}
+                                    initActionSet={initActionSet}
+                                    runner={runner}
+                                    actions={scriptActions}
+                                    resetLaunchOptions={resetLaunchOptions}
+                                    updater={update}
+                                    scriptRunner={runScript}
+                                />
+
+                                {/* </Focusable> */}
+                            </ScrollPanelGroup>
+                        }
+                    </Focusable>
+                </ModalPosition>
+            </ModalRoot >
+
 
         </>
+
+
     );
 
 

@@ -9,9 +9,11 @@ import {
   MenuItem,
   showModal,
   ServerAPI,
+  ScrollPanelGroup,
+  ModalPosition,
 
 } from "decky-frontend-lib";
-import { Panel, ScrollPanelGroup } from "./Scrollable";
+// import { Panel, ScrollPanelGroup } from "./Scrollable";
 import { VFC } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
 import { EditorAction, MenuAction, ProgressUpdate } from "../Types/Types";
@@ -163,8 +165,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
   }
 
   return (
-    <PanelSection>
-      <h1>{name}</h1>
+    <>
+
+
+
+
+
       <Focusable
         // @ts-ignore
         focusableIfNoChildren={true}
@@ -174,8 +180,10 @@ const GameDisplay: VFC<GameDisplayProperties> = (
           color: "white",
 
           width: "100%",
-
+          height: "100%",
           overflow: "scroll",
+          padding: "0px",
+          margin: "0px"
         }}
         onCancel={(_) => {
           //e.stopPropagation();
@@ -184,18 +192,23 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         }}
         onCancelActionDescription="Go back to Store"
       >
-        <Panel focusable={true} noFocusRing={false}>
+        <h1 style={{ padding: "0px", margin: "0px" }}>{name}</h1>
 
-          <Focusable style={{ display: "flex", flexDirection: "column", overflow: "scroll" }} >
-            <Panel style={{ whiteSpace: "nowrap", overflowX: "scroll" }} >
-              <Marquee play children={Array.isArray(images) &&
-                images.map((image: string) => (
-                  <img src={image} style={{ height: "150px", display: "inline-block" }} />
-                ))}
-              />
-            </Panel>
-          </Focusable>
-        </Panel>
+        <Focusable
+          // @ts-ignore
+          focusable={true}
+          noFocusRing={false} e style={{ display: "flex", flexDirection: "column", overflow: "scroll" }} >
+          {/* <div
+                // @ts-ignore
+                style={{ whiteSpace: "nowrap", overflowX: "scroll" }} > */}
+
+          <Marquee play children={Array.isArray(images) &&
+            images.map((image: string) => (
+              <img src={image} style={{ height: "150px", display: "inline-block" }} />
+            ))}
+          />
+          {/* </div> */}
+        </Focusable>
 
         <PanelSection
           // @ts-ignore
@@ -330,27 +343,32 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
           </Focusable>
         </PanelSection>
+        <PanelSection>
 
 
-        <ScrollPanelGroup
-          focusable={false}
-          style={{ flex: 1, minHeight: 0, height: "200px", width: "100%" }}
-          scrollPaddingTop={32}
-        >
-          <Focusable
+          <ScrollPanelGroup
             // @ts-ignore
-            focusableIfNoChildren={true}
-            onCancel={(_) => { closeModal(); }}
-            onCancelActionDescription="Go back to Store" >
-            <Panel focusable={true} noFocusRing={false} style={{ width: "100%" }}>
-              <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
-            </Panel>
-          </Focusable>
-        </ScrollPanelGroup>
-
+            focusable={false}
+            style={{ flex: 1, minHeight: 0, height: "200px", width: "100%" }}
+            scrollPaddingTop={32}
+          >
+            <Focusable
+              // @ts-ignore
+              focusableIfNoChildren={true}
+              onCancel={(_) => { closeModal(); }}
+              onCancelActionDescription="Go back to Store" >
+              <Focusable
+                // @ts-ignore
+                focusable={true}
+                noFocusRing={false} style={{ width: "100%" }}>
+                <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
+              </Focusable>
+            </Focusable>
+          </ScrollPanelGroup>
+        </PanelSection>
       </Focusable>
-    </PanelSection>
 
+    </>
   );
 }
 
