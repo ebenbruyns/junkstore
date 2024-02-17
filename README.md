@@ -8,12 +8,10 @@ This is a very simple plugin that builds it's content from a set of scripts.
 
 Everything is loaded from the init.json file. Once the actions are cached they frontend can call them using the ActionSet and the Action name.
 
-# Junk Store plugin [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
-[Junk Store Discord server](https://discord.gg/Dy7JUNc44A)
-
-[See it in action here!](https://www.youtube.com/watch?v=dzoQzM_xExU)
-
-This is a very simple plugin that builds its content from a set of scripts.
+## Known issues:
+1) If you face errors to do initial authorization in Epic make sure you did "Install dependencies". it's in "About" section of the plugin properties
+2) If game doesn't starts via "Play" button make sure to:
+   Select "Run exe in Game folder". Highlight suggested file. Press X to set game executable. Exit to native Steam's game properties in game mode. Select latest GE Proton version. Press "Play" button.
 
 ## Customizing Scripts
 
