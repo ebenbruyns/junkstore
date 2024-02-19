@@ -1,4 +1,4 @@
-import { Dropdown, Field, Focusable, Panel, PanelSection, ScrollPanelGroup, ServerAPI } from "decky-frontend-lib";
+import { Dropdown, Field, Focusable, ModalPosition, Panel, PanelSection, ScrollPanelGroup, ServerAPI } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import Logger from "./Utils/logger";
 import { LogFile } from "./Types/Types";
@@ -34,9 +34,10 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     };
 
     return (
-        <ScrollPanelGroup focusable={false} style={{ margin: "0px" }}>
-            <Panel style={{ background: "inherit" }}>
-
+        <ModalPosition>
+            <ScrollPanelGroup
+                // @ts-ignore
+                focusable={false} style={{ margin: "0px" }}>
                 <Focusable
 
 
@@ -87,7 +88,8 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
                 </Focusable>
 
-            </Panel>
-        </ScrollPanelGroup>
+
+            </ScrollPanelGroup>
+        </ModalPosition>
     );
 };

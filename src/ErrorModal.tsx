@@ -1,6 +1,6 @@
-import { PanelSection, ModalRoot } from "decky-frontend-lib";
+import { PanelSection, ModalRoot, Focusable, } from "decky-frontend-lib";
 import { VFC } from "react";
-import { Panel } from "./Components/Scrollable";
+// import { Panel } from "./Components/Scrollable";
 import { ErrorModalProps } from "./ConfEditor";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
 
@@ -16,12 +16,14 @@ export const ErrorModal: VFC<ErrorModalProps> = ({ Error, onCancel, onOK, onEscK
             bOKDisabled={bOKDisabled}
             closeModal={closeModal}
         >
-            <Panel focusable={true} noFocusRing={false}>
+            <Focusable
+                // @ts-ignore
+                focusable={true} noFocusRing={false}>
                 <PanelSection title="Error">
                     <ErrorDisplay error={Error} />
 
                 </PanelSection>
-            </Panel>
+            </Focusable>
         </ModalRoot>
     );
 };

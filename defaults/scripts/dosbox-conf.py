@@ -76,20 +76,24 @@ def main():
 
     args = parser.parse_args()
     database.create_tables(args.dbfile)
-    database.add_missing_config_sets("dos", args.dbfile)
+    # database.add_missing_config_sets("dos", args.dbfile)
     if args.parsejson:
         config_data = dosbox.read_json_from_stdin()
         print(database.parse_json_store_in_database(
             args.parsejson, args.forkname, args.version, args.platform, config_data, args.dbfile))
+
     if args.updatebats:
         batfiles = dosbox.read_json_from_stdin()
         print(dosbox.update_bat_files(args.dbfile, args.updatebats, batfiles))
+
     if args.conf:
         dosbox.write_config_file(
             args.conf, args.forkname, args.version, args.platform, args.dbfile)
+
     if args.confjson:
         print(database.get_config_json(
             args.confjson, args.forkname, args.version, args.platform, args.dbfile))
+
     if args.getgameswithimages:
         filter = ""
         urlencode = False
@@ -102,38 +106,49 @@ def main():
             needsLogin = args.getgameswithimages[4]
         print(dosbox.get_games_with_images(args.dbfile,
               args.getgameswithimages[0], filter, installed, isLimited, urlencode, needsLogin))
+
     if args.getgamedata:
         urlencode = False
         if (args.urlencode):
             urlencode = True
         print(dosbox.get_game_data(args.dbfile,
-              args.getgamedata[0], args.getgamedata[1], urlencode, args.forkfilter, args.versionfilter, args.platformfilter))
+              args.getgamedata[0], args.getgamedata[1], urlencode, args.platform, args.forkname, args.version))
+
     if args.addsteamclientid:
         dosbox.add_steam_client_id(
             args.addsteamclientid[0], args.addsteamclientid[1], args.dbfile)
         print(json.dumps({'Type': 'Success', 'Content': {'success': True}}))
+
     if args.clearsteamclientid:
         dosbox.clear_steam_client_id(args.clearsteamclientid[0], args.dbfile)
         print(json.dumps({'Type': 'Success', 'Content': {'success': True}}))
+
     if args.getzip:
         urlencode = False
         if (args.urlencode):
             urlencode = True
         print(dosbox.get_zip_for_shortname(
             args.getzip, args.dbfile, urlencode))
+
     if args.launchoptions:
         print(dosbox.get_lauch_options(args.launchoptions, args.dbfile))
+
     if args.writebatfiles:
         dosbox.write_bat_files(args.dbfile, args.writebatfiles)
+
     if args.getjsonbats:
         print(dosbox.get_json_bat_files(args.dbfile, args.getjsonbats))
+
     if args.getprogress:
         print(dosbox.get_last_progress_update(args.getprogress))
+
     if args.getsetting:
         print(dosbox.get_setting(args.dbfile, args.getsetting))
+
     if args.savesetting:
         print(dosbox.save_setting(args.dbfile,
               args.savesetting[0], args.savesetting[1]))
+
     if args.get_base64_images:
         urlencode = True
         if (args.urlencode):
@@ -143,6 +158,7 @@ def main():
         print(database.get_base64_images(
 
             args.get_base64_images[0], args.dbfile, args.get_base64_images[1], urlencode))
+
     if not any(vars(args).values()):
         parser.print_help()
 

@@ -176,7 +176,7 @@ def insert_data(db_file, games_list):
                         "INSERT INTO Images (GameID, ImagePath, FileName, SortOrder) VALUES (?, ?, ?, ?)", (game_id, image['url'], '', image['width']))
                 conn.commit()
             database.create_empty_config_set(
-                shortname, "Proton", "null", "Windows", conn)
+                shortname, "", "", "Proton", conn)
         except Exception as e:
             print(f"Error parsing metadata for game: {title} {e}")
 

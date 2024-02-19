@@ -1,4 +1,4 @@
-import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, Panel, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, ModalPosition, Navigation, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
@@ -197,112 +197,116 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                         title: "Support",
                         content: <>
                             <PanelSection>
-                                <ScrollPanelGroup
-                                    // @ts-ignore
-                                    focusable={false}
-                                    style={{ flex: 1, minHeight: 0, height: "200px", width: "100%" }}
-                                    scrollPaddingTop={32}
-                                >
-                                    <Focusable
+                                <ModalPosition>
+                                    <ScrollPanelGroup
                                         // @ts-ignore
-                                        focusableIfNoChildren={true} >
-                                        <Panel
+                                        focusable={false}
+                                        style={{ flex: 1, minHeight: 0, height: "200px", width: "100%", marginTop: "40px" }}
+                                        scrollPaddingTop={32}
+                                    >
+                                        <Focusable
                                             // @ts-ignore
-                                            focusable={true} noFocusRing={false} style={{ width: "100%" }}>
-
-
-                                            <div>
-
-                                                I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
-                                                <br />
-                                                <br />
-                                                There is quite a large vision for Junk Store and a lot that I would like to add, such as support for more stores, platforms, features, etc. Ultimately I would like to create a platform that allows anyone to create their own scripts and share them with the community. A platform that allows anyone to contribute settings and scripts for games and stores.
-                                                <br />
-                                                <br />
-
-                                                To test the waters and to try and gauge interest in something like this, the first part has been gifted to the community to help you get more out of your gaming collection and experience.
-                                                <br />
-                                                <br />
-
-                                                This is something I would like to continue adding to for your benefit, however as the saying goes 'time is money'. I would love to be able to work on this full time, however that is simply not possible without some form of income. To make my vision a reality, I would be grateful if you would consider contributing to the growth of Junk Store and this project.
-                                                <br />
-                                                <br />
-
-                                                If you like what I'm doing please consider supporting me. I have a Github Sponsors page. I have also arranged to accept donations in Bitcoin, Etherium and Monero as requested by some. If you would like to support me in other ways please contact me on Discord.
-
-                                                <br />
-                                                <br />
-                                            </div>
-                                        </Panel>
-                                    </Focusable>
-                                </ScrollPanelGroup>
-                                <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                                    {socialLinks.map((linkInfo, index) => (
-                                        <Field
-                                            key={index}
-                                            label={linkInfo.label}
-                                            icon={linkInfo.icon}
-                                            bottomSeparator={"none"}
-                                            padding={"none"}
+                                            focusableIfNoChildren={true}
                                         >
                                             <Focusable
-                                                style={{
-                                                    marginLeft: "auto",
-                                                    boxShadow: "none",
-                                                    display: "flex",
-                                                    justifyContent: "right",
-                                                    padding: "4px",
-                                                }}
-                                            >
-                                                <DialogButton
-                                                    onClick={() => {
-                                                        Navigation.NavigateToExternalWeb(linkInfo.link);
-                                                    }}
-                                                    style={{
-                                                        padding: "10px",
-                                                        fontSize: "14px",
-                                                    }}
-                                                >
-                                                    {linkInfo.buttonText}
-                                                </DialogButton>
-                                                <DialogButton
-                                                    onClick={() => {
-                                                        showQrModal(linkInfo.link);
-                                                    }}
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
-                                                        padding: "10px",
-                                                        maxWidth: "40px",
-                                                        minWidth: "auto",
-                                                        marginLeft: ".5em",
-                                                    }}
-                                                >
-                                                    <HiOutlineQrCode />
-                                                </DialogButton>
-                                            </Focusable>
-                                        </Field>
-                                    ))}
-                                </Focusable>
+                                                // @ts-ignore
 
+                                                focusable={true} noFocusRing={false} style={{ width: "100%" }}>
+
+
+                                                <div>
+
+                                                    I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
+                                                    <br />
+                                                    <br />
+                                                    There is quite a large vision for Junk Store and a lot that I would like to add, such as support for more stores, platforms, features, etc. Ultimately I would like to create a platform that allows anyone to create their own scripts and share them with the community. A platform that allows anyone to contribute settings and scripts for games and stores.
+                                                    <br />
+                                                    <br />
+
+                                                    To test the waters and to try and gauge interest in something like this, the first part has been gifted to the community to help you get more out of your gaming collection and experience.
+                                                    <br />
+                                                    <br />
+
+                                                    This is something I would like to continue adding to for your benefit, however as the saying goes 'time is money'. I would love to be able to work on this full time, however that is simply not possible without some form of income. To make my vision a reality, I would be grateful if you would consider contributing to the growth of Junk Store and this project.
+                                                    <br />
+                                                    <br />
+
+                                                    If you like what I'm doing please consider supporting me. I have a Github Sponsors page. I have also arranged to accept donations in Bitcoin, Etherium and Monero as requested by some. If you would like to support me in other ways please contact me on Discord.
+
+                                                    <br />
+                                                    <br />
+                                                </div>
+                                            </Focusable>
+                                        </Focusable>
+                                    </ScrollPanelGroup>
+
+                                    <Focusable style={{ display: "flex", flexDirection: "column" }}>
+                                        {socialLinks.map((linkInfo, index) => (
+                                            <Field
+                                                key={index}
+                                                label={linkInfo.label}
+                                                icon={linkInfo.icon}
+                                                bottomSeparator={"none"}
+                                                padding={"none"}
+                                            >
+                                                <Focusable
+                                                    style={{
+                                                        marginLeft: "auto",
+                                                        boxShadow: "none",
+                                                        display: "flex",
+                                                        justifyContent: "right",
+                                                        padding: "4px",
+                                                    }}
+                                                >
+                                                    <DialogButton
+                                                        onClick={() => {
+                                                            Navigation.NavigateToExternalWeb(linkInfo.link);
+                                                        }}
+                                                        style={{
+                                                            padding: "10px",
+                                                            fontSize: "14px",
+                                                        }}
+                                                    >
+                                                        {linkInfo.buttonText}
+                                                    </DialogButton>
+                                                    <DialogButton
+                                                        onClick={() => {
+                                                            showQrModal(linkInfo.link);
+                                                        }}
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            padding: "10px",
+                                                            maxWidth: "40px",
+                                                            minWidth: "auto",
+                                                            marginLeft: ".5em",
+                                                        }}
+                                                    >
+                                                        <HiOutlineQrCode />
+                                                    </DialogButton>
+                                                </Focusable>
+                                            </Field>
+                                        ))}
+                                    </Focusable>
+                                </ModalPosition>
                             </PanelSection>
                         </>
                     },
                     {
                         title: "About",
                         content: <>
-                            <PanelSection>
-                                <ScrollPanelGroup
-                                    // @ts-ignore
-                                    focusable={false}
-                                    style={{ flex: 1, minHeight: 0, height: "calc(100%-40px)", width: "100%" }}
-                                    scrollPaddingTop={32}
-                                >
-                                    <Focusable
+                            <ModalPosition>
+                                <PanelSection>
+                                    <ScrollPanelGroup
                                         // @ts-ignore
-                                        focusableIfNoChildren={true} >
-                                        <Panel
+                                        focusable={false}
+                                        style={{ flex: 1, minHeight: 0, height: "calc(100%-80px)", width: "100%", marginTop: "40px" }}
+                                        scrollPaddingTop={32}
+                                    >
+                                        <Focusable
+                                            // @ts-ignore
+                                            focusableIfNoChildren={true}
                                             // @ts-ignore
                                             focusable={true} noFocusRing={false} style={{ width: "100%" }}>
                                             <div>
@@ -326,11 +330,12 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                                     <li>Logan (Beebles) - UI Developer</li>
                                                 </ul>
                                             </div>
-                                        </Panel>
-                                    </Focusable>
-                                </ScrollPanelGroup>
-                            </PanelSection>
 
+                                        </Focusable>
+                                    </ScrollPanelGroup>
+
+                                </PanelSection>
+                            </ModalPosition>
                         </>
                     },
                     {
@@ -342,7 +347,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     showTitle
 
                 />
-            </DialogControlsSection>
+            </DialogControlsSection >
         </DialogBody >
     );
 };

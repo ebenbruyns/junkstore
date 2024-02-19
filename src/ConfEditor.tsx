@@ -1,11 +1,11 @@
 import {
     Focusable,
-    PanelSection, Dropdown, ModalRoot, ModalRootProps
+    PanelSection, Dropdown, ModalRoot, ModalRootProps, ScrollPanelGroup, ModalPosition
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
 import { SectionEditor } from "./Components/SectionEditor";
-import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
+// import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
@@ -82,128 +82,137 @@ export const ConfEditor: VFC<EditorProperties> = ({
                 {`
             .GenericConfirmDialog {
                 width: 100% !important;
+                height: 100% !important;
             }
         `} </style>
             <ModalRoot>
 
-
-                <ScrollPanelGroup focusable={false}>
-                    <Panel style={{ background: "inherit" }}>
-                        <Focusable style={{ display: "flex", marginTop: "0px" }}>
-                            <Focusable
-                                style={{
-                                    flex: "1",
-                                }}
-                                onSecondaryActionDescription="Save config"
-                                onSecondaryButton={async (_) => {
-                                    logger.log("Saving config: ", confData)
-                                    const result = await executeAction(serverAPI,
-                                        actionSetName,
-                                        "SaveContent",
-                                        {
-                                            content_id: contentId,
-                                            inputData: confData
-                                        });
-                                    logger.log("Save result: ", result)
-                                    //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                                    closeModal();
-                                }}
-                                onCancel={(_) => {
-                                    closeModal();
-                                    //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                                }}
-                                onCancelActionDescription="Go back to Game Details"
-                            >
-                                <PanelSection title={"Configuration: "}>
-                                    <Dropdown
-                                        rgOptions={[
-                                            { data: 0, label: "Basic" },
-                                            { data: 1, label: "Advanced" },
-                                            { data: 2, label: "Expert" },
-                                            { data: 3, label: "All" },
-                                        ]}
-                                        onChange={(e) => {
-                                            setModeLevel(e.data);
-                                        }}
-                                        selectedOption={modeLevel} />
-                                    {confData.Sections?.map((section) => {
-                                        if (section && modeLevel >= section.ModeLevel)
-                                            return (
-                                                <SectionEditor
-                                                    key={section.Name}
-                                                    section={section}
-                                                    modeLevel={modeLevel}
-                                                    onChange={(updatedSection) => handleSectionChange(updatedSection)}
-                                                    updateHelpText={(field: KeyValuePair) => {
-                                                        updateHelpText(field);
-                                                        setSectionHelpText(section.Description);
-
-                                                    }} />
-                                            );
-                                        else
-                                            return null;
-                                    })}
-                                </PanelSection>
-                                {confData.AutoexecEnabled !== undefined && confData.AutoexecEnabled == true && (
-                                    <PanelSection title="[Autoexec]">
-                                        <Focusable
-                                            // @ts-ignore
-                                            focusableIfNoChildren={true}
-                                            noFocusRing={true}
-                                            onFocusCapture={() => {
-                                                if (focusRef && focusRef.current != null)
-                                                    // @ts-ignore
-                                                    focusRef.current.focus();
+                <ModalPosition>
+                    <ScrollPanelGroup
+                        // @ts-ignore
+                        focusable={false}>
+                        <Focusable
+                            // @ts-ignore
+                            style={{ background: "inherit", height: "700px" }}>
+                            <Focusable style={{ display: "flex", marginTop: "0px" }}>
+                                <Focusable
+                                    style={{
+                                        flex: "1",
+                                    }}
+                                    onSecondaryActionDescription="Save config"
+                                    onSecondaryButton={async (_) => {
+                                        logger.log("Saving config: ", confData)
+                                        const result = await executeAction(serverAPI,
+                                            actionSetName,
+                                            "SaveContent",
+                                            {
+                                                content_id: contentId,
+                                                inputData: confData
+                                            });
+                                        logger.log("Save result: ", result)
+                                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
+                                        closeModal();
+                                    }}
+                                    onCancel={(_) => {
+                                        closeModal();
+                                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
+                                    }}
+                                    onCancelActionDescription="Go back to Game Details"
+                                >
+                                    <PanelSection title={"Configuration: "}>
+                                        <Dropdown
+                                            rgOptions={[
+                                                { data: 0, label: "Basic" },
+                                                { data: 1, label: "Advanced" },
+                                                { data: 2, label: "Expert" },
+                                                { data: 3, label: "All" },
+                                            ]}
+                                            onChange={(e) => {
+                                                setModeLevel(e.data);
                                             }}
-                                            onOKButton={() => { }}
-                                        >
+                                            selectedOption={modeLevel} />
+                                        {confData.Sections?.map((section) => {
+                                            if (section && modeLevel >= section.ModeLevel)
+                                                return (
+                                                    <SectionEditor
+                                                        key={section.Name}
+                                                        section={section}
+                                                        modeLevel={modeLevel}
+                                                        onChange={(updatedSection) => handleSectionChange(updatedSection)}
+                                                        updateHelpText={(field: KeyValuePair) => {
+                                                            updateHelpText(field);
+                                                            setSectionHelpText(section.Description);
 
-                                            <textarea
-                                                className=""
-                                                ref={focusRef}
-                                                style={{ width: "100%", height: "200px" }}
-                                                value={confData.Autoexec}
-                                                onChange={(e) => {
-                                                    setConfData({ ...confData, Autoexec: e.target.value });
-                                                }} />
-                                        </Focusable>
+                                                        }} />
+                                                );
+                                            else
+                                                return null;
+                                        })}
                                     </PanelSection>
-                                )}
-                            </Focusable>
-                            <Focusable
-                                focusWithinClassName="gpfocuswithin"
-                                onActivate={() => {
-                                    // WIP
-                                    // showModal(
-                                    //   <DetailsModal
-                                    //     sectionHelpText={sectionHelpText}
-                                    //     helpText={helpText}
-                                    //   />
-                                    // );
-                                }}
-                                style={{
-                                    flex: 1,
-                                    minHeight: 0,
-                                    marginRight: "20px",
-                                    position: "sticky",
-                                    height: "fit-content",
-                                    top: "40px",
-                                }}
-                            >
-                                <Panel focusable={true} noFocusRing={false}>
-                                    <div>{sectionHelpText}</div>
-                                    <div>{helpText.Description}</div>
-                                    {helpText.EnumValues &&
-                                        helpText.EnumValues.map((enumValue) => (
-                                            <div>
-                                                {enumValue.Key} {enumValue.Description}
-                                            </div>
-                                        ))}
-                                </Panel>
+                                    {confData.AutoexecEnabled && confData.Autoexec && (
+                                        <PanelSection title="[Autoexec]">
+                                            <Focusable
+                                                // @ts-ignore
+                                                focusableIfNoChildren={true}
+                                                noFocusRing={true}
+                                                onFocusCapture={() => {
+                                                    if (focusRef && focusRef.current != null)
+                                                        // @ts-ignore
+                                                        focusRef.current.focus();
+                                                }}
+                                                onOKButton={() => { }}
+                                            >
+
+                                                <textarea
+                                                    className=""
+                                                    ref={focusRef}
+                                                    style={{ width: "100%", height: "200px" }}
+                                                    value={confData.Autoexec}
+                                                    onChange={(e) => {
+                                                        setConfData({ ...confData, Autoexec: e.target.value });
+                                                    }} />
+                                            </Focusable>
+                                        </PanelSection>
+                                    )}
+                                </Focusable>
+                                <Focusable
+                                    focusWithinClassName="gpfocuswithin"
+                                    onActivate={() => {
+                                        // WIP
+                                        // showModal(
+                                        //   <DetailsModal
+                                        //     sectionHelpText={sectionHelpText}
+                                        //     helpText={helpText}
+                                        //   />
+                                        // );
+                                    }}
+                                    style={{
+                                        flex: 1,
+                                        minHeight: 0,
+                                        marginRight: "20px",
+                                        position: "sticky",
+                                        height: "fit-content",
+                                        top: "40px",
+                                    }}
+                                >
+                                    <Focusable
+                                        // @ts-ignore
+                                        focusable={true}
+                                        noFocusRing={false}>
+                                        <div>{sectionHelpText}</div>
+                                        <div>{helpText.Description}</div>
+                                        {helpText.EnumValues &&
+                                            helpText.EnumValues.map((enumValue) => (
+                                                <div>
+                                                    {enumValue.Key} {enumValue.Description}
+                                                </div>
+                                            ))}
+                                    </Focusable>
+                                </Focusable>
                             </Focusable>
                         </Focusable>
-                    </Panel>
-                </ScrollPanelGroup>
+                    </ScrollPanelGroup>
+                </ModalPosition>
             </ModalRoot>
         </>
     );

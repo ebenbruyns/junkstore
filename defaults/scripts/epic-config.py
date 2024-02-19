@@ -61,7 +61,7 @@ def main():
         print(epic.get_login_status(args.offline))
     if args.get_env_settings:
         result = json.loads(database.get_config_json(
-            [args.get_env_settings], "Proton", "null", "Windows", args.dbfile))
+            [args.get_env_settings], "", "", "Proton", args.dbfile))
         print(database.generate_bash_env_settings(
             json.dumps(result['Content'])))
     if args.generate_env_settings_json:

@@ -13,7 +13,7 @@ if [[ "${PLATFORM}" == "Epic" ]]; then
 fi
 
 function Epic_init() {
-    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE > /dev/null
+    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE #> /dev/null
 }
 function Epic_getgames(){
     if [ -z "${1}" ]; then
@@ -37,10 +37,10 @@ function Epic_getgames(){
     echo $TEMP
 }
 function Epic_saveconfig(){
-    cat | $DOSCONF --parsejson "${1}" --dbfile $DBFILE --platform Windows --fork Proton --version null
+    cat | $DOSCONF --parsejson "${1}" --dbfile $DBFILE --platform Proton --fork "" --version "" --dbfile $DBFILE
 }
 function Epic_getconfig(){
-    TEMP=$($DOSCONF --confjson "${1}" --platform Windows --fork Proton --version null --dbfile $DBFILE)
+    TEMP=$($DOSCONF --confjson "${1}" --platform Proton --fork "" --version "" --dbfile $DBFILE)
     echo $TEMP
 }
 
@@ -156,7 +156,7 @@ function Epic_uninstall(){
 }
 function Epic_getgamedetails(){
     IMAGE_PATH=""
-    TEMP=$($DOSCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE)
+    TEMP=$($DOSCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE --forkname "Proton" --version "null" --platform "Windows")
     echo $TEMP
     exit 0
 }

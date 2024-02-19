@@ -176,7 +176,7 @@ def display_game_details(game_data):
     return html
 
 
-def get_editors(db_file, shortname, forkfilter=None, versionfilter=None, platformfilter=None):
+def get_editors(db_file, shortname, platform, forkname, version):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     c.execute("SELECT ID FROM Game WHERE ShortName=?", (shortname,))
@@ -188,16 +188,13 @@ def get_editors(db_file, shortname, forkfilter=None, versionfilter=None, platfor
     #                 'Title': 'Runner',
     #                 'Description': 'Configures the runner to use with the launcher',
     #                 'ContentId': shortname}]
-    filter = ""
-    if forkfilter != None:
-        filter = f" AND (forkname = '{forkfilter}' or forkname = '')"
-    if versionfilter != None:
-        filter = f" AND (version = '{versionfilter}' or version = '')"
-    if platformfilter != None:
-        filter = f" AND (platform = '{platformfilter}' or platform ='') and platform = 'dos'"
 
-    c.execute(
-        f"SELECT ID, platform, forkname, version FROM Config_Set WHERE ShortName=? {filter}", (shortname,))
+    c.execute("""SELECT config_set.id, config_set.platform, config_set.forkname, config_set.version from config_Set
+                WHERE config_set.ShortName = ? AND (config_set.forkname = '' or config_set.forkname = ?) AND 
+                (config_set.version = '' or config_set.version = ?) AND 
+                (config_set.platform = '' or config_set.platform = ?)
+                order by config_set.platform desc, config_set.forkname desc, config_set.version desc
+                LIMIT 1""", (shortname, forkname, version, platform,))
 
     for row in c.fetchall():
         platform = row[1]
@@ -229,7 +226,7 @@ def get_editors(db_file, shortname, forkfilter=None, versionfilter=None, platfor
     return editors
 
 
-def get_game_data(db_file, shortname, image_prefix, urlencode, forkfilter=None, versionfilter=None, platformfilter=None):
+def get_game_data(db_file, shortname, image_prefix, urlencode, platform, forkname, version):
     conn = sqlite3.connect(db_file)
 
     c = conn.cursor()
@@ -291,10 +288,10 @@ def get_game_data(db_file, shortname, image_prefix, urlencode, forkfilter=None, 
             'ShortName': shortname,
             'HasDosConfig': False,
             'HasBatFiles': False,
-            'Editors': get_editors(db_file, shortname, forkfilter, versionfilter, platformfilter)
+            'Editors': get_editors(db_file, shortname, platform, forkname, version)
         }
         result['Images'] = image_files
-        return json.dumps({'Type': 'GameDetails', 'Content':  result})
+        return json.dumps({'Type': 'GameDetails', 'Content':  result}, indent=2)
     else:
         return None
 
