@@ -184,7 +184,7 @@ function disable-eos-overlay(){
 
 function export_env_variables() {
     while read -r line; do
-        echo $line
+        export $line
     done <<< $STEAM_ENV
 }
 
