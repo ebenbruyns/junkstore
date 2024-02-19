@@ -81,7 +81,7 @@ def main():
         config_data = dosbox.read_json_from_stdin()
         print(database.parse_json_store_in_database(
             args.parsejson, args.forkname, args.version, args.platform, config_data, args.dbfile))
-
+        
     if args.updatebats:
         batfiles = dosbox.read_json_from_stdin()
         print(dosbox.update_bat_files(args.dbfile, args.updatebats, batfiles))
@@ -89,11 +89,11 @@ def main():
     if args.conf:
         dosbox.write_config_file(
             args.conf, args.forkname, args.version, args.platform, args.dbfile)
-
+        
     if args.confjson:
         print(database.get_config_json(
             args.confjson, args.forkname, args.version, args.platform, args.dbfile))
-
+        
     if args.getgameswithimages:
         filter = ""
         urlencode = False
@@ -106,14 +106,14 @@ def main():
             needsLogin = args.getgameswithimages[4]
         print(dosbox.get_games_with_images(args.dbfile,
               args.getgameswithimages[0], filter, installed, isLimited, urlencode, needsLogin))
-
+        
     if args.getgamedata:
         urlencode = False
         if (args.urlencode):
             urlencode = True
         print(dosbox.get_game_data(args.dbfile,
               args.getgamedata[0], args.getgamedata[1], urlencode, args.platform, args.forkname, args.version))
-
+        
     if args.addsteamclientid:
         dosbox.add_steam_client_id(
             args.addsteamclientid[0], args.addsteamclientid[1], args.dbfile)
@@ -129,7 +129,7 @@ def main():
             urlencode = True
         print(dosbox.get_zip_for_shortname(
             args.getzip, args.dbfile, urlencode))
-
+        
     if args.launchoptions:
         print(dosbox.get_lauch_options(args.launchoptions, args.dbfile))
 
@@ -148,7 +148,7 @@ def main():
     if args.savesetting:
         print(dosbox.save_setting(args.dbfile,
               args.savesetting[0], args.savesetting[1]))
-
+        
     if args.get_base64_images:
         urlencode = True
         if (args.urlencode):
@@ -157,7 +157,7 @@ def main():
             urlencode = False
         print(database.get_base64_images(
             args.get_base64_images[0], args.dbfile, args.get_base64_images[1], urlencode))
-
+        
     if not any(vars(args).values()):
         parser.print_help()
 

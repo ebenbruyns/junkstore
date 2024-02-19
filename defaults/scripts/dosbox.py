@@ -182,12 +182,6 @@ def get_editors(db_file, shortname, platform, forkname, version):
     c.execute("SELECT ID FROM Game WHERE ShortName=?", (shortname,))
     game_id = c.fetchone()[0]
     editors = []
-    # if game_id:
-    #     editors = [{'Type': 'IniEditor',
-    #                 'InitActionId': 'GetRunnerConfigActions',
-    #                 'Title': 'Runner',
-    #                 'Description': 'Configures the runner to use with the launcher',
-    #                 'ContentId': shortname}]
 
     c.execute("""SELECT config_set.id, config_set.platform, config_set.forkname, config_set.version from config_Set
                 WHERE config_set.ShortName = ? AND (config_set.forkname = '' or config_set.forkname = ?) AND 
