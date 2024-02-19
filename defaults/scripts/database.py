@@ -80,11 +80,13 @@ def get_config(shortnames, forkname, version, platform, db_file):
     autoexec_text = ""
     id = 0
     for shortname in shortnames:
-        c.execute("""SELECT config_set.id from config_Set
+        select_config_query = """SELECT config_set.id from config_Set
                 WHERE config_set.ShortName = ? AND (config_set.forkname = '' or config_set.forkname = ?) AND 
                 (config_set.version = '' or config_set.version = ?) AND 
                 (config_set.platform = '' or config_set.platform = ?)
-                order by config_set.platform desc, config_set.forkname desc, config_set.version desc""", (shortname, forkname, version, platform))
+                order by config_set.platform desc, config_set.forkname desc, config_set.version desc"""
+
+        c.execute(select_config_query, (shortname, forkname, version, platform))
         row = c.fetchone()
         id = row[0]
         c.execute(

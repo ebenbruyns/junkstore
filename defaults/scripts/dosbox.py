@@ -205,6 +205,7 @@ def get_editors(db_file, shortname, platform, forkname, version):
             title = "Proton config"
         if (platform == "dos"):
             title = "Dosbox config"
+
         editors.append({
             'Type': 'IniEditor',
             'InitActionId': 'GetDosboxConfigFileActions',

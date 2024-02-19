@@ -156,7 +156,6 @@ def main():
         else:
             urlencode = False
         print(database.get_base64_images(
-
             args.get_base64_images[0], args.dbfile, args.get_base64_images[1], urlencode))
 
     if not any(vars(args).values()):

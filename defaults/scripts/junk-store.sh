@@ -39,10 +39,10 @@ done
 
 # Check if the PLATFORM is in the list of strings
 if [[ " ${PLATFORMS[@]} " =~ " ${1} " ]]; then
-    PLATFORM=$1
+    export PLATFORM=$1
     shift  # Remove the first argument from the argument list
 else
-    PLATFORM=""
+    export PLATFORM=""
 fi
 
 # List of actions that can be performed by the junk-store.sh script
