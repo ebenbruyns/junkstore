@@ -38,6 +38,7 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
       {games.map((game: GameData) => (
         <div style={{ width: "118px", height: "210px", overflow: "clip" }}>
           <GameImage
+            className={'libraryassetimage_Image_24_Au'}
             key={game.ID}
             src={game.Images.length > 0 ? game.Images[0] : ""}
             alt={game.Name}

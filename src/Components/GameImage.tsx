@@ -15,7 +15,7 @@ function GameImage(props) {
       onOKActionDescription="Show details"
 
     >
-      <img style={{ width: "100%", height: "100%" }} src={props.src} alt={props.src}></img>
+      <img style={{ width: "100%", height: "100%" }} className={props.className} src={props.src} alt={props.src}></img>
     </Focusable>
   );
 }
