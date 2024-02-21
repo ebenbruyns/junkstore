@@ -1,10 +1,11 @@
-import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, ModalPosition, Navigation, PanelSection, ScrollPanelGroup, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, PanelSection, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiDiscord, SiElsevier, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
+import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
 import { LogViewer } from "./LogViewer";
+import { ScrollableWindowRelative } from './ScrollableWindow';
 
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
@@ -196,147 +197,123 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     {
                         title: "Support",
                         content: <>
-                            <PanelSection>
-                                <ModalPosition>
-                                    <ScrollPanelGroup
-                                        // @ts-ignore
-                                        focusable={false}
-                                        style={{ flex: 1, minHeight: 0, height: "200px", width: "100%", marginTop: "40px" }}
-                                        scrollPaddingTop={32}
-                                    >
-                                        <Focusable
-                                            // @ts-ignore
-                                            focusableIfNoChildren={true}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flex: 'auto',
+                                    flexDirection: 'column',
+                                    gap: '10px'
+                                }}>
+                                <div style={{ padding: '0 15px', flex: 'auto', display: 'flex' }}>
+                                    <ScrollableWindowRelative>
+                                        <div style={{ padding: '5px 0' }}>
+
+                                            I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
+                                            <br />
+                                            <br />
+                                            There is quite a large vision for Junk Store and a lot that I would like to add, such as support for more stores, platforms, features, etc. Ultimately I would like to create a platform that allows anyone to create their own scripts and share them with the community. A platform that allows anyone to contribute settings and scripts for games and stores.
+                                            <br />
+                                            <br />
+
+                                            To test the waters and to try and gauge interest in something like this, the first part has been gifted to the community to help you get more out of your gaming collection and experience.
+                                            <br />
+                                            <br />
+
+                                            This is something I would like to continue adding to for your benefit, however as the saying goes 'time is money'. I would love to be able to work on this full time, however that is simply not possible without some form of income. To make my vision a reality, I would be grateful if you would consider contributing to the growth of Junk Store and this project.
+                                            <br />
+                                            <br />
+
+                                            If you like what I'm doing please consider supporting me. I have a Github Sponsors page. I have also arranged to accept donations in Bitcoin, Etherium and Monero as requested by some. If you would like to support me in other ways please contact me on Discord.
+
+                                            <br />
+                                            <br />
+                                        </div>
+                                    </ScrollableWindowRelative>
+                                </div>
+                                <Focusable style={{ display: "flex", flexDirection: "column" }}>
+                                    {socialLinks.map((linkInfo, index) => (
+                                        <Field
+                                            key={index}
+                                            label={linkInfo.label}
+                                            icon={linkInfo.icon}
+                                            bottomSeparator={"none"}
+                                            padding={"none"}
+                                            indentLevel={1}
                                         >
                                             <Focusable
-                                                // @ts-ignore
-
-                                                focusable={true} noFocusRing={false} style={{ width: "100%" }}>
-
-
-                                                <div>
-
-                                                    I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
-                                                    <br />
-                                                    <br />
-                                                    There is quite a large vision for Junk Store and a lot that I would like to add, such as support for more stores, platforms, features, etc. Ultimately I would like to create a platform that allows anyone to create their own scripts and share them with the community. A platform that allows anyone to contribute settings and scripts for games and stores.
-                                                    <br />
-                                                    <br />
-
-                                                    To test the waters and to try and gauge interest in something like this, the first part has been gifted to the community to help you get more out of your gaming collection and experience.
-                                                    <br />
-                                                    <br />
-
-                                                    This is something I would like to continue adding to for your benefit, however as the saying goes 'time is money'. I would love to be able to work on this full time, however that is simply not possible without some form of income. To make my vision a reality, I would be grateful if you would consider contributing to the growth of Junk Store and this project.
-                                                    <br />
-                                                    <br />
-
-                                                    If you like what I'm doing please consider supporting me. I have a Github Sponsors page. I have also arranged to accept donations in Bitcoin, Etherium and Monero as requested by some. If you would like to support me in other ways please contact me on Discord.
-
-                                                    <br />
-                                                    <br />
-                                                </div>
-                                            </Focusable>
-                                        </Focusable>
-                                    </ScrollPanelGroup>
-
-                                    <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                                        {socialLinks.map((linkInfo, index) => (
-                                            <Field
-                                                key={index}
-                                                label={linkInfo.label}
-                                                icon={linkInfo.icon}
-                                                bottomSeparator={"none"}
-                                                padding={"none"}
+                                                style={{
+                                                    marginLeft: "auto",
+                                                    boxShadow: "none",
+                                                    display: "flex",
+                                                    justifyContent: "right",
+                                                    padding: "4px",
+                                                }}
                                             >
-                                                <Focusable
+                                                <DialogButton
+                                                    onClick={() => {
+                                                        Navigation.NavigateToExternalWeb(linkInfo.link);
+                                                    }}
                                                     style={{
-                                                        marginLeft: "auto",
-                                                        boxShadow: "none",
-                                                        display: "flex",
-                                                        justifyContent: "right",
-                                                        padding: "4px",
+                                                        padding: "10px",
+                                                        fontSize: "14px",
                                                     }}
                                                 >
-                                                    <DialogButton
-                                                        onClick={() => {
-                                                            Navigation.NavigateToExternalWeb(linkInfo.link);
-                                                        }}
-                                                        style={{
-                                                            padding: "10px",
-                                                            fontSize: "14px",
-                                                        }}
-                                                    >
-                                                        {linkInfo.buttonText}
-                                                    </DialogButton>
-                                                    <DialogButton
-                                                        onClick={() => {
-                                                            showQrModal(linkInfo.link);
-                                                        }}
-                                                        style={{
-                                                            display: "flex",
-                                                            justifyContent: "center",
-                                                            alignItems: "center",
-                                                            padding: "10px",
-                                                            maxWidth: "40px",
-                                                            minWidth: "auto",
-                                                            marginLeft: ".5em",
-                                                        }}
-                                                    >
-                                                        <HiOutlineQrCode />
-                                                    </DialogButton>
-                                                </Focusable>
-                                            </Field>
-                                        ))}
-                                    </Focusable>
-                                </ModalPosition>
-                            </PanelSection>
+                                                    {linkInfo.buttonText}
+                                                </DialogButton>
+                                                <DialogButton
+                                                    onClick={() => {
+                                                        showQrModal(linkInfo.link);
+                                                    }}
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        padding: "10px",
+                                                        maxWidth: "40px",
+                                                        minWidth: "auto",
+                                                        marginLeft: ".5em",
+                                                    }}
+                                                >
+                                                    <HiOutlineQrCode />
+                                                </DialogButton>
+                                            </Focusable>
+                                        </Field>
+                                    ))}
+                                </Focusable>
+                            </div>
                         </>
                     },
                     {
                         title: "About",
-                        content: <>
-                            <ModalPosition>
-                                <PanelSection>
-                                    <ScrollPanelGroup
-                                        // @ts-ignore
-                                        focusable={false}
-                                        style={{ flex: 1, minHeight: 0, height: "calc(100%-80px)", width: "100%", marginTop: "40px" }}
-                                        scrollPaddingTop={32}
-                                    >
-                                        <Focusable
-                                            // @ts-ignore
-                                            focusableIfNoChildren={true}
-                                            // @ts-ignore
-                                            focusable={true} noFocusRing={false} style={{ width: "100%" }}>
-                                            <div>
-                                                Junk Store was born out of neccessity. I wanted a way to quickly and easily install and update games not
-                                                available on Steam. I also wanted to be able to install games from other stores like GOG and Epic Games.
-                                                <br />
-                                                <br />
-                                                It all started with DOS games but quickly grew to something more generic. If you can feed the plugin the relevant
-                                                information it can install it.
-                                                <br />
-                                                <br />
-                                                I hope you enjoy it.
-                                                <br />
-                                                <br />
-                                                P.S. If you want to contribute to the project please contact me on Discord.
-                                                <br />
-                                                <br />
-                                                <h2>Contributors</h2>
-                                                <ul>
-                                                    <li>Eben Bruyns - Main Developer</li>
-                                                    <li>Logan (Beebles) - UI Developer</li>
-                                                </ul>
-                                            </div>
-
-                                        </Focusable>
-                                    </ScrollPanelGroup>
-
-                                </PanelSection>
-                            </ModalPosition>
-                        </>
+                        content: (
+                            <div style={{ padding: '0 15px', height: '100%', display: 'flex' }}>
+                                <ScrollableWindowRelative>
+                                    <div style={{ padding: '5px 0' }}>
+                                        <div>
+                                            Junk Store was born out of neccessity. I wanted a way to quickly and easily install and update games not
+                                            available on Steam. I also wanted to be able to install games from other stores like GOG and Epic Games.
+                                            <br />
+                                            <br />
+                                            It all started with DOS games but quickly grew to something more generic. If you can feed the plugin the relevant
+                                            information it can install it.
+                                            <br />
+                                            <br />
+                                            I hope you enjoy it.
+                                            <br />
+                                            <br />
+                                            P.S. If you want to contribute to the project please contact me on Discord.
+                                            <br />
+                                            <br />
+                                            <h2>Contributors</h2>
+                                            <ul>
+                                                <li>Eben Bruyns - Main Developer</li>
+                                                <li>Logan (Beebles) - UI Developer</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </ScrollableWindowRelative>
+                            </div>
+                        )
                     },
                     {
                         title: "Logs",
