@@ -183,12 +183,10 @@ function disable-eos-overlay(){
 }
 
 function export_env_variables() {
-    for LINE in $STEAM_ENV; do
-        export $LINE
-    done
-
-    
- }
+    while read -r line; do
+        export $line
+    done <<< $STEAM_ENV
+}
 
 function get_steam_env() {
     # limiting the list at the moment, but it might be required to use all the env vars in steam, TBD
