@@ -10,7 +10,7 @@ import {
   showModal,
   ServerAPI,
   ScrollPanelGroup,
-  ModalPosition,
+
 
 } from "decky-frontend-lib";
 // import { Panel, ScrollPanelGroup } from "./Scrollable";
@@ -43,6 +43,7 @@ interface GameDisplayProperties {
   updater: () => void;
   scriptRunner: (actionSet: string, actionId: string, args: any) => void;
   clearActiveGame: () => void;
+  reloadData: () => void;
 }
 
 //@ts-ignore
@@ -68,7 +69,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     actions,
     resetLaunchOptions,
     scriptRunner,
-    clearActiveGame
+    clearActiveGame,
+    reloadData
   }
 ) => {
   const logger = new Logger("GameDisplay");
@@ -81,9 +83,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
           return <MenuItem onSelected={
             () => {
               if (editor.Type == "IniEditor")
-                showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />);
+                showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} refreshParent={reloadData} />);
               if (editor.Type == "FileEditor")
-                showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} />)
+                showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} refreshParent={reloadData} />)
 
             }
           }>{editor.Title}</MenuItem>
@@ -102,7 +104,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
             () => {
 
               logger.debug("show exe list")
-              showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} />)
+              showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} refreshParent={reloadData} />)
 
             }
           }>Run exe in Game folder</MenuItem>}
@@ -200,7 +202,13 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         <Focusable
           // @ts-ignore
           focusable={true}
-          noFocusRing={false} e style={{ display: "flex", flexDirection: "column", overflow: "scroll" }} >
+          noFocusRing={true} e style={{ display: "flex", flexDirection: "column", overflow: "scroll" }}
+        // onCancel={(_) => {
+        //   clearActiveGame();
+        //   closeModal();
+        // }}
+        // onCancelActionDescription="Go back to Store"
+        >
           {/* <div
                 // @ts-ignore
                 style={{ whiteSpace: "nowrap", overflowX: "scroll" }} > */}
@@ -236,6 +244,11 @@ const GameDisplay: VFC<GameDisplayProperties> = (
               marginRight: "1em",
               marginTop: "1em"
             }}
+          // onCancel={(_) => {
+          //   clearActiveGame();
+          //   closeModal();
+          // }}
+          // onCancelActionDescription="Go back to Store"
           >
 
             {steamClientID == "" && !installing && (
@@ -358,14 +371,17 @@ const GameDisplay: VFC<GameDisplayProperties> = (
             <Focusable
               // @ts-ignore
               focusableIfNoChildren={true}
-              onCancel={(_) => { closeModal(); }}
-              onCancelActionDescription="Go back to Store" >
-              <Focusable
-                // @ts-ignore
-                focusable={true}
-                noFocusRing={false} style={{ width: "100%" }}>
-                <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
-              </Focusable>
+              onCancel={(_) => {
+                clearActiveGame();
+                closeModal();
+              }}
+              onCancelActionDescription="Go back to Store"
+
+              // @ts-ignore
+              focusable={true}
+              noFocusRing={false} style={{ width: "100%" }}>
+              <div style={{ width: "100%" }} dangerouslySetInnerHTML={{ __html: description }} />
+
             </Focusable>
           </ScrollPanelGroup>
         </PanelSection>

@@ -261,7 +261,7 @@ class Plugin:
                 inputData = json.dumps(inputData)
 
             result = await Helper.execute_action(actionSet, actionName, *args, *kwargs.values(), input_data=inputData, game_id=gameId, app_id=appId)
-            # decky_plugin.logger.info(f"execute_action result: {result}")
+            decky_plugin.logger.info(f"execute_action result: {result}")
             return result
         except Exception as e:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
@@ -341,44 +341,6 @@ class Plugin:
 
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")
-
-    # async def AntiCheatInstaller(self, GameName):
-    #     try:
-    #         decky_plugin.logger.info("Installing Anti Cheat")
-    #         env = {
-    #             "STEAM_COMPAT_CLIENT_INSTALL_PATH": "/home/eben/Games/FallGuys",
-    #             "STEAM_COMPAT_DATA_PATH": "/home/eben/.local/share/Steam/steamapps/compatdata/3598223863",
-    #             "WAYLAND_DISPLAY": "wayland-0",
-    #             "XDG_CONFIG_DIRS": "/home/eben/.config/kdedefaults:/etc/xdg",
-    #             "XDG_SESSION_PATH": "/org/freedesktop/DisplayManager/Session1",
-    #             "KDE_FULL_SESSION": "true",
-    #             "WAYLAND_DISPLAY": "wayland-0",
-    #             "XDG_SESSION_TYPE": "wayland",
-    #             "XDG_RUNTIME_DIR": "/run/user/1000",
-    #             "XAUTHORITY": "/run/user/1000/xauth_AmZojz",
-    #             "DISPLAY": ":0"  # Add DISPLAY environment variable
-    #         }
-    #         decky_plugin.logger.info("Anti Cheat env")
-    #         for key, value in os.environ.items():
-    #             decky_plugin.logger.info(f"{key}={value}")
-    #         cmd = "/home/eben/.local/share/Steam/compatibilitytools.d/GE-Proton8-25/proton run EasyAntiCheat/EasyAntiCheat_Setup.exe"
-    #         proc = await asyncio.create_subprocess_shell(cmd,
-    #                                                      stdout=asyncio.subprocess.PIPE,
-    #                                                      stderr=asyncio.subprocess.PIPE,
-    #                                                      stdin=asyncio.subprocess.PIPE,
-    #                                                      shell=True,
-    #                                                      env=env,
-    #                                                      cwd="/home/eben/Games/FallGuys",
-    #                                                      start_new_session=False
-    #                                                      )
-
-    #         stdout, stderr = await proc.communicate("".encode())
-    #         decky_plugin.logger.info(
-    #             f"Anti Cheat install result - err: {stderr.decode()}")
-    #         decky_plugin.logger.info(
-    #             f"Anti Cheat install result - out : {stdout.decode()}")
-    #     except Exception as e:
-    #         decky_plugin.logger.error(f"Error in AntiCheatInstaller: {e}")
 
     async def _migration(self):
         plugin_dir = "Junk-Store"

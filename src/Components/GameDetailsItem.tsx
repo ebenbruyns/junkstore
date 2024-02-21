@@ -60,6 +60,11 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         logger.log("GameDetailsItem onInit");
         onInit();
     }, []);
+
+    const reloadData = async () => {
+        setGameData({ Type: "Empty", Content: { Details: {} } });
+        onInit();
+    }
     const onInit = async () => {
         try {
             logger.debug("onInit starting");
@@ -431,6 +436,8 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                                     resetLaunchOptions={resetLaunchOptions}
                                     updater={update}
                                     scriptRunner={runScript}
+                                    clearActiveGame={clearActiveGame}
+                                    reloadData={reloadData}
                                 />
 
                                 {/* </Focusable> */}

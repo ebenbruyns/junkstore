@@ -6,6 +6,7 @@ export interface EditorProperties {
     initAction: string;
     contentId: string;
     closeModal?: any;
+    refreshParent: () => void;
 }
 export interface ExeRunnerProperties extends EditorProperties {
 

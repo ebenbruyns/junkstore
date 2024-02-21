@@ -1,0 +1,30 @@
+{
+  "Sections": [
+    {
+      "Name": "Dos",
+      "Visible": true,
+      "Description": "Settings to control behvarior outside of DosBox.",
+      "ModeLevel": 0,
+      "Options": [
+        {
+          "Key": "Forkname",
+          "Description": "The name of the fork to use for DosBox. This will be used to determine the DosBox binary to use.",
+          "DefaultValue": "DosBoxStaging",
+          "Value": "DosBoxStaging",
+          "Type": "Enum",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": [
+            { "Key": "dosbox", "Description": "DosBox" },
+            { "Key": "staging", "Description": "DosBox Staging" },
+            { "Key": "dosboxx", "Description": "DosBox X" }
+          ]
+        }
+      ]
+    }
+  ],
+  "Autoexec": "",
+  "AutoexecEnabled": false
+}

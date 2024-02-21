@@ -1,14 +1,14 @@
 import { VFC, useEffect, useState } from "react";
 import { ExeRunnerProperties } from "./Types/EditorProperties";
 import { executeAction, getAppDetails } from "./Utils/executeAction";
-import { ActionSet, FilesData } from "./Types/Types";
+import { ActionSet, FilesData, SaveRefresh } from "./Types/Types";
 import { DialogButton, ModalRoot, PanelSection, ScrollPanelGroup, SteamSpinner } from "decky-frontend-lib";
 import Logger from "./Utils/logger";
 import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
 
 
 export const ExeRunner: VFC<ExeRunnerProperties> = ({
-    serverAPI, initActionSet, initAction, contentId, closeModal, shortName, closeParent
+    serverAPI, initActionSet, initAction, contentId, closeModal, shortName, closeParent, refreshParent
 }) => {
     const logger = new Logger("ExeRunner");
     const [actionSetName, setActionSetName] = useState("" as string);
@@ -91,7 +91,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         const startDir = appDetailsStore.GetAppData(parseInt(contentId)).details.strShortcutStartDir
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
                         const gameId = gameIDFromAppID(parseInt(contentId))
-                        await executeAction(serverAPI, actionSetName, "RunBinary"
+                        const result = await executeAction(serverAPI, actionSetName, "RunBinary"
                             , {
                                 gameId: String(gameId),
                                 appId: String(contentId),
@@ -103,6 +103,12 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                                 CompatToolName: compatToolName
 
                             });
+                        if (result.Type === "Refresh") {
+                            const tmp = result.Content as SaveRefresh
+                            if (tmp.Refresh) {
+                                refreshParent()
+                            }
+                        }
                         closeModal();
                         closeParent();
                         setBusy(false);

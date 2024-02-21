@@ -11,7 +11,7 @@ shift
 source "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
-SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE)
+SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE --platform Proton --fork "" --version "" --dbfile $DBFILE)
 echo "${SETTINGS}"
 eval "${SETTINGS}"
 

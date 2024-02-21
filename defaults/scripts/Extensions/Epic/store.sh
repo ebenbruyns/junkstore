@@ -32,15 +32,15 @@ function Epic_getgames(){
         LIMIT="${3}"
     fi
     IMAGE_PATH=""
-    TEMP=$($DOSCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+    TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
    
     echo $TEMP
 }
-function Epic_saveconfig(){
-    cat | $DOSCONF --parsejson "${1}" --dbfile $DBFILE --platform Proton --fork "" --version "" --dbfile $DBFILE
+function Epic_saveplatformconfig(){
+    cat | $EPICCONF --parsejson "${1}" --dbfile $DBFILE --platform Proton --fork "" --version "" --dbfile $DBFILE
 }
-function Epic_getconfig(){
-    TEMP=$($DOSCONF --confjson "${1}" --platform Proton --fork "" --version "" --dbfile $DBFILE)
+function Epic_getplatformconfig(){
+    TEMP=$($EPICCONF --confjson "${1}" --platform Proton --fork "" --version "" --dbfile $DBFILE)
     echo $TEMP
 }
 
@@ -129,7 +129,7 @@ function Epic_install(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     rm $PROGRESS_LOG
 
-    RESULT=$($DOSCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
+    RESULT=$($EPICCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
     mkdir -p "${HOME}/.compat/${1}"
     ARGS=$($ARGS_SCRIPT "${1}")
     TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE $OFFLINE_MODE)
@@ -150,23 +150,17 @@ function Epic_uninstall(){
     # this should be fixed before used, it might kill the entire machine
     # WORKING_DIR=$($EPICCONF --get-working-dir "${1}")
     # rm -rf "${WORKING_DIR}"
-    TEMP=$($DOSCONF --clearsteamclientid "${1}" --dbfile $DBFILE)
+    TEMP=$($EPICCONF --clearsteamclientid "${1}" --dbfile $DBFILE)
     echo $TEMP
     
 }
 function Epic_getgamedetails(){
     IMAGE_PATH=""
-    TEMP=$($DOSCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE --forkname "Proton" --version "null" --platform "Windows")
+    TEMP=$($EPICCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE --forkname "Proton" --version "null" --platform "Windows")
     echo $TEMP
     exit 0
 }
-function Epic_getbats(){
-    TEMP=$($DOSCONF --getjsonbats "${1}" --dbfile $DBFILE --dbfile $DBFILE)
-    echo $TEMP
-}
-function Epic_savebats(){
-    cat | $DOSCONF --updatebats "${1}" --dbfile $DBFILE
-}
+
 function Epic_getprogress()
 {
     TEMP=$($EPICCONF --getprogress "${DECKY_PLUGIN_LOG_DIR}/${1}.progress" --dbfile $DBFILE)
@@ -247,10 +241,7 @@ function Epic_login(){
     get_steam_env
     launchoptions "/bin/flatpak" "run com.github.derrod.legendary auth" "" "Epic Games Login" "Epic"
 }
-function Epic_login_launch_options(){
-    TEMP=$($DOSCONF --launchoptions "/bin/flatpak" "run com.github.derrod.legendary auth" "" "Epic Games Login" --dbfile $DBFILE)
-    echo $TEMP
-}
+
 
 function Epic_logout(){
     TEMP=$($LEGENDARY auth --delete)
@@ -258,11 +249,11 @@ function Epic_logout(){
 }
 
 function Epic_getsetting(){
-    TEMP=$($DOSCONF --getsetting $1 --dbfile $DBFILE)
+    TEMP=$($EPICCONF --getsetting $1 --dbfile $DBFILE)
     echo $TEMP
 }
 function Epic_savesetting(){
-    $DOSCONF --savesetting $1 $2 --dbfile $DBFILE
+    $EPICCONF --savesetting $1 $2 --dbfile $DBFILE
 }   
 function Epic_getjsonimages(){
     

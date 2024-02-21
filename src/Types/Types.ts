@@ -92,6 +92,10 @@ export interface LoginStatus extends Content {
   Username: string;
   LoggedIn: boolean;
 }
+export interface SaveRefresh extends Content {
+  Saved: boolean;
+  Refresh: boolean;
+}
 export interface FilesData extends Content {
   Files: FileData[];
 }

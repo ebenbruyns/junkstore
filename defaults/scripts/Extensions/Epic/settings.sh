@@ -1,5 +1,4 @@
 #!/bin/bash
-DOSCONF="${DECKY_PLUGIN_DIR}/scripts/dosbox-conf.py"
 EPICCONF="${DECKY_PLUGIN_DIR}/scripts/epic-config.py"
 export LEGENDARY="/bin/flatpak run com.github.derrod.legendary"
 PROTON_TRICKS="/bin/flatpak run com.github.Matoking.protontricks"

@@ -3,7 +3,7 @@ import {
     PanelSection, Dropdown, ModalRoot, ModalRootProps, ScrollPanelGroup, ModalPosition
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
 import { SectionEditor } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
@@ -16,7 +16,7 @@ export interface ErrorModalProps extends ModalRootProps {
 }
 
 export const ConfEditor: VFC<EditorProperties> = ({
-    serverAPI, initActionSet, initAction, contentId, closeModal
+    serverAPI, initActionSet, initAction, contentId, closeModal, refreshParent
 }) => {
     const logger = new Logger("ConfEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
@@ -110,6 +110,12 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                                 inputData: confData
                                             });
                                         logger.log("Save result: ", result)
+                                        if (result.Type === "Refresh") {
+                                            const tmp = result.Content as SaveRefresh
+                                            if (tmp.Refresh) {
+                                                refreshParent()
+                                            }
+                                        }
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                         closeModal();
                                     }}

@@ -3,7 +3,7 @@ import {
     PanelSection, Dropdown, ModalRoot, ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ActionSet, FileData, FilesData } from "./Types/Types";
+import { ActionSet, FileData, FilesData, SaveRefresh } from "./Types/Types";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
@@ -13,7 +13,8 @@ export const BatEditor: VFC<EditorProperties> = ({
     initActionSet,
     initAction,
     contentId,
-    closeModal
+    closeModal,
+    refreshParent
 }) => {
     const [batData, setBatData] = useState([{ Id: 0, GameId: 0, Path: '', Content: '' }] as FileData[]);
     //const [editorText, setEditorText] = useState("test" as string);
@@ -71,12 +72,18 @@ export const BatEditor: VFC<EditorProperties> = ({
 
                             onSecondaryActionDescription="Save bat files"
                             onSecondaryButton={async (_) => {
-                                await executeAction(serverAPI, actionSetName,
+                                const result = await executeAction(serverAPI, actionSetName,
                                     "SaveContent",
                                     {
                                         content_id: contentId,
                                         inputData: batData,
                                     });
+                                if (result.Type === "Refresh") {
+                                    const tmp = result.Content as SaveRefresh
+                                    if (tmp.Refresh) {
+                                        refreshParent()
+                                    }
+                                }
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                 closeModal();
                             }}

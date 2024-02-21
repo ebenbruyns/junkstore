@@ -51,7 +51,8 @@ ACTIONS=("init" "getgames" "getactions" "saveconfig" "getconfig" "download" \
 "uninstall" "protontricks" "enable-eos-overlay" "disable-eos-overlay" \
 "getgamedetails" "getbats" "savebats" "getprogress" "login" \
 "login-launch-options" "logout" "loginstatus" "getsetting" "savesetting" \
-"getlaunchoptions" "run-exe" "get-exe-list" "gettabconfig" "savetabconfig")
+"getlaunchoptions" "run-exe" "get-exe-list" "gettabconfig" "savetabconfig" \
+"saveplatformconfig" "getplatformconfig")
 
 
 # Check if ACTION is one of the actions in the case statement

@@ -233,19 +233,19 @@
   "epic-config-actions": {
     "Type": "ActionSet",
     "Content": {
-      "SetName": "DosboxConfigFileActions",
+      "SetName": "EpicPlatformConfigFileActions",
       "Actions": [
         {
           "Id": "GetContent",
           "Title": "Get the ini files as json",
           "Type": "IniEditor",
-          "Command": "./scripts/junk-store.sh Epic getconfig"
+          "Command": "./scripts/junk-store.sh Epic getplatformconfig"
         },
         {
           "Id": "SaveContent",
           "Title": "Save the ini files as json",
           "Type": "IniEditor",
-          "Command": "./scripts/junk-store.sh Epic saveconfig"
+          "Command": "./scripts/junk-store.sh Epic saveplatformconfig"
         }
       ]
     }
@@ -396,7 +396,7 @@
           "Command": "./scripts/get-json.py epic-script-actions"
         },
         {
-          "Id": "GetDosboxConfigFileActions",
+          "Id": "GetPlatformConfigFileActions",
           "Title": "Get dosbox config file actions",
           "Type": "Init",
           "Command": "./scripts/get-json.py epic-config-actions"
