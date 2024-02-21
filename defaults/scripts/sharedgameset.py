@@ -35,8 +35,7 @@ class GameSet:
 
     def read_json_from_stdin(self):
         json_str = sys.stdin.read()
-        json_obj = json.loads(json_str)
-        return json_obj
+        return json.loads(json_str)
 
     def create_tables(self):
         conn = sqlite3.connect(self.db_file)

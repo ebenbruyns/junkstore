@@ -1,6 +1,6 @@
 import { AppDetails, LifetimeNotification, ServerAPI, showModal } from "decky-frontend-lib";
 import { ContentError, ContentResult, LaunchOptions } from "../Types/Types";
-import Logger from "./logger";
+import Logger, { log } from "./logger";
 import { ErrorModal } from "../ErrorModal";
 import { gameIDFromAppID } from "./gameIDFromAppID";
 
@@ -80,7 +80,8 @@ const cleanupIds = async () => {
 export async function executeAction(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult> {
 
     const logger = new Logger("executeAction");
-    logger.log(`actionSet: ${actionSet}, actionName: ${actionName},, args: ${args}`);
+    logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
+    logger.debug("Args: ", args);
     const res = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
         actionSet: actionSet,
         actionName: actionName,
@@ -95,6 +96,7 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
             // @ts-ignore
             const id = parseInt(args.appId);
             const details = await getAppDetails(id)
+            logger.log("details: ", details);
             const oldLaunchOptions = {
                 Name: details?.strDisplayName,
                 Exe: details?.strShortcutExe,
@@ -112,21 +114,21 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
                 if (!data.bRunning) {
                     // This might not work in desktop mode.
                     // @ts-ignore
-                    // let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
-                    // if (gamepadWindowInstance) {
-                    //     setTimeout(async () => {
-                    //         gamepadWindowInstance.NavigateBack();
-                    //         unregister();
-                    //         await configureShortcut(id, oldLaunchOptions);
+                    let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                    if (gamepadWindowInstance) {
+                        setTimeout(async () => {
+                            gamepadWindowInstance.NavigateBack();
+                            unregister();
+                            await configureShortcut(id, oldLaunchOptions);
 
-                    //     }, 1000)
-                    // }
+                        }, 1000)
+                    }
                 }
             })
             await configureShortcut(id, newLaunchOptions);
             logger.debug("running app: ", id);
-            SteamClient.UI.
-                runApp(id);
+            SteamClient.Apps.RunGame(id, "", -1, 100);
+            //  runApp(id);
         }
 
         return {} as ContentResult;
@@ -143,23 +145,25 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
 }
 
 export async function getAppDetails(appId: number): Promise<AppDetails | null> {
+    const logger = new Logger("getAppDetails");
     return await new Promise((resolve) => {
         let timeoutId: NodeJS.Timeout | undefined;
         try {
             const { unregister } = (SteamClient as SteamClientEx).Apps.RegisterForAppDetails(appId, (details) => {
                 clearTimeout(timeoutId);
                 unregister();
-                console.log("details: ", details);
+                logger.debug("App details: ", details);
                 resolve(details);
             });
 
             timeoutId = setTimeout(() => {
                 unregister();
+                logger.debug("App details: timeout.");
                 resolve(null);
             }, 1000);
         } catch (error) {
             clearTimeout(timeoutId);
-            //logger.critical(error);
+            logger.error(error);
             resolve(null);
         }
     });

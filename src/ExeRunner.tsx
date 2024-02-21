@@ -3,7 +3,7 @@ import { ExeRunnerProperties } from "./Types/EditorProperties";
 import { executeAction, getAppDetails } from "./Utils/executeAction";
 import { ActionSet, FilesData, SaveRefresh } from "./Types/Types";
 import { DialogButton, ModalRoot, PanelSection, ScrollPanelGroup, SteamSpinner } from "decky-frontend-lib";
-import Logger from "./Utils/logger";
+import Logger, { log } from "./Utils/logger";
 import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
 
 
@@ -86,9 +86,16 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         setBusy(true);
                         logger.debug(`steamclientid ${parseInt(contentId)}`)
                         // @ts-ignore
-                        const compatToolName = appDetailsStore.GetAppData(Number(contentId)).details.strCompatToolName
+                        const res = await getAppDetails(parseInt(contentId))
+                        logger.debug("app details: ", res)
+                        if (res == null) {
+                            logger.error("app details is null")
+                            return;
+                        }
+
+                        const compatToolName = res.strCompatToolName
                         //@ts-ignore
-                        const startDir = appDetailsStore.GetAppData(parseInt(contentId)).details.strShortcutStartDir
+                        const startDir = res.strShortcutStartDir
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
                         const gameId = gameIDFromAppID(parseInt(contentId))
                         const result = await executeAction(serverAPI, actionSetName, "RunBinary"

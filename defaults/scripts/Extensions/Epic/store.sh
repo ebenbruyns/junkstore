@@ -187,7 +187,6 @@ function Epic_disable-eos-overlay(){
 function Epic_run-exe(){
     get_steam_env  
     SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE)
-    echo "${SETTINGS}"
     eval "${SETTINGS}"
     STEAM_ID="${1}"
     GAME_SHORTNAME="${2}"
@@ -200,7 +199,7 @@ function Epic_run-exe(){
     fi
     COMPAT_TOOL="${5}"
     GAME_PATH=$($EPICCONF --get-game-dir $GAME_SHORTNAME --dbfile $DBFILE --offline)
-    launchoptions "\\\"${GAME_PATH}/${GAME_EXE}\\\""  "${ARGS}  &> ${DECKY_PLUGIN_LOG_DIR}/run-exe.log" "${3}" "Protontricks" true "${COMPAT_TOOL}"
+    launchoptions "\\\"${GAME_PATH}/${GAME_EXE}\\\""  "${ARGS}  &> ${DECKY_PLUGIN_LOG_DIR}/run-exe.log" "${3}" "Run exe" true "${COMPAT_TOOL}"
 }
 function Epic_get-exe-list(){
     get_steam_env
@@ -220,7 +219,7 @@ function Epic_get-exe-list(){
     JSON="${JSON}]}}"
     echo $JSON
 }
-function Epic_launchoptions () {
+function launchoptions () {
     Exe=$1 
     Options=$2 
     WorkingDir=$3 
