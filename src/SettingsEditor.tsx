@@ -1,11 +1,11 @@
 import {
     Focusable,
-    PanelSection, Dropdown, ModalRootProps
+    PanelSection, Dropdown, ModalRootProps,
+    ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
 import { SectionEditor } from "./Components/SectionEditor";
-import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
@@ -82,9 +82,11 @@ export const SettingsEditor: VFC<EditorProperties> = ({
     };
     return (
         <>
-
-            <ScrollPanelGroup focusable={false}>
-                <Panel style={{ background: "inherit" }}>
+            <ScrollPanelGroup 
+                //@ts-ignore
+                focusable={false}
+            >
+                <Focusable style={{ background: "inherit" }}>
                     <Focusable //style={{ display: "flex", marginTop: "0px" }}
                     >
                         <Focusable
@@ -145,7 +147,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                         </Focusable>
 
                     </Focusable>
-                </Panel>
+                </Focusable>
             </ScrollPanelGroup>
 
         </>
