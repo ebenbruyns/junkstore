@@ -36,7 +36,19 @@
   "main-menu-content": {
     "Type": "MainMenu",
     "Content": {
-      "Panels": []
+      "Panels": [
+        {
+          "Title": "Custom Stores",
+          "Type": "Section",
+          "Actions": [
+            {
+              "ActionId": "JunkStoreInit",
+              "Title": "Games",
+              "Type": "Page"
+            }
+          ]
+        }
+      ]
     }
   }
 }

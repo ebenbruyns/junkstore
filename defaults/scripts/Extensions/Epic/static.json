@@ -91,24 +91,6 @@
       ]
     }
   },
-  "main-menu-content": {
-    "Type": "MainMenu",
-    "Content": {
-      "Panels": [
-        {
-          "Title": "Custom Stores",
-          "Type": "Section",
-          "Actions": [
-            {
-              "ActionId": "JunkStoreInit",
-              "Title": "Epic Games",
-              "Type": "Page"
-            }
-          ]
-        }
-      ]
-    }
-  },
   "epic-games-login-actions": {
     "Type": "ActionSet",
     "Content": {

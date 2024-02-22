@@ -102,7 +102,8 @@ class GameSet:
                     option['Key'] = option['Key'].lower()
             return data
 
-    def create_empty_config_set(self, shortname, forkname, version, platform, conn):
+    def create_empty_config_set(self, shortname, forkname, version, platform):
+        conn = sqlite3.connect(self.db_file)
         c = conn.cursor()
         config_set_id = 0
         c.execute("select id from config_set where ShortName = ? AND forkname = ? AND version = ? AND platform = ?",
@@ -112,6 +113,7 @@ class GameSet:
             c.execute("INSERT INTO config_set (ShortName, forkname, version, platform) VALUES (?, ?, ?, ?)",
                       (shortname, forkname, version, platform))
             conn.commit()
+        conn.close()
 
     def add_missing_config_sets(self, name):
         conn = sqlite3.connect(self.db_file)
@@ -268,7 +270,6 @@ class GameSet:
                 filepath = self.get_schema_file(plugin_dir, config_schema)
             else:
                 filepath = self.get_schema_file(WorkingDir, config_schema)
-        # print(f"filepath: {filepath}")
             config_data = self.load_conf_data_from_json(
                 os.path.expanduser(
                     filepath))
@@ -285,6 +286,7 @@ class GameSet:
                         (config_set.platform = '' or config_set.platform = ?)
                         order by config_set.platform desc, config_set.forkname desc, config_set.version desc""", (shortname, forkname, version, platform))
                 row = c.fetchone()
+
                 id = row[0]
                 c.execute(
                     """SELECT config_set.ShortName, configs.section, configs.key, configs.value FROM configs 
@@ -313,7 +315,7 @@ class GameSet:
             conn.close()
             return json.dumps({'Type': 'IniContent', 'Content': config_data})
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
+            print(f"An error occurred: ", e)
             # Handle the exception here
 
     def find_section(self, config_data, section_name):
@@ -445,7 +447,7 @@ class GameSet:
             row = c.fetchone()
             if (not row):
                 self.create_empty_config_set(
-                    shortname, "", "", self.setNameConfig, conn)
+                    shortname, "", "", self.setNameConfig)
 
             editors.append({
                 'Type': 'IniEditor',

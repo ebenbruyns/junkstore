@@ -97,7 +97,7 @@ class DosArgs(sharedgameset.GenericArgs):
 
 def main():
 
-    dosProcessor = DosArgs("Dos")
+    dosProcessor = DosArgs("dos")
     dosProcessor.parseArgs()
     dosProcessor.processArgs()
 
