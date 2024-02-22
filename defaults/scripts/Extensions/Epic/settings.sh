@@ -4,7 +4,7 @@ export LEGENDARY="/bin/flatpak run com.github.derrod.legendary"
 PROTON_TRICKS="/bin/flatpak run com.github.Matoking.protontricks"
 # the launcher script to use in steam
 export LAUNCHER="${DECKY_PLUGIN_DIR}/scripts/${Extensions}/Epic/epic-launcher.sh"
-ARGS_SCRIPT="${DECKY_PLUGIN_DIR}/scripts/${Extensions}/Epic/get-epic-args.sh"
+export ARGS_SCRIPT="${DECKY_PLUGIN_DIR}/scripts/${Extensions}/Epic/get-epic-args.sh"
 DBNAME="epic.db"
 # database to use for configs and metadata
 DBFILE="${DECKY_PLUGIN_RUNTIME_DIR}/epic.db"
