@@ -96,6 +96,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         const compatToolName = res.strCompatToolName
                         //@ts-ignore
                         const startDir = res.strShortcutStartDir
+
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
                         const gameId = gameIDFromAppID(parseInt(contentId))
                         const result = await executeAction(serverAPI, actionSetName, "RunBinary"

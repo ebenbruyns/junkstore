@@ -199,7 +199,7 @@ function Epic_run-exe(){
     fi
     COMPAT_TOOL="${5}"
     GAME_PATH=$($EPICCONF --get-game-dir $GAME_SHORTNAME --dbfile $DBFILE --offline)
-    launchoptions "\\\"${GAME_PATH}/${GAME_EXE}\\\""  "${ARGS}  &> ${DECKY_PLUGIN_LOG_DIR}/run-exe.log" "${3}" "Run exe" true "${COMPAT_TOOL}"
+    launchoptions "\\\"${GAME_PATH}/${GAME_EXE}\\\""  "${ARGS}  &> ${DECKY_PLUGIN_LOG_DIR}/run-exe.log" "${GAME_PATH}" "Run exe" true "${COMPAT_TOOL}"
 }
 function Epic_get-exe-list(){
     get_steam_env

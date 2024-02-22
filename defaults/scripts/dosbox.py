@@ -156,22 +156,6 @@ class Dosbox (sharedgameset.GameSet):
                            'Path': path, 'Content': content})
         return json.dumps({'Type': 'FileContent', 'Content': {'Files': result}})
 
-    def add_steam_client_id(self, shortname, steam_client_id):
-        conn = sqlite3.connect(self.db_file)
-        c = conn.cursor()
-        c.execute("UPDATE Game SET SteamClientID=? WHERE ShortName=?",
-                  (steam_client_id, shortname))
-        conn.commit()
-        conn.close()
-
-    def clear_steam_client_id(self, shortname):
-        conn = sqlite3.connect(self.db_file)
-        c = conn.cursor()
-        c.execute("UPDATE Game SET SteamClientID='' WHERE ShortName=?",
-                  (shortname,))
-        conn.commit()
-        conn.close()
-
     def get_zip_for_shortname(self, shortname, urlencode):
         conn = sqlite3.connect(self.db_file)
         c = conn.cursor()

@@ -515,6 +515,22 @@ class GameSet:
         conn.close()
         return json.dumps({'Type': 'Success', 'Content': {'success': True}})
 
+    def add_steam_client_id(self, shortname, steam_client_id):
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        c.execute("UPDATE Game SET SteamClientID=? WHERE ShortName=?",
+                  (steam_client_id, shortname))
+        conn.commit()
+        conn.close()
+
+    def clear_steam_client_id(self, shortname):
+        conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        c.execute("UPDATE Game SET SteamClientID='' WHERE ShortName=?",
+                  (shortname,))
+        conn.commit()
+        conn.close()
+
 
 class GenericArgs:
     gameSet: GameSet = None

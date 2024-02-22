@@ -127,7 +127,8 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
             })
             await configureShortcut(id, newLaunchOptions);
             logger.debug("running app: ", id);
-            SteamClient.Apps.RunGame(id, "", -1, 100);
+            const gameId = gameIDFromAppID(id)
+            SteamClient.Apps.RunGame(gameId, "", -1, 100);
             //  runApp(id);
         }
 

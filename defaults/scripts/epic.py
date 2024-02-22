@@ -31,33 +31,25 @@ class Epic(sharedgameset.GameSet):
     # sample json for game returned from legendary list --json
 
     def get_list(self,  offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
+        offline_switch = "--offline" if offline else ""
         games_list = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} list --json {offline_switch}"))
         self.insert_data(games_list)
 
     def get_working_dir(self, game_id, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
         print(result['working_directory'])
 
     def get_game_dir(self, game_id, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
         print(result['game_directory'])
 
     def get_login_status(self, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} status --json {offline_switch}"))
 
@@ -68,20 +60,13 @@ class Epic(sharedgameset.GameSet):
         return json.dumps({'Type': 'LoginStatus', 'Content': {'Username': account, 'LoggedIn': logged_in}})
 
     def get_parameters(self, game_id, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
-
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} launch {game_id} --json {offline_switch} "))
-        args = " ".join(result['egl_parameters'])
-        return args
+        return " ".join(result['egl_parameters'])
 
     def has_updates(self, game_id, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
-
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} info {game_id} --json {offline_switch}"))
         json_result = json.loads(result)
@@ -90,9 +75,7 @@ class Epic(sharedgameset.GameSet):
         return json.dumps({'Type': 'UpdateAvailable', 'Content': False})
 
     def get_lauch_options(self, game_id, steam_command, name, offline):
-        offline_switch = ""
-        if offline:
-            offline_switch = "--offline"
+        offline_switch = "--offline" if offline else ""
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
         launcher = os.environ['LAUNCHER']
@@ -119,39 +102,39 @@ class Epic(sharedgameset.GameSet):
 
             try:
                 title = game['app_title']
-                notes = game['metadata']['description']
-                application_path = ""
-                manual_path = ""
-                publisher = game['metadata']['developer']
-                root_folder = ""
-                source = "Epic"
-                database_id = game['app_name']
-                genre = ""
-                configuration_path = ""
-                developer = game['metadata']['developer']
-                release_date = game['metadata']['creationDate']
                 shortname = game['asset_infos']['Windows']['asset_id']
 
                 c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
                 result = c.fetchone()
                 if result is None:
-                    vals = []
+                    notes = game['metadata']['description']
+                    application_path = ""
+                    manual_path = ""
+                    root_folder = ""
+                    source = "Epic"
+                    database_id = game['app_name']
+                    genre = ""
+                    configuration_path = ""
+                    publisher = game['metadata']['developer']
+                    developer = game['metadata']['developer']
+                    release_date = game['metadata']['creationDate']
+                    vals = [
+                        title,
+                        notes,
+                        application_path,
+                        manual_path,
+                        publisher,
+                        root_folder,
+                        source,
+                        database_id,
+                        genre,
+                        configuration_path,
+                        developer,
+                        release_date,
+                        "",
+                        shortname,
+                    ]
 
-                    vals.append(title)
-                    vals.append(notes)
-                    vals.append(application_path)
-                    vals.append(manual_path)
-                    vals.append(publisher)
-                    vals.append(root_folder)
-                    vals.append(source)
-                    vals.append(database_id)
-                    vals.append(genre)
-                    vals.append(configuration_path)
-                    vals.append(developer)
-                    vals.append(release_date)
-
-                    vals.append("")
-                    vals.append(shortname)
                     # print(f"Inserting game {title} into database: {vals}")
 
                     placeholders = ', '.join(
@@ -198,8 +181,7 @@ class Epic(sharedgameset.GameSet):
                 lines = f.readlines()
 
                 for i in range(len(lines) - 5):
-                    match = progress_re.search(''.join(lines[i:i+6]))
-                    if match:
+                    if match := progress_re.search(''.join(lines[i: i + 6])):
                         last_progress_update = {
                             "Percentage": float(match.group(1)),
                             "Description": f"Downloaded {match.group(2)} MB of {match.group(3)} MB ({match.group(1)}%)\nSpeed: {match.group(11)} MB/s"
