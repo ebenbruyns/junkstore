@@ -3,8 +3,8 @@ import {
     PanelSection, Dropdown, ModalRoot, ModalRootProps, 
     quickAccessControlsClasses
 } from "decky-frontend-lib";
-import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
+import { VFC, useEffect, useState, useRef, createRef } from "react";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
@@ -23,11 +23,11 @@ export const ConfEditor: VFC<EditorProperties> = ({
 }) => {
     const logger = new Logger("ConfEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
-    const [confData, setConfData] = useState({} as ConfData);
-    const focusRef = useRef(null);
-    const [modeLevel, setModeLevel] = useState(0 as number);
-    const [actionSetName, setActionSetName] = useState("" as string);
-    const [helpText, setHelpText] = useState({
+    const [confData, setConfData] = useState<ConfData>();
+    const focusRef = createRef <HTMLTextAreaElement> ();
+    const [modeLevel, setModeLevel] = useState<number>(0);
+    const [actionSetName, setActionSetName] = useState<string>("");
+    const [helpText, setHelpText] = useState<KeyValuePair>({
         Key: "",
         Description: "",
         DefaultValue: "",
@@ -38,8 +38,8 @@ export const ConfEditor: VFC<EditorProperties> = ({
         Max: 100,
         Parents: [],
         EnumValues: [],
-    } as KeyValuePair);
-    const [sectionHelpText, setSectionHelpText] = useState("" as string);
+    } );
+    const [sectionHelpText, setSectionHelpText] = useState<string>();
     useEffect(() => {
         OnInit();
 
@@ -72,8 +72,8 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }
     const handleSectionChange = (section: Section) => {
-        const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s
-        );
+        const updatedSections = confData?.Sections?.map((s) => s.Name === section.Name ? section : s);
+        
         setConfData({ ...confData, Sections: updatedSections });
     };
     const updateHelpText = (field: KeyValuePair) => {
@@ -138,7 +138,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     selectedOption={modeLevel}
                                 />
                             </div>
-                            {confData.Sections?.map((section) => {
+                            {confData?.Sections?.map((section) => {
                                 if (section && modeLevel >= section.ModeLevel)
                                     return (
                                         <SectionEditor
@@ -156,7 +156,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     return null;
                             })}
                         </PanelSection>
-                        {confData.AutoexecEnabled && confData.Autoexec && (
+                        {confData?.AutoexecEnabled && confData?.Autoexec && (
                             <PanelSection title="[Autoexec]">
                                 <Focusable
                                     // @ts-ignore
