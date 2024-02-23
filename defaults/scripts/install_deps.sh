@@ -1,21 +1,10 @@
 #!/bin/bash
-DOWNLOAD_LOCATION=https://github.com/ebenbruyns/legendary-flatpak/releases/latest/download/legendary.flatpak
 
-function download_and_install() {
-    cd /tmp
-    flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    flatpak --user install flathub org.gnome.Platform//45 -y
-    flatpak --user install com.github.Matoking.protontricks -y
-    wget $DOWNLOAD_LOCATION
-    flatpak --user install legendary.flatpak -y
-    rm legendary.flatpak
-}
+#recusively find all install_deps.sh files and execute them
+find ./scripts/Extensions -type f -name "install_deps.sh" -exec bash {} \;
+find ~/homebrew/data/Junk-Store/scripts/Extensions -type f -name "install_deps.sh" -exec bash {} \;
 
-if flatpak list | grep -q "com.github.derrod.legendary"; then
-    echo "legendary flatpak is installed, removing and reinstalling"
-    flatpak uninstall com.github.derrod.legendary -y    
-fi
-download_and_install
+
 
 echo "==================================="
 echo "  Dependecy installation complete"
