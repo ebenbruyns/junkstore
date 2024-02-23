@@ -64,7 +64,16 @@ fi
 
 CMD=$@
 ARGS=$("${ARGS_SCRIPT}" $ID)
-eval "${CMD} ${ARGS}" # &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+function sync-saves(){
+    if [[ "${OFFLINE_MODE}" == "" ]]; then
+    $LEGENDARY sync-saves $ID
+fi
+}
+sync-saves
+eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+sync-saves
+
+
 # echo "#!/bin/bash" > run.sh
 # echo "${CMD} ${ARGS}" >> run.sh
 # chmod +x run.sh
