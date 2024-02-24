@@ -3,6 +3,7 @@ import { GameData } from "../Types/Types";
 import { VFC } from "react";
 import GameGridItem from './GameGridItem';
 
+export const contentTabsContainerClass = 'content-tabs-container'
 interface GridContainerProperties {
     games: GameData[];
     filterFn: () => void;
@@ -20,9 +21,9 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
     return (
         <>
             <style>{`
-                .${gamepadTabbedPageClasses.TabContentsScroll} {
-                    scroll-padding-top: 160px;
-                    scroll-padding-bottom: 115px;
+                .${contentTabsContainerClass} .${gamepadTabbedPageClasses.TabContentsScroll} {
+                    scroll-padding-top: calc( var(--basicui-header-height) + 140px ) !important;
+                    scroll-padding-bottom: 80px;
                 }
             `}</style>
             <Focusable
