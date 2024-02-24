@@ -139,7 +139,7 @@ export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: st
     }
 
     if (res.result.Type === 'Error') {
-        const error = res.result.Content as ContentError; //only acceptable if this is gauranteed that in this case (res.result.Type === 'RunExe') Content is indeed LaunchOptions
+        const error = res.result.Content as ContentError; //only acceptable if this is gauranteed that in this case (res.result.Type === 'Error') Content is indeed ContentError
         showModal(<ErrorModal Error={error} />);
         logger.error("result: ", res);
         return null;
