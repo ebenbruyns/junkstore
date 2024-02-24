@@ -3,7 +3,7 @@ import {
     PanelSection, Dropdown, ModalRoot, ModalRootProps, 
     quickAccessControlsClasses
 } from "decky-frontend-lib";
-import { VFC, useEffect, useState, createRef } from "react";
+import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
@@ -24,7 +24,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
     const logger = new Logger("ConfEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
     const [confData, setConfData] = useState<ConfData>();
-    const focusRef = createRef<HTMLTextAreaElement>();
+    const focusRef = useRef<HTMLTextAreaElement>(null);
     const [modeLevel, setModeLevel] = useState<number>(0);
     const [actionSetName, setActionSetName] = useState<string>("");
     const [helpText, setHelpText] = useState<KeyValuePair>({
@@ -180,7 +180,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     noFocusRing={true}
                                     onFocusCapture={() => {
                                         if (focusRef && focusRef.current != null)
-                                            // @ts-ignore
                                             focusRef.current.focus();
                                     }}
                                     onOKButton={() => { }}
