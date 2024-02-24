@@ -14,6 +14,9 @@ interface GridContainerProperties {
 }
 
 const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterFn, limitFn, limited, initActionSet, initAction }) => {
+    const imgAreaWidth = '120px';
+    const imgAreaHeight = '165px';
+
     return (
         <>
             <style>{`
@@ -23,19 +26,13 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
                 }
             `}</style>
             <Focusable
-
                 style={{
-                    marginLeft: "0px",
-                    color: "white",
                     display: "grid",
-                    justifyContent: "center",
-                    gridGap: "20px",
-                    gridTemplateColumns: "repeat(6, 1fr)",
+                    justifyContent: "space-between",
+                    gridGap: "16px",
+                    gridTemplateColumns: `repeat(auto-fill, ${imgAreaWidth})`,
                     gridTemplateRows: "repeat(6, 1fr)",
-                    width: "100%",
-                    height: "calc (100% - 120px)",
                     overflow: "visible",
-                    gridAutoRows: "1fr"
                 }}
                 onSecondaryActionDescription="Toggle Installed Filter"
                 onSecondaryButton={filterFn}
@@ -46,8 +43,8 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
                     <GameGridItem
                         gameData={game}
                         serverAPI={serverAPI}
-                        imgAreaWidth='120px'
-                        imgAreaHeight='165px'
+                        imgAreaWidth={imgAreaWidth}
+                        imgAreaHeight={imgAreaHeight}
                         // filterFn={filterFn}
                         // limitFn={limitFn}
                         // limited={limited}

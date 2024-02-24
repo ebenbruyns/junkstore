@@ -32,17 +32,17 @@
     "@rollup/plugin-typescript": "^8.3.3",
     "@types/react": "16.14.0",
     "@types/webpack": "^5.28.0",
+    "decky-frontend-lib": "^3.24.5",
     "react-markdown": "^8.0.7",
     "react-qr-code": "^2.0.12",
     "rollup": "^2.77.1",
     "rollup-plugin-import-assets": "^1.1.1",
     "shx": "^0.3.4",
     "tslib": "^2.4.0",
-    "decky-frontend-lib": "^3.24.5",
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "react-icons": "^4.4.0"
+    "react-icons": "^5.0.1"
   },
   "pnpm": {
     "peerDependencyRules": {

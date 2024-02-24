@@ -4,6 +4,7 @@ import { Focusable, ServerAPI, showModal } from "decky-frontend-lib";
 import { VFC, useState } from 'react';
 import { GameData } from '../Types/Types';
 import { GameDetailsItem } from './GameDetailsItem';
+import { FaGears } from "react-icons/fa6";
 
 interface GameGridItemProps {
     gameData: GameData;
@@ -18,14 +19,14 @@ interface GameGridItemProps {
 const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaHeight, serverAPI, initActionSet, initAction, noName }) => {
     const [isFocused, setIsFocused] = useState(false);
 
-    const src = gameData.Images.length > 0 ? gameData.Images[0] : "";
+    const hasImage = gameData.Images.length > 0;
 
     return (
-        <div>
-            <div style={{ width: imgAreaWidth, height: imgAreaHeight, display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: imgAreaWidth }}>
+            <div style={{ height: imgAreaHeight, display: 'flex', alignItems: 'center' }}>
                 <Focusable
                     key={gameData.ID}
-                    style={{ position: 'relative', flex: 'auto' }}
+                    style={{ position: 'relative', margin: 'auto', ...(!hasImage ? { width: '100%', height: '100%', display: 'flex' } : {}) }}
                     onActivate={() => {
                         showModal(<GameDetailsItem serverAPI={serverAPI} shortname={gameData.ShortName} initActionSet={initActionSet} initAction={initAction} />);
                         //Router.CloseSideMenus();
@@ -35,7 +36,26 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                     onGamepadFocus={() => setIsFocused(true)}
                     onGamepadBlur={() => setIsFocused(false)}
                 >
-                    <img className={'libraryassetimage_Image_24_Au'} style={{ height: '100%' }} src={src} />
+                    {!hasImage ?
+                        <FaGears
+                            style={{
+                                alignSelf: 'center',
+                                flex: 'auto',
+                                height: '40%',
+                                color: '#6767675e'
+                            }}
+                        /> :
+                        <img
+                            className={'libraryassetimage_Image_24_Au'}
+                            style={{
+                                width: 'auto',
+                                height: 'auto',
+                                maxWidth: imgAreaWidth,
+                                maxHeight: imgAreaHeight
+                            }}
+                            src={hasImage ? gameData.Images[0] : ""}
+                        />
+                    }
                     {isFocused && (
                         <img
                             style={{
@@ -47,7 +67,7 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                                 top: '0',
                                 left: '0'
                             }}
-                            src={src}
+                            src={hasImage ? gameData.Images[0] : ""}
                         />
                     )}
                 </Focusable >
