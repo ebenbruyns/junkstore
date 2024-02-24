@@ -7,14 +7,14 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, gamepadUIClasses, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
-import GridContainer from "./Components/GridContainer";
+import GridContainer, { contentTabsContainerClass } from "./Components/GridContainer";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
@@ -67,7 +67,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
             content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
             id: index.toString()
         }));
-    }
+    };
     const getPages = () => {
         return content.Tabs.map((tab) => ({
             title: tab.Title,
@@ -76,18 +76,23 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
 
         } as SidebarNavigationPage));
 
-    }
+    };
 
 
     return (
         <DialogBody key={initActionSet + "_" + initAction}>
             {layout === "horizontal" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} style={{ height: "calc(100% - 40px)" }}>
-                    <div style={{ marginBottom: "40px" }} />
-                    <Tabs key="0"
+                <DialogControlsSection
+                    className={joinClassNames(contentTabsContainerClass, 'gamepadlibrary_GamepadLibrary_ZBBhe')}
+                    key={initActionSet + "_" + initAction + "horizontal"}
+                >
+                    <Tabs
+                        key="0"
                         activeTab={currentTab}
                         onShowTab={(tabID: string) => setCurrentTab(tabID)}
                         tabs={getContent()}
+                        //@ts-ignore
+                        canBeHeaderBackground={'on-outer-scroll'}
                     />
                 </DialogControlsSection>}
             {layout === "vertical" && content.Tabs.length > 0 &&
@@ -178,12 +183,12 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     };
     const configEditor = () => {
         showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
-    }
+    };
     const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args)
+        const result = await executeAction(serverAPI, actionSet, actionId, args);
         logger.debug("runScript result", result);
 
-    }
+    };
     const actionsMenu = (e: any) => {
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
@@ -200,20 +205,20 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                                 inputData: "",
                                 gameId: "",
                                 appId: ""
-                            }
+                            };
 
-                            runScript(initActionSet, action.ActionId, args)
+                            runScript(initActionSet, action.ActionId, args);
 
                         }}
-                    >{action.Title}</MenuItem>)
+                    >{action.Title}</MenuItem>);
 
                 })}
 
 
             </Menu>,
             e.currentTarget ?? window
-        )
-    }
+        );
+    };
 
     return (
         <>
