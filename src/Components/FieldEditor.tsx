@@ -16,6 +16,8 @@ import { ValueType } from "../Types/Types";
 import { KeyValuePair } from "../Types/Types";
 import { FaCog } from "react-icons/fa";
 
+const fieldEditorRootClass = 'field-editor-root';
+
 type FieldProps = {
   field: KeyValuePair;
   value: any;
@@ -150,12 +152,13 @@ export const FieldEditor: VFC<{
       style={{ display: "flex", flexDirection: "row" }}>
       <style>
         {`
-            .DialogInputLabelGroup {
+            .${fieldEditorRootClass} .DialogInputLabelGroup {
                 margin-bottom: 0;
             }
         `}
       </style>
       <Focusable
+        className={fieldEditorRootClass}
         style={{
           flex: "1",
           display: "flex",

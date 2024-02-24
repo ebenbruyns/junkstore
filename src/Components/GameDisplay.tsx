@@ -22,6 +22,9 @@ import { BatEditor } from "../BatEditor";
 import Logger from "../Utils/logger";
 import { ExeRunner } from "../ExeRunner";
 import { getAppDetails } from "../Utils/executeAction";
+
+const gameDisplayRootClass = 'game-display-root';
+
 interface GameDisplayProperties {
   serverApi: ServerAPI;
   name: string;
@@ -176,6 +179,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
 
       <Focusable
+        className={gameDisplayRootClass}
         // @ts-ignore
         focusableIfNoChildren={true}
 
@@ -226,10 +230,10 @@ const GameDisplay: VFC<GameDisplayProperties> = (
           style={{ display: "flex", flexDirection: "row" }} focusable={true}>
           <style>
             {`
-            .DialogInputLabelGroup {
+            .${gameDisplayRootClass} .DialogInputLabelGroup {
                 margin-bottom: 0;
             }
-            .ButtonItem {
+            .${gameDisplayRootClass} .ButtonItem {
               margin-bottom: 0;
             }
         `}

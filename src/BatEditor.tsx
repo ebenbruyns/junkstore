@@ -8,6 +8,8 @@ import { ActionSet, FileData, FilesData, SaveRefresh } from "./Types/Types";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
 
+const batEditorRootClass = 'bat-editor-modal-root';
+
 export const BatEditor: VFC<EditorProperties> = ({
     serverAPI,
     initActionSet,
@@ -49,12 +51,13 @@ export const BatEditor: VFC<EditorProperties> = ({
         <>
             <style>
                 {`
-        .GenericConfirmDialog {
+        .${batEditorRootClass}.GenericConfirmDialog {
             width: 100% !important,
             height: 100% !important,
         }
     `} </style>
             <ModalRoot
+                className={batEditorRootClass}
                 bAllowFullSize={true}
                 // @ts-ignore
                 bAllowFullSizeMobile={true}

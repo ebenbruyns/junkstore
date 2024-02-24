@@ -8,6 +8,8 @@ import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
 import { GameStateUpdate, executeAction } from "../Utils/executeAction";
 
+const gameDetailsRootClass = 'game-details-modal-root';
+
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;
     shortname: string;
@@ -376,13 +378,13 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         <>
             <style>
                 {`
-                            .GenericConfirmDialog {
+                            .${gameDetailsRootClass}.GenericConfirmDialog {
                                 width: 100% !important;
                                 height: 100% !important;
                                 padding: 0px !important;
                                 margin: 0px !important;
                             }
-                            .ModalPosition {
+                            .${gameDetailsRootClass} .ModalPosition {
                                 scroll-padding: 0px !important;
                                 padding: 0px !important;
                                 margin: -10px !important;
@@ -391,6 +393,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             </style>
 
             <ModalRoot
+                className={gameDetailsRootClass}
                 // @ts-ignore
                 style={{ width: 800, height: "100%", padding: "0px", margin: "0px", background: parent }}
                 onCancel={closeModal}
