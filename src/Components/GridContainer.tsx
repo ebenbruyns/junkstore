@@ -6,15 +6,12 @@ import GameGridItem from './GameGridItem';
 export const contentTabsContainerClass = 'content-tabs-container'
 interface GridContainerProperties {
     games: GameData[];
-    filterFn: () => void;
-    limitFn: () => void;
-    limited: boolean;
     serverAPI: ServerAPI;
     initActionSet: string;
     initAction: string;
 }
 
-const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterFn, limitFn, limited, initActionSet, initAction }) => {
+const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, initActionSet, initAction }) => {
     const imgAreaWidth = '120px';
     const imgAreaHeight = '165px';
 
@@ -34,11 +31,8 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
                     gridTemplateColumns: `repeat(auto-fill, ${imgAreaWidth})`,
                     gridTemplateRows: "repeat(6, 1fr)",
                     overflow: "visible",
+                    marginTop: '15px'
                 }}
-                onSecondaryActionDescription="Toggle Installed Filter"
-                onSecondaryButton={filterFn}
-                onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-                onOptionsButton={limitFn}
             >
                 {games.map((game: GameData) => (
                     <GameGridItem
@@ -46,9 +40,6 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, filterF
                         serverAPI={serverAPI}
                         imgAreaWidth={imgAreaWidth}
                         imgAreaHeight={imgAreaHeight}
-                        // filterFn={filterFn}
-                        // limitFn={limitFn}
-                        // limited={limited}
                         initActionSet={initActionSet}
                         initAction={initAction}
                     />

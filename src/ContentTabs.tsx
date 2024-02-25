@@ -222,149 +222,90 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
 
     return (
         <>
-
             {content.Type === "GameGrid" && (
-                <>
-
-
-                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />}
-                    <Focusable //key={initActionSet + "_" + initAction}
-
-                        // @ts-ignore
-                        focusableIfNoChildren={true}
-
-                        style={{
-                            display: "flex",
-                            marginLeft: "0px",
-                            marginBottom: "1em",
-                            color: "white",
-
-                            //justifyContent: "space-between",
-                            //flexFlow: "row ",
-                            flex: "1",
-                            alignItems: "flex-end",
-                        }}
-
-                        onSecondaryActionDescription="Toggle Installed Filter"
-                        onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
-                        onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-                        onOptionsButton={() => setLimited(!limited)}
-                    >
-                        <TextField
-                            placeholder="Search"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{
-                                minWidth: "685px",
-                                flexGrow: "10",
-                            }}
-                        />
+                <Focusable
+                    onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
+                    onOptionsButton={() => setLimited(!limited)}
+                    onSecondaryActionDescription="Toggle Installed Filter"
+                    onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
+                    style={{ paddingTop: '15px' }}
+                >
+                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />} {/*this should probably be changed*/}
+                    <Focusable style={{ display: "flex", gap: '15px' }}>
+                        <div style={{ width: '100%' }}>
+                            <TextField
+                                placeholder="Search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                         <DialogButton
                             onClick={actionsMenu}
                             onOKButton={actionsMenu}
-                            style={{
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-                                flexDirection: "column",
-                            }}
+                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                         >
-                            <FaSlidersH
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
+                            <FaSlidersH style={{ verticalAlign: 'middle' }} />
                         </DialogButton>
                         <DialogButton
                             onClick={configEditor}
                             onOKButton={configEditor}
-                            style={{
-
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-
-
-                            }}
+                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                         >
-                            <FaCog
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
+                            <FaCog style={{ verticalAlign: 'middle' }} />
                         </DialogButton>
                     </Focusable>
                     {(content.Content as GameDataList).NeedsLogin === "true" && (
-                        <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                        <div style={{ paddingTop: '15px' }}>
+                            <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                        </div>
                     )}
                     <GridContainer
                         serverAPI={serverAPI}
                         games={(content.Content as GameDataList).Games}
-                        limited={limited}
-                        limitFn={() => setLimited(!limited)}
-                        filterFn={() => setFilterInstalled(!filterInstalled)}
                         initActionSet={actionSetName}
-                        initAction="" />
-                </>
-            )
-            }
-            {
-                content.Type === "StoreTabs" &&
+                        initAction=""
+                    />
+                </Focusable>
+            )}
+            {content.Type === "StoreTabs" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="horizontal"
                     initAction={initAction}
-                    initActionSet={initActionSet} />
-            }
-            {
-                content.Type === "SideBarPage" &&
+                    initActionSet={initActionSet}
+                />}
+            {content.Type === "SideBarPage" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="vertical"
                     initAction={initAction}
-                    initActionSet={initActionSet} />
+                    initActionSet={initActionSet}
+                />
             }
-            {
-                content.Type === "MainMenu" &&
+            {content.Type === "MainMenu" &&
                 <MainMenu //key={initActionSet + "_" + initAction} 
                     serverApi={serverAPI}
                     content={content.Content as StoreContent}
-                    initActionSet={actionSetName} initAction="" />
+                    initActionSet={actionSetName}
+                    initAction=""
+                />
             }
-            {
-                content.Type === "Text" &&
+            {content.Type === "Text" &&
                 <TextContent //key={initActionSet + "_" + initAction} 
-                    content={content.Content as string} />
+                    content={content.Content as string}
+                />
             }
-            {
-                content.Type === "Html" &&
+            {content.Type === "Html" &&
                 <HtmlContent //key={initActionSet + "_" + initAction}
-                    content={content.Content as string} />
+                    content={content.Content as string}
+                />
             }
-
-            {
-                content.Type === "Error" &&
+            {content.Type === "Error" &&
                 <ErrorDisplay //key={initActionSet + "_" + initAction}
-                    error={content.Content as ContentError} />
+                    error={content.Content as ContentError}
+                />
             }
-            {
-                content.Type === "Empty" &&
-                <Loading />
-            }
+            {content.Type === "Empty" && <Loading />}
         </>
     );
 };
