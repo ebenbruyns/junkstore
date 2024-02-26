@@ -1,22 +1,19 @@
 // Define the game image
 
-import { Focusable, ServerAPI, Spinner, showModal } from "decky-frontend-lib";
+import { Focusable, Spinner } from "decky-frontend-lib";
 import { VFC, useState } from 'react';
 import { GameData } from '../Types/Types';
-import { GameDetailsItem } from './GameDetailsItem';
 import { FaGears } from "react-icons/fa6";
 
 interface GameGridItemProps {
     gameData: GameData;
     imgAreaWidth: string;
     imgAreaHeight: string;
-    serverAPI: ServerAPI;
-    initActionSet: string;
-    initAction: string;
+    onClick: () => void;
     noName?: boolean;
 }
 
-const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaHeight, serverAPI, initActionSet, initAction, noName }) => {
+const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaHeight, onClick, noName }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [isImgLoaded, setIsImgLoaded] = useState(false);
 
@@ -27,11 +24,7 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
             onGamepadFocus={() => setIsFocused(true)}
             onGamepadBlur={() => setIsFocused(false)}
             noFocusRing={true}
-            onActivate={() => {
-                showModal(<GameDetailsItem serverAPI={serverAPI} shortname={gameData.ShortName} initActionSet={initActionSet} initAction={initAction} />);
-                //Router.CloseSideMenus();
-                //Router.Navigate("/game/" + tabindex + "/" + game.ShortName);
-            }}
+            onActivate={onClick}
             onOKActionDescription="Show details"
         >
             <div style={{ height: imgAreaHeight, display: 'flex', alignItems: 'center' }}>
@@ -90,9 +83,11 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                     )}
                 </div >
             </div>
-            <div style={{ padding: '6px 1px 0', fontSize: '13px', textAlign: 'center', color: '#c2c0c0' }}>
-                {gameData.Name}
-            </div>
+            {!noName && (
+                <div style={{ padding: '6px 1px 0', fontSize: '13px', textAlign: 'center', color: '#c2c0c0' }}>
+                    {gameData.Name}
+                </div>
+            )}
         </Focusable>
     );
 };

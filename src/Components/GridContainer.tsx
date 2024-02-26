@@ -1,9 +1,10 @@
-import { Focusable, ServerAPI, gamepadTabbedPageClasses } from "decky-frontend-lib";
+import { Focusable, ServerAPI, gamepadTabbedPageClasses, showModal } from "decky-frontend-lib";
 import { GameData } from "../Types/Types";
 import { VFC } from "react";
 import GameGridItem from './GameGridItem';
+import { GameDetailsItem } from './GameDetailsItem';
 
-export const contentTabsContainerClass = 'content-tabs-container'
+export const contentTabsContainerClass = 'content-tabs-container';
 interface GridContainerProperties {
     games: GameData[];
     serverAPI: ServerAPI;
@@ -27,21 +28,19 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, initAct
                 style={{
                     display: "grid",
                     justifyContent: "space-between",
-                    gridGap: "16px",
+                    gridGap: "16px 12px",
                     gridTemplateColumns: `repeat(auto-fill, ${imgAreaWidth})`,
-                    gridTemplateRows: "repeat(6, 1fr)",
-                    overflow: "visible",
                     marginTop: '15px'
                 }}
+                //@ts-ignore
+                navEntryPreferPosition={2} //maintain x
             >
                 {games.map((game: GameData) => (
                     <GameGridItem
                         gameData={game}
-                        serverAPI={serverAPI}
                         imgAreaWidth={imgAreaWidth}
                         imgAreaHeight={imgAreaHeight}
-                        initActionSet={initActionSet}
-                        initAction={initAction}
+                        onClick={() => showModal(<GameDetailsItem serverAPI={serverAPI} shortname={game.ShortName} initActionSet={initActionSet} initAction={initAction} />)}
                     />
                 ))}
             </Focusable>
