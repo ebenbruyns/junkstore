@@ -1,6 +1,6 @@
 import { Focusable, ServerAPI, gamepadTabbedPageClasses, showModal } from "decky-frontend-lib";
 import { GameData } from "../Types/Types";
-import { VFC } from "react";
+import { VFC, memo } from "react";
 import GameGridItem from './GameGridItem';
 import { GameDetailsItem } from './GameDetailsItem';
 
@@ -12,7 +12,7 @@ interface GridContainerProperties {
     initAction: string;
 }
 
-const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, initActionSet, initAction }) => {
+const GridContainer: VFC<GridContainerProperties> = memo(({ serverAPI, games, initActionSet, initAction }) => {
     const imgAreaWidth = '120px';
     const imgAreaHeight = '165px';
 
@@ -46,5 +46,5 @@ const GridContainer: VFC<GridContainerProperties> = ({ serverAPI, games, initAct
             </Focusable>
         </>
     );
-};
+});
 export default GridContainer;
