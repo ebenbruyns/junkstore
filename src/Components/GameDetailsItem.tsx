@@ -377,16 +377,11 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             <style>
                 {`
                 .${gameDetailsRootClass} .GenericConfirmDialog {
-                    // position: absolute;
-                    // top: 0;
-                    // left: 0;
                     width: 100%;
                     height: 100%;
-                    // padding: 0 24px 20px;
                     padding: 0;
                     border: 0;
                     border-radius: 0;
-                    // background: radial-gradient(155.42% 100% at 0% 0%, #060a0e 0 0%, #0e141b 100%);
                     background: #0e172175;
                     backdrop-filter: blur(8px);
                 }

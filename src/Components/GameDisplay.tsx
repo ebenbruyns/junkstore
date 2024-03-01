@@ -8,8 +8,10 @@ import {
     showModal,
     ServerAPI,
     ProgressBar,
+    FocusableProps,
+    afterPatch,
 } from "decky-frontend-lib";
-import { VFC, useEffect, useRef, useState } from "react";
+import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
 import { EditorAction, MenuAction, ProgressUpdate } from "../Types/Types";
 import { ConfEditor } from "../ConfEditor";
@@ -44,7 +46,6 @@ interface GameDisplayProperties {
     reloadData: () => void;
 }
 
-//@ts-ignore
 
 const GameDisplay: VFC<GameDisplayProperties> = (
     {
@@ -55,7 +56,6 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         images,
         steamClientID,
         installer,
-        // @ts-ignore
         uninstaller,
         cancelInstall,
         runner,
@@ -83,7 +83,6 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 showModal(<ConfEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} refreshParent={reloadData} />);
                             if (editor.Type == "FileEditor")
                                 showModal(<BatEditor serverAPI={serverApi} initActionSet={initActionSet} initAction={editor.InitActionId} contentId={editor.ContentId} refreshParent={reloadData} />);
-
                         }
                     }>{editor.Title}</MenuItem>;
                 })}
@@ -102,7 +101,6 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
                             logger.debug("show exe list");
                             showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} refreshParent={reloadData} />);
-
                         }
                     }>Run exe in Game folder</MenuItem>}
                 {steamClientID !== "" &&
@@ -132,10 +130,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 };
                                 if (steamClientID != "") {
                                     logger.debug("steamClientID: ", steamClientID);
-                                    //@ts-ignore
                                     const id = parseInt(steamClientID);
                                     const details = await getAppDetails(id);
-                                    // @ts-ignore
                                     if (details == null) {
                                         logger.error("details is null"); return;
 
@@ -143,7 +139,6 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                     else {
                                         logger.debug("details: ", details);
                                         const compatToolName = details.strCompatToolName;
-                                        //@ts-ignore
                                         const startDir = details.strShortcutStartDir;
                                         args.startDir = startDir;
                                         args.compatToolName = compatToolName;
@@ -174,11 +169,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     // background: 'linear-gradient(0deg, #0000007d, transparent)'
                 }}
             >
-                <div style={{ height: '165px' }}>
-                    <ImageMarquee sources={images} height='165px' />
-                </div>
+                <ImageMarquee sources={images} height='165px' />
             </div>
-            <Focusable
+            <FocusOnMount
                 style={{
                     display: 'grid',
                     gridTemplateColumns: '340px auto',
@@ -225,14 +218,20 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </div>
                 </div>
                 <div style={{ width: '100%', padding: '8px 0', color: '#c2c0c0' }}>
-                    <ScrollableWindow height='100%'>
+                    <ScrollableWindow
+                        height='100%'
+                        onCancel={() => {
+                            clearActiveGame();
+                            closeModal();
+                        }}
+                    >
                         <div
                             style={{ paddingRight: '10px', whiteSpace: 'pre-wrap' }}
                             dangerouslySetInnerHTML={{ __html: description }}
                         />
                     </ScrollableWindow>
                 </div>
-            </Focusable>
+            </FocusOnMount>
         </>
     );
 };
@@ -244,16 +243,12 @@ interface ImageMarqueeProps {
 
 const ImageMarquee: VFC<ImageMarqueeProps> = ({ sources, height }) => {
     const [key, setKey] = useState(0); //used to force marquee to remount so it works properly
-
     const ref = useRef<HTMLDivElement>(null);
 
     const checkOverflow = () => {
         if (ref.current?.parentElement?.parentElement) {
             const hasOverflow = ref.current.parentElement.parentElement.clientWidth < ref.current.scrollWidth;
-            if (hasOverflow) {
-                console.log('marquee is overflowing');
-                setKey(1);
-            }
+            if (hasOverflow) setKey(1);
         }
     };
 
@@ -297,6 +292,23 @@ const MarqueeImage: VFC<MarqueeImageProps> = ({ src, onLoad }) => {
             onLoad={() => setIsImgLoaded(true)}
             onError={() => setError(true)}
         />;
+};
+
+const FocusOnMount: FC<FocusableProps> = (props) => {
+    const [shouldFocus, setShouldFocus] = useState(true);
+    const focusable = <Focusable {...props} />;
+
+    if (shouldFocus) {
+        afterPatch(focusable.type, 'render', (_: any, ret: any) => {
+            setShouldFocus(() => {
+                ret.props.value.BTakeFocus(3);
+                return false;
+            });
+            return ret;
+        }, { singleShot: true });
+    }
+
+    return focusable;
 };
 
 export default GameDisplay;
