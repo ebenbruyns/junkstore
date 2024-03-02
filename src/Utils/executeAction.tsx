@@ -77,12 +77,12 @@ const cleanupIds = async () => {
     }
 }
 //* this is where you will be assuming the type of content and if the case is amibigous you can use type unions and deal with each possiblitiy outside the function
-export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult<Content> | null> { 
+export async function executeAction<ContentType>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult<ContentType> | null> { 
 
     const logger = new Logger("executeAction");
-    logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
-    logger.debug("Args: ", args);
-    const res = await serverAPI.callPluginMethod<{}, ContentResult<Content | LaunchOptions | ContentError>>("execute_action", {
+    // logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
+    // logger.debug("Args: ", args);
+    const res = await serverAPI.callPluginMethod<{}, ContentResult<ContentType | LaunchOptions | ContentError>>("execute_action", {
         actionSet: actionSet,
         actionName: actionName,
         ...args
@@ -145,7 +145,7 @@ export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: st
         return null;
     }
 
-    return res.result as ContentResult<Content>; //only acceptable because we've handle the other possibilities explicitly
+    return res.result as ContentResult<ContentType>; //only acceptable because we've handle the other possibilities explicitly
 }
 
 export async function getAppDetails(appId: number): Promise<AppDetails | null> {

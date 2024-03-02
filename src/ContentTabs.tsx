@@ -7,27 +7,25 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, gamepadUIClasses, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, joinClassNames } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
+import { ActionSet, ContentError, ContentResult, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
-import GridContainer, { contentTabsContainerClass } from "./Components/GridContainer";
+import { GridContent, contentTabsContainerClass } from "./Components/GridContainer";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
-import { LoginContent } from "./Components/LoginContent";
-import { ConfEditor } from "./ConfEditor";
-import { FaCog, FaSlidersH } from "react-icons/fa";
-import { GameDetailsItem } from "./Components/GameDetailsItem";
+import { useCachedData } from './hooks/useCachedData';
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
     initActionSet: string;
     initAction: string;
     layout: string;
+    subActionSet: string;
 }
 export interface StoreTabsState {
     currentTab: string;
@@ -40,83 +38,28 @@ export const parseTabsState = (state: string | null): StoreTabsState => {
         };
     }
     return JSON.parse(state) as StoreTabsState;
+};
+
+interface ContentData {
+    serverAPI: ServerAPI;
+    content: Content;
+    initActionSet: string;
+    initAction: string;
+    subActionSet: string;
 }
 
-export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initAction, initActionSet, layout }) => {
+export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs: content, initAction, initActionSet, layout, subActionSet: actionSetName }) => {
     const logger = new Logger("StoreTabs");
-    const state = localStorage.getItem(`${initActionSet}_${initAction}_tabs`)
+    const state = localStorage.getItem(`${initActionSet}_${initAction}_tabs`);
     const savedState = parseTabsState(state);
-    logger.debug("Initial Saved state: ", savedState);
-    const [currentTab, setCurrentTab] = useState(savedState ? savedState?.currentTab : "-1");
-    const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
-    const [actionSetName, setActionSetName] = useState("");
+    // logger.debug("Initial Saved state: ", savedState);
+    const { cacheData, setCacheData } = useCachedData(initActionSet, initAction, 'tabs', { currentTab: "-1" });
+    // const [currentTab, setCurrentTab] = useState(savedState ? savedState?.currentTab : "-1");
+    // const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
+    // const [actionSetName, setActionSetName] = useState("");
+    // console.log('con tabs', content, actionSetName);
 
-    const saveState = () => {
-        if (currentTab !== undefined) {
-            const state = {
-                currentTab
-            };
-            logger.debug("Saving state: ", state);
-            localStorage.setItem(`${initActionSet}_${initAction}_tabs`, JSON.stringify(state));
-        }
-
-    };
-
-    const loadState = () => {
-        const savedState = localStorage.getItem(`${initActionSet}_${initAction}_tabs`);
-        logger.debug("Loading state: ", savedState);
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            setCurrentTab(state.currentTab);
-        }
-    };
-    useEffect(() => {
-        saveState();
-    }, [currentTab]);
-    useEffect(() => {
-
-
-        loadState();
-
-        const handleBeforeUnload = () => {
-            saveState();
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [initActionSet, initAction]);
-
-    useEffect(() => {
-        onInit();
-        loadState();
-    }, []);
-
-    const onInit = async () => {
-        try {
-            logger.debug(`Initializing StoreTabs with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            if (!initActionSet || initActionSet === "" || !initAction || initAction === "") {
-                logger.debug("initActionSet or initAction is empty");
-                return;
-            }
-            const data = await executeAction(serverAPI, initActionSet,
-                initAction,
-                {
-                    inputData: "",
-                }
-            );
-            const result = data.Content as ActionSet;
-            setActionSetName(result.SetName);
-            setContent(tabs);
-            //setCurrentTab("0");
-            logger.debug(`StoreTabs initialized with actionSetName: ${result.SetName}`);
-        } catch (error) {
-            logger.error(`Error initializing StoreTabs: ${error}`);
-        }
-    };
-    const getContent = () => {
+    const getTabs = () => {
         return content.Tabs.map((tab, index) => ({
             title: tab.Title,
             content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
@@ -133,7 +76,6 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
 
     };
 
-
     return (
         <DialogBody key={initActionSet + "_" + initAction}>
             {layout === "horizontal" && content.Tabs.length > 0 &&
@@ -143,9 +85,9 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
                 >
                     <Tabs
                         key="0"
-                        activeTab={currentTab}
-                        onShowTab={(tabID: string) => setCurrentTab(tabID)}
-                        tabs={getContent()}
+                        activeTab={cacheData.currentTab}
+                        onShowTab={(tabID: string) => setCacheData({ currentTab: tabID })}
+                        tabs={getTabs()}
                         //@ts-ignore
                         canBeHeaderBackground={'on-outer-scroll'}
                     />
@@ -169,83 +111,92 @@ export interface ContentState {
     activeGame: string;
 };
 
-export const parseContentState = (state: string | null): ContentState => {
-    if (!state || state === "") {
-        return {
-            searchQuery: "",
-            filterInstalled: true,
-            limited: true,
-            activeGame: ""
-        };
-    }
-    return JSON.parse(state) as ContentState;
-}
+// function useContent() {
+//     logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
+//     const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
+//     logger.debug("init result: ", actionSetRes);
+//     if (!actionSetRes) return;
+//     const actionSet = actionSetRes.Content;
+//     logger.debug("Action set: ", actionSet);
+//     const contentRes = await executeAction(serverAPI, actionSet.SetName, "GetContent", { inputData: "" });
+//     setActionSetName(actionSet.SetName);
+//     setContent(contentRes);
+//     logger.debug("GetContent result: ", contentRes);
+// }
 
 export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; padTop?: boolean; }> = ({
-    serverAPI, initActionSet, initAction, padTop = true }) => {
+    serverAPI, initActionSet, initAction, padTop = true, }) => {
     const logger = new Logger("Content");
-    const state = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`)
-    const savedState = parseContentState(state);
+    // const state = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`)
+    // const savedState = parseContentState(state);
     const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState<string>("");
-    const [searchQuery, setSearchQuery] = useState(savedState ? savedState?.searchQuery : "");
-    const [filterInstalled, setFilterInstalled] = useState(savedState ? savedState?.filterInstalled : true);
-    const [limited, setLimited] = useState(savedState ? savedState?.limited : true);
-    const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-    const [activeGame, setActiveGame] = useState(savedState ? savedState?.activeGame : "");
-    const saveState = () => {
-        logger.debug("Saving state");
-        const state = {
-            searchQuery,
-            filterInstalled,
-            limited,
-            activeGame
-        };
-        logger.debug("State: ", state);
-        localStorage.setItem(`${initActionSet}_${initAction}_searchquery`, JSON.stringify(state));
+    // const [searchQuery, setSearchQuery] = useState(savedState ? savedState?.searchQuery : "");
+    // const [filterInstalled, setFilterInstalled] = useState(savedState ? savedState?.filterInstalled : true);
+    // const [limited, setLimited] = useState(savedState ? savedState?.limited : true);
+    // const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
+    // const [activeGame, setActiveGame] = useState(savedState ? savedState?.activeGame : "");
+    // console.log('content', initAction, initActionSet, actionSetName);
+    // const saveState = () => {
+    //     logger.debug("Saving state");
+    //     const state = {
+    //         searchQuery,
+    //         filterInstalled,
+    //         limited,
+    //         activeGame
+    //     };
+    //     logger.debug("State: ", state);
+    //     localStorage.setItem(`${initActionSet}_${initAction}_searchquery`, JSON.stringify(state));
+    // };
+
+    // const loadState = () => {
+    //     logger.debug("Loading state");
+    //     const savedState = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`);
+    //     logger.debug("Saved state: ", savedState);
+    //     if (savedState) {
+    //         const state = JSON.parse(savedState);
+    //         setSearchQuery(state.searchQuery);
+    //         setFilterInstalled(state.filterInstalled);
+    //         setLimited(state.limited);
+    //         setActiveGame(state.activeGame);
+    //     }
+    // };
+    // const activeGameSetter = (shortname: string) => {
+    //     logger.debug("Setting active game: ", shortname);
+    //     setActiveGame(shortname);
+    // }
+    // const clearActiveGame = () => {
+    //     logger.debug("Clearing active game");
+    //     setActiveGame("");
+    // }
+    // useEffect(() => {
+    //     logger.debug("Saving state on useEffect");
+    //     saveState();
+    // }
+    //     , [searchQuery, filterInstalled, limited, activeGame]);
+
+    // useEffect(() => {
+
+
+    //     loadState();
+
+    //     const handleBeforeUnload = () => {
+    //         saveState();
+    //     };
+
+    //     window.addEventListener("beforeunload", handleBeforeUnload);
+
+    //     return () => {
+    //         window.removeEventListener("beforeunload", handleBeforeUnload);
+    //     };
+    // }, [initActionSet, initAction]);
+
+    const getContentArgs = async (actionArgs: {[param: string]: string}) => {
+            const data = await executeAction(serverAPI, actionSetName, "GetContent", actionArgs);
+            logger.log('refreshed', data)
+            setContent(data as ContentResult);
+
     };
-
-    const loadState = () => {
-        logger.debug("Loading state");
-        const savedState = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`);
-        logger.debug("Saved state: ", savedState);
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            setSearchQuery(state.searchQuery);
-            setFilterInstalled(state.filterInstalled);
-            setLimited(state.limited);
-            setActiveGame(state.activeGame);
-        }
-    };
-    const activeGameSetter = (shortname: string) => {
-        logger.debug("Setting active game: ", shortname);
-        setActiveGame(shortname);
-    }
-    const clearActiveGame = () => {
-        logger.debug("Clearing active game");
-        setActiveGame("");
-    }
-    useEffect(() => {
-        logger.debug("Saving state on useEffect");
-        saveState();
-    }
-        , [searchQuery, filterInstalled, limited, activeGame]);
-
-    useEffect(() => {
-
-
-        loadState();
-
-        const handleBeforeUnload = () => {
-            saveState();
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [initActionSet, initAction]);
 
     const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
         if (!setName) return;
@@ -257,157 +208,114 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                     installed: String(installed),
                     limited: String(limited)
                 });
-            setContent(data as ContentResult);
-        } catch (error) {
-            logger.error("GetContent: ", error);
-        }
-    };
-    useEffect(() => {
-        logger.log("Content: ", content);
-        if (content.Type !== "Empty" && content.Type !== "Error") {
-            if (activeGame && activeGame !== "") {
-                logger.debug("activeGame: ", activeGame);
-                showModal(<GameDetailsItem serverAPI={serverAPI} shortname={activeGame} initActionSet={actionSetName} initAction="" clearActiveGame={clearActiveGame} />)
             }
-            else {
-                logger.debug("No active game");
-            }
-        }
-    }, [content]);
+            catch (e){
 
-    useEffect(() => {
-        logger.log(`Search query: ${searchQuery}, Filter installed: ${filterInstalled}, Limited: ${limited}, Action set name: ${actionSetName}`);
-        fetchData(actionSetName, searchQuery, filterInstalled, limited);
-    }, [searchQuery, filterInstalled, limited, actionSetName]);
+            }
+        }
+
+    // useEffect(() => {
+    //     logger.log("Content: ", content);
+    //     if (content.Type !== "Empty" && content.Type !== "Error") {
+    //         if (activeGame && activeGame !== "") {
+    //             logger.debug("activeGame: ", activeGame);
+    //             showModal(<GameDetailsItem serverAPI={serverAPI} shortname={activeGame} initActionSet={actionSetName} initAction="" clearActiveGame={clearActiveGame} />)
+    //         }
+    //         else {
+    //             logger.debug("No active game");
+    //         }
+    //     }
+    // }, [content]);
+
+    // useEffect(() => {
+    //     // logger.log(`Search query: ${searchQuery}, Filter installed: ${filterInstalled}, Limited: ${limited}, Action set name: ${actionSetName}`);
+    //     fetchData(actionSetName);
+    // }, [ actionSetName]);
 
     useEffect(() => {
         onInit();
-        loadState();
+        // loadState();
 
     }, []);
 
     const onInit = async () => {
         try {
             logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const data = await executeAction(serverAPI, initActionSet,
-                initAction,
-                {
-                    inputData: ""
-                });
-            logger.debug("init result: ", data);
-            const result = data.Content as ActionSet;
-            setActionSetName(result.SetName);
-            const menu = await executeAction(serverAPI, result.SetName,
-                "GetContent",
-                {
-                    inputData: ""
-                });
-            setContent(menu);
-            logger.debug("GetContent result: ", menu);
-            const actionRes = await executeAction(serverAPI, result.SetName,
-                "GetScriptActions",
-                {
-                    inputData: ""
-                }) as ContentResult;
-            logger.debug("onInit actionRes", actionRes);
-            if (actionRes.Type === "ScriptSet") {
-                const scriptActions = actionRes.Content as ScriptActions;
-                logger.debug("onInit scriptActions", scriptActions);
-                setScriptActions(scriptActions.Actions);
-            }
+            const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
+            logger.debug("init result: ", actionSetRes);
+            if (!actionSetRes) return logger.error('action result is null');
+            const actionSet = actionSetRes.Content;
+            logger.debug("Action set: ", actionSet);
+            const contentRes = await executeAction(serverAPI, actionSet.SetName, "GetContent", { inputData: "" });
+            setActionSetName(actionSet.SetName);
+            setContent(contentRes);
+            // logger.debug("GetContent result: ", contentRes);
+            // const actionRes = await executeAction(serverAPI, result.SetName,
+            //     "GetScriptActions",
+            //     {
+            //         inputData: ""
+            //     }) as ContentResult;
+            // logger.debug("onInit actionRes", actionRes);
+            // if (actionRes.Type === "ScriptSet") {
+            //     const scriptActions = actionRes.Content as ScriptActions;
+            //     logger.debug("onInit scriptActions", scriptActions);
+            //     setScriptActions(scriptActions.Actions);
+            // }
 
         } catch (error) {
             logger.error("OnInit: ", error);
         }
     };
-    const configEditor = () => {
-        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
-    };
-    const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args);
-        logger.debug("runScript result", result);
+    // const configEditor = () => {
+    //     showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
+    // };
+    // const runScript = async (actionSet: string, actionId: string, args: any) => {
+    //     const result = await executeAction(serverAPI, actionSet, actionId, args);
+    //     logger.debug("runScript result", result);
 
-    };
-    const actionsMenu = (e: any) => {
-        showContextMenu(
-            <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-                {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
-
-
-                    return (<MenuItem onSelected={
-                        async () => {
-                            const args = {
-                                shortname: "",
-                                steamClientID: "",
-                                startDir: "",
-                                compatToolName: "",
-                                inputData: "",
-                                gameId: "",
-                                appId: ""
-                            };
-
-                            runScript(initActionSet, action.ActionId, args);
-
-                        }}
-                    >{action.Title}</MenuItem>);
-
-                })}
+    // };
+    // const actionsMenu = (e: any) => {
+    //     showContextMenu(
+    //         <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
+    //             {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
 
 
-            </Menu>,
-            e.currentTarget ?? window
-        );
-    };
+    //                 return (<MenuItem onSelected={
+    //                     async () => {
+    //                         const args = {
+    //                             shortname: "",
+    //                             steamClientID: "",
+    //                             startDir: "",
+    //                             compatToolName: "",
+    //                             inputData: "",
+    //                             gameId: "",
+    //                             appId: ""
+    //                         };
+
+    //                         runScript(initActionSet, action.ActionId, args);
+
+    //                     }}
+    //                 >{action.Title}</MenuItem>);
+
+    //             })}
+
+
+    //         </Menu>,
+    //         e.currentTarget ?? window
+    //     );
+    // };
 
     return (
         <>
             {content.Type === "GameGrid" && (
-                <Focusable
-                    onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
-                    onOptionsButton={() => setLimited(!limited)}
-                    onSecondaryActionDescription="Toggle Installed Filter"
-                    onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-                    style={{ paddingTop: '15px' }}
-                >
-                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />} {/*this should probably be changed*/}
-                    <Focusable style={{ display: "flex", gap: '15px' }}>
-                        <div style={{ width: '100%' }}>
-                            <TextField
-                                placeholder="Search"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <DialogButton
-                            onClick={actionsMenu}
-                            onOKButton={actionsMenu}
-                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
-                        >
-                            <FaSlidersH style={{ verticalAlign: 'middle' }} />
-                        </DialogButton>
-                        <DialogButton
-                            onClick={configEditor}
-                            onOKButton={configEditor}
-                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
-                        >
-                            <FaCog style={{ verticalAlign: 'middle' }} />
-                        </DialogButton>
-                    </Focusable>
-                    {(content.Content as GameDataList).NeedsLogin === "true" && (
-                        <div style={{ paddingTop: '15px' }}>
-                            <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
-                        </div>
-                    )}
-                    <GridContainer
-                        serverAPI={serverAPI}
-                        games={(content.Content as GameDataList).Games}
-                        initActionSet={actionSetName}
-                        initAction=""
-                   
-                        setActiveGame={activeGameSetter}
-                        clearActiveGame={clearActiveGame}
-                    />
-                </Focusable>
+                <GridContent
+                    content={content.Content}
+                    serverAPI={serverAPI}
+                    initAction={initAction}
+                    initActionSet={initActionSet}
+                    actionSetName={actionSetName}
+                    refreshContent={getContentArgs}
+                />
             )}
             {content.Type === "StoreTabs" &&
                 <ContentTabs serverAPI={serverAPI}
@@ -415,6 +323,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                     layout="horizontal"
                     initAction={initAction}
                     initActionSet={initActionSet}
+                    subActionSet={actionSetName}
                 />}
             {content.Type === "SideBarPage" &&
                 <ContentTabs serverAPI={serverAPI}
@@ -422,13 +331,14 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                     layout="vertical"
                     initAction={initAction}
                     initActionSet={initActionSet}
+                    subActionSet={actionSetName}
                 />
             }
             {content.Type === "MainMenu" &&
                 <MainMenu //key={initActionSet + "_" + initAction} 
                     serverApi={serverAPI}
                     content={content.Content as StoreContent}
-                    initActionSet={actionSetName}
+                    initActionSet={'MainMenu'}
                     initAction=""
                 />
             }

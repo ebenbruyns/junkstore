@@ -186,7 +186,8 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async (_) => {
                                         logger.log("Saving config: ", confData)
-                                        const result = await executeAction<SaveRefresh /*| SomeOtherContentPossibility */>(serverAPI, //pass multiple possible Content types with a union
+                                        const result = await executeAction<SaveRefresh /*| SomeOtherContentPossibility */>( //pass multiple possible Content types with a union
+                                            serverAPI,
                                             actionSetName,
                                             "SaveContent",
                                             {
