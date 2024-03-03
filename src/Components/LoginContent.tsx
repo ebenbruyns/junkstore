@@ -1,5 +1,5 @@
-import { DialogButton, DialogLabel, Focusable, ServerAPI } from "decky-frontend-lib";
-import { VFC, useEffect, useState } from "react";
+import { DialogButton, DialogLabel, ServerAPI } from "decky-frontend-lib";
+import { ReactElement, VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, LaunchOptions, LoginStatus, SettingsData } from "../Types/Types";
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
@@ -19,7 +19,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     }
         , [LoggedIn, actionSetName]);
     const updateLoginStatus = async () => {
-        logger.debug("Updating login status with actionSetName: ", actionSetName)
+        logger.debug("Updating login status with actionSetName: ", actionSetName);
         const result = await executeAction(serverAPI, actionSetName,
             "GetContent",
             {
@@ -27,12 +27,12 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             });
         setContent(result);
         logger.debug("Login status: ", result);
-    }
+    };
     const createShortcut = async (launchOptions: LaunchOptions) => {
         logger.debug("Creating shortcut for login");
-        const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "")
-        setSteamClientId(id.toString())
-        await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options)
+        const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "");
+        setSteamClientId(id.toString());
+        await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetAppHidden(id, false);
         await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
         await executeAction(serverAPI, actionSetName,
@@ -42,7 +42,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                 value: id.toString()
             });
         return id;
-    }
+    };
     const getSteamClientId = async (launchOptions: LaunchOptions) => {
         if (SteamClientId === "") {
             logger.debug("No Shortcut found, creating one...");
@@ -52,7 +52,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             const id = parseInt(SteamClientId);
             logger.debug("Shortcut configured: ", id);
             // @ts-ignore
-            const app = appStore.allApps.find(a => { a.appid == id })
+            const app = appStore.allApps.find(a => { a.appid == id; });
             if (app) {
                 logger.debug("Shortcut found: ", id);
                 return id;
@@ -63,7 +63,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             }
 
         }
-    }
+    };
     const login = async () => {
         try {
             const data = await executeAction(serverAPI, actionSetName,
@@ -72,10 +72,10 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                     inputData: ""
                 });
 
-            const launchOptions = data.Content as LaunchOptions
+            const launchOptions = data.Content as LaunchOptions;
             setContent(data as ContentResult);
-            const id = await getSteamClientId(launchOptions)
-            const gameId = gameIDFromAppID(id)
+            const id = await getSteamClientId(launchOptions);
+            const gameId = gameIDFromAppID(id);
 
             await executeAction(serverAPI, actionSetName,
                 "Login",
@@ -99,7 +99,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             let gid = gameIDFromAppID(id);
             SteamClient.Apps.RunGame(gid, "", -1, 100);
         }, 500);
-    }
+    };
     const logout = async () => {
         try {
             const data = await executeAction(serverAPI, actionSetName,
@@ -107,7 +107,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                 {
                     inputData: ""
                 });
-            setLoggedIn("false")
+            setLoggedIn("false");
             setContent(data);
         } catch (error) {
             logger.error("Logout: ", error);
@@ -133,7 +133,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             const settings = tmp.Content as SettingsData;
             if (settings.value !== "")
                 setSteamClientId(settings.value);
-            setLoggedIn("unknown")
+            setLoggedIn("unknown");
 
         } catch (error) {
             logger.error("OnInit: ", error);
@@ -142,41 +142,30 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     useEffect(() => {
         onInit();
     }, []);
-    return (
-        <Focusable
-            style={{
-                flex: "1",
-                display: "flex",
-                gap: "8px",
-                alignItems: "flex-end",
-                marginLeft: "0em",
-                marginRight: "0em",
-                marginTop: "0em",
-                marginBottom: "1em",
-            }}
-        >
-            {content.Type === "LoginStatus" &&
-                (content.Content as LoginStatus).LoggedIn &&
-                <>
-                    <DialogLabel>Logged in as {(content.Content as LoginStatus).Username}</DialogLabel>
-                    <div style={{ flexGrow: 1, flexShrink: 1 }}></div>
-                    <DialogButton onClick={logout} style={{
-                        width: "100px", height: "40px", verticalAlign: "middle"
-                    }}>Logout</DialogButton>
-                </>}
-            {content.Type === "LoginStatus" && !(content.Content as LoginStatus).LoggedIn &&
-                <>
-                    <DialogLabel>Not logged in</DialogLabel>
-                    <div style={{ flexGrow: 1, flexShrink: 1 }}></div>
-                    <DialogButton onClick={login} style={{
-                        width: "100px", height: "40px", verticalAlign: "middle"
-                    }}>Login</DialogButton>
-                </>}
-            {content.Type === "Empty" &&
-                <div>Checking status...</div>}
-            {content.Type === "Error" &&
-                <ErrorDisplay error={content.Content as ContentError} />}
-        </Focusable>
-    );
 
+    const labelStyle = { flex: 'auto', margin: '0', display: 'flex', alignItems: 'center' };
+    let innerElement: ReactElement = <></>;
+
+    switch (content.Type) {
+        case 'LoginStatus':
+            const isLoggedIn = (content.Content as LoginStatus).LoggedIn;
+            innerElement = (
+                <>
+                    <DialogLabel style={labelStyle}>Logged in as {(content.Content as LoginStatus).Username}</DialogLabel>
+                    <DialogButton onClick={isLoggedIn ? logout : login} style={{ width: "100px", verticalAlign: "middle" }}>{isLoggedIn ? 'Logout' : 'Login'}</DialogButton>
+                </>
+            );
+            break;
+        case 'Empty':
+            innerElement = <DialogLabel style={labelStyle}>Checking status...</DialogLabel>;
+            break;
+        case 'Error':
+            innerElement = <ErrorDisplay error={content.Content as ContentError} />;
+    }
+
+    return (
+        <div style={{ display: "flex", height: '40px' }}>
+            {innerElement}
+        </div>
+    );
 };

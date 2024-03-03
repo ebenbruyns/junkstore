@@ -1,14 +1,18 @@
-import { Focusable, ModalPosition, GamepadButton, ScrollPanelGroup, gamepadDialogClasses, scrollPanelClasses } from "decky-frontend-lib";
+import { Focusable, ModalPosition, GamepadButton, ScrollPanelGroup, gamepadDialogClasses, scrollPanelClasses, FooterLegendProps } from "decky-frontend-lib";
 import { FC, useLayoutEffect, useRef, useState } from "react";
 
-export interface ScrollableWindowProps {
+export interface ScrollableWindowProps extends FooterLegendProps {
     height: string;
     fadeAmount?: string;
     scrollBarWidth?: string;
-    noFooter?: boolean;
+    alwaysFocus?: boolean;
+    noScrollDescription?: boolean;
+
+    onActivate?: (e: CustomEvent) => void;
+    onCancel?: (e: CustomEvent) => void;
 }
 
-export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount, scrollBarWidth, noFooter, children }) => {
+export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount, scrollBarWidth, alwaysFocus, noScrollDescription, children, actionDescriptionMap, ...focusableProps }) => {
     const fade = fadeAmount === undefined || fadeAmount === '' ? '10px' : fadeAmount;
     const barWidth = scrollBarWidth === undefined || scrollBarWidth === '' ? '4px' : scrollBarWidth;
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -22,24 +26,25 @@ export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount
                 setIsOverflowing(hasOverflow);
             }
         };
-
         if (current) trigger();
-    }, [scrollPanelRef, children, height]);
+    }, [children, height]);
 
     const panel = (
-        <ScrollPanelGroup 
         //@ts-ignore
-        ref={scrollPanelRef} focusable={false} style={{ flex: 1, minHeight: 0 }}>
+        <ScrollPanelGroup ref={scrollPanelRef} focusable={false} style={{ flex: 1, minHeight: 0 }}>
             <Focusable
                 //@ts-ignore
-                focusable={isOverflowing}
+                focusable={alwaysFocus || isOverflowing}
+                key={'scrollable-window-focusable-element'}
                 noFocusRing={true}
-                actionDescriptionMap={noFooter ? undefined :
+                actionDescriptionMap={Object.assign(noScrollDescription ? {} :
                     {
                         [GamepadButton.DIR_UP]: 'Scroll Up',
                         [GamepadButton.DIR_DOWN]: 'Scroll Down'
-                    }
-                }
+                    },
+                    actionDescriptionMap ?? {}
+                )}
+                {...focusableProps}
             >
                 {children}
             </Focusable>
@@ -60,7 +65,11 @@ export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount
 		  }
 		  .modal-position-container .${scrollPanelClasses.ScrollPanel}::-webkit-scrollbar-thumb {
 			border: 0;
-		  }`}
+		  }
+		  .modal-position-container .${scrollPanelClasses.ScrollPanel}.gpfocuswithin::-webkit-scrollbar-thumb {
+			background-color: currentColor;
+		  }
+          `}
             </style>
             <div
                 className='modal-position-container'
@@ -70,9 +79,8 @@ export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount
                     WebkitMask: `linear-gradient(to right , transparent, transparent calc(100% - ${barWidth}), white calc(100% - ${barWidth})), linear-gradient(to bottom, transparent, black ${fade}, black calc(100% - ${fade}), transparent 100%)`
                 }}>
                 {isOverflowing ? (
-                    <ModalPosition key={'modal-position'}>
-
-                            {panel}
+                    <ModalPosition key={'scrollable-window-modal-position'}>
+                        {panel}
                     </ModalPosition>
                 ) : (
                     <div className={`${gamepadDialogClasses.ModalPosition} ${gamepadDialogClasses.WithStandardPadding} Panel`} key={'modal-position'}>
@@ -85,13 +93,13 @@ export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount
 };
 
 interface ScrollableWindowAutoProps extends Omit<ScrollableWindowProps, 'height'> {
-	heightPercent?: number;
+    heightPercent?: number;
 }
 
 export const ScrollableWindowRelative: FC<ScrollableWindowAutoProps> = ({ heightPercent, ...props }) => {
-	return (
-		<div style={{ flex: 'auto' }}>
-			<ScrollableWindow height={`${heightPercent ?? 100}%`} {...props} />
-		</div>
-	);
+    return (
+        <div style={{ flex: 'auto' }}>
+            <ScrollableWindow height={`${heightPercent ?? 100}%`} {...props} />
+        </div>
+    );
 };

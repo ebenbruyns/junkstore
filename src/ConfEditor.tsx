@@ -3,7 +3,7 @@ import {
     PanelSection, Dropdown, ModalRoot, ModalRootProps, 
     quickAccessControlsClasses
 } from "decky-frontend-lib";
-import { VFC, useEffect, useState, useRef, createRef } from "react";
+import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
@@ -24,7 +24,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
     const logger = new Logger("ConfEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
     const [confData, setConfData] = useState<ConfData>();
-    const focusRef = createRef <HTMLTextAreaElement> ();
+    const focusRef = useRef<HTMLTextAreaElement>(null);
     const [modeLevel, setModeLevel] = useState<number>(0);
     const [actionSetName, setActionSetName] = useState<string>("");
     const [helpText, setHelpText] = useState<KeyValuePair>({
@@ -45,7 +45,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction(
+        const result = await executeAction<ActionSet>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             initActionSet,
             initAction,
@@ -53,12 +53,17 @@ export const ConfEditor: VFC<EditorProperties> = ({
                 content_id: contentId
             }
         )
+        
         logger.log("OnInit result: ", result)
+        if (!result) {
+            closeModal();
+            return;
+        }
 
-        const setName = (result.Content as ActionSet).SetName;
+        const setName = result.Content.SetName;
         logger.log("SetName: ", setName)
         setActionSetName(setName);
-        const data = await executeAction(
+        const data = await executeAction<ConfData>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             setName,
             "GetContent",
@@ -67,12 +72,18 @@ export const ConfEditor: VFC<EditorProperties> = ({
             }
         )
 
-        const res = data.Content as ConfData
+        if (!data) {
+            closeModal();
+            return;
+        }
+
+        const res = data.Content
         setConfData(res);
 
     }
     const handleSectionChange = (section: Section) => {
-        const updatedSections = confData?.Sections?.map((s) => s.Name === section.Name ? section : s);
+        if (!confData) return;
+        const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s); //as per type def Sections should always be defined
         
         setConfData({ ...confData, Sections: updatedSections });
     };
@@ -110,7 +121,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         }}
                         onSecondaryActionDescription="Save config"
                         onSecondaryButton={async (_) => {
-                            logger.log("Saving config: ", confData)
+                            logger.log("Saving config: ", confData);
                             const result = await executeAction(serverAPI,
                                 actionSetName,
                                 "SaveContent",
@@ -118,7 +129,12 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     content_id: contentId,
                                     inputData: confData
                                 });
-                            logger.log("Save result: ", result)
+
+                            logger.log("Save result: ", result);
+                            // if (!result) {
+                            //     closeModal();
+                            //     return;
+                            // }
                             //Router.Navigate("/game/" + tabindex + "/" + shortname)
                             closeModal();
                         }}
@@ -164,23 +180,27 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     noFocusRing={true}
                                     onFocusCapture={() => {
                                         if (focusRef && focusRef.current != null)
-                                            // @ts-ignore
                                             focusRef.current.focus();
                                     }}
                                     onOKButton={() => { }}
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async (_) => {
                                         logger.log("Saving config: ", confData)
-                                        const result = await executeAction(serverAPI,
+                                        const result = await executeAction<SaveRefresh /*| SomeOtherContentPossibility */>(serverAPI, //pass multiple possible Content types with a union
                                             actionSetName,
                                             "SaveContent",
                                             {
                                                 content_id: contentId,
                                                 inputData: confData
                                             });
+                                            
                                         logger.log("Save result: ", result)
+                                        if (!result) {
+                                            closeModal(); 
+                                            return;
+                                        }
                                         if (result.Type === "Refresh") {
-                                            const tmp = result.Content as SaveRefresh
+                                            const tmp = result.Content //if some other possibilties then you can cast here
                                             if (tmp.Refresh) {
                                                 refreshParent()
                                             }

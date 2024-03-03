@@ -7,14 +7,14 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, gamepadUIClasses, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
-import GridContainer from "./Components/GridContainer";
+import GridContainer, { contentTabsContainerClass } from "./Components/GridContainer";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
@@ -122,7 +122,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
             content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
             id: index.toString()
         }));
-    }
+    };
     const getPages = () => {
         return content.Tabs.map((tab) => ({
             title: tab.Title,
@@ -131,18 +131,23 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
 
         } as SidebarNavigationPage));
 
-    }
+    };
 
 
     return (
         <DialogBody key={initActionSet + "_" + initAction}>
             {layout === "horizontal" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} style={{ height: "calc(100% - 40px)" }}>
-                    <div style={{ marginBottom: "40px" }} />
-                    <Tabs key="0"
+                <DialogControlsSection
+                    className={joinClassNames(contentTabsContainerClass, 'gamepadlibrary_GamepadLibrary_ZBBhe')}
+                    key={initActionSet + "_" + initAction + "horizontal"}
+                >
+                    <Tabs
+                        key="0"
                         activeTab={currentTab}
                         onShowTab={(tabID: string) => setCurrentTab(tabID)}
                         tabs={getContent()}
+                        //@ts-ignore
+                        canBeHeaderBackground={'on-outer-scroll'}
                     />
                 </DialogControlsSection>}
             {layout === "vertical" && content.Tabs.length > 0 &&
@@ -317,12 +322,12 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     };
     const configEditor = () => {
         showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
-    }
+    };
     const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args)
+        const result = await executeAction(serverAPI, actionSet, actionId, args);
         logger.debug("runScript result", result);
 
-    }
+    };
     const actionsMenu = (e: any) => {
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
@@ -339,169 +344,110 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                                 inputData: "",
                                 gameId: "",
                                 appId: ""
-                            }
+                            };
 
-                            runScript(initActionSet, action.ActionId, args)
+                            runScript(initActionSet, action.ActionId, args);
 
                         }}
-                    >{action.Title}</MenuItem>)
+                    >{action.Title}</MenuItem>);
 
                 })}
 
 
             </Menu>,
             e.currentTarget ?? window
-        )
-    }
+        );
+    };
 
     return (
         <>
-
             {content.Type === "GameGrid" && (
-                <>
-
-
-                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />}
-                    <Focusable //key={initActionSet + "_" + initAction}
-
-                        // @ts-ignore
-                        focusableIfNoChildren={true}
-
-                        style={{
-                            display: "flex",
-                            marginLeft: "0px",
-                            marginBottom: "1em",
-                            color: "white",
-
-                            //justifyContent: "space-between",
-                            //flexFlow: "row ",
-                            flex: "1",
-                            alignItems: "flex-end",
-                        }}
-
-                        onSecondaryActionDescription="Toggle Installed Filter"
-                        onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
-                        onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-                        onOptionsButton={() => setLimited(!limited)}
-                    >
-                        <TextField
-                            placeholder="Search"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{
-                                minWidth: "685px",
-                                flexGrow: "10",
-                            }}
-                        />
+                <Focusable
+                    onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
+                    onOptionsButton={() => setLimited(!limited)}
+                    onSecondaryActionDescription="Toggle Installed Filter"
+                    onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
+                    style={{ paddingTop: '15px' }}
+                >
+                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />} {/*this should probably be changed*/}
+                    <Focusable style={{ display: "flex", gap: '15px' }}>
+                        <div style={{ width: '100%' }}>
+                            <TextField
+                                placeholder="Search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                         <DialogButton
                             onClick={actionsMenu}
                             onOKButton={actionsMenu}
-                            style={{
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-                                flexDirection: "column",
-                            }}
+                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                         >
-                            <FaSlidersH
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
+                            <FaSlidersH style={{ verticalAlign: 'middle' }} />
                         </DialogButton>
                         <DialogButton
                             onClick={configEditor}
                             onOKButton={configEditor}
-                            style={{
-
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-
-
-                            }}
+                            style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                         >
-                            <FaCog
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
+                            <FaCog style={{ verticalAlign: 'middle' }} />
                         </DialogButton>
                     </Focusable>
                     {(content.Content as GameDataList).NeedsLogin === "true" && (
-                        <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                        <div style={{ paddingTop: '15px' }}>
+                            <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                        </div>
                     )}
                     <GridContainer
                         serverAPI={serverAPI}
                         games={(content.Content as GameDataList).Games}
-                        limited={limited}
-                        limitFn={() => setLimited(!limited)}
-                        filterFn={() => setFilterInstalled(!filterInstalled)}
                         initActionSet={actionSetName}
                         initAction=""
+                   
                         setActiveGame={activeGameSetter}
                         clearActiveGame={clearActiveGame}
                     />
-                </>
-            )
-            }
-            {
-                content.Type === "StoreTabs" &&
+                </Focusable>
+            )}
+            {content.Type === "StoreTabs" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="horizontal"
                     initAction={initAction}
-                    initActionSet={initActionSet} />
-            }
-            {
-                content.Type === "SideBarPage" &&
+                    initActionSet={initActionSet}
+                />}
+            {content.Type === "SideBarPage" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="vertical"
                     initAction={initAction}
-                    initActionSet={initActionSet} />
+                    initActionSet={initActionSet}
+                />
             }
-            {
-                content.Type === "MainMenu" &&
+            {content.Type === "MainMenu" &&
                 <MainMenu //key={initActionSet + "_" + initAction} 
                     serverApi={serverAPI}
                     content={content.Content as StoreContent}
-                    initActionSet={actionSetName} initAction="" />
+                    initActionSet={actionSetName}
+                    initAction=""
+                />
             }
-            {
-                content.Type === "Text" &&
+            {content.Type === "Text" &&
                 <TextContent //key={initActionSet + "_" + initAction} 
-                    content={content.Content as string} />
+                    content={content.Content as string}
+                />
             }
-            {
-                content.Type === "Html" &&
+            {content.Type === "Html" &&
                 <HtmlContent //key={initActionSet + "_" + initAction}
-                    content={content.Content as string} />
+                    content={content.Content as string}
+                />
             }
-
-            {
-                content.Type === "Error" &&
+            {content.Type === "Error" &&
                 <ErrorDisplay //key={initActionSet + "_" + initAction}
-                    error={content.Content as ContentError} />
+                    error={content.Content as ContentError}
+                />
             }
-            {
-                content.Type === "Empty" &&
-                <Loading />
-            }
+            {content.Type === "Empty" && <Loading />}
         </>
     );
 };

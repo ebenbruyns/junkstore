@@ -6,6 +6,7 @@ import { DialogButton, ModalRoot, PanelSection, ScrollPanelGroup, SteamSpinner }
 import Logger, { log } from "./Utils/logger";
 import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
 
+const exeRunnerRootClass = 'exe-runner-modal-root';
 
 export const ExeRunner: VFC<ExeRunnerProperties> = ({
     serverAPI, initActionSet, initAction, contentId, closeModal, shortName, closeParent, refreshParent
@@ -66,12 +67,13 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
         <>
             <style>
                 {`
-    .GenericConfirmDialog {
+    .${exeRunnerRootClass}.GenericConfirmDialog {
         width: 100% !important,
         height: 100% !important,
     }
 `} </style>
             <ModalRoot
+                className={exeRunnerRootClass}
                 bAllowFullSize={true}
                 // @ts-ignore
                 bAllowFullSizeMobile={true}

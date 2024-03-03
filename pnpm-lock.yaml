@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   react-icons:
-    specifier: ^4.4.0
-    version: 4.9.0
+    specifier: ^5.0.1
+    version: 5.0.1
 
 devDependencies:
   '@rollup/plugin-commonjs':
@@ -1054,8 +1054,8 @@ packages:
       safe-buffer: 5.2.1
     dev: true
 
-  /react-icons@4.9.0:
-    resolution: {integrity: sha512-ijUnFr//ycebOqujtqtV9PFS7JjhWg0QU6ykURVHuL4cbofvRCf3f6GMn9+fBktEFQOIVZnuAYLZdiyadRQRFg==}
+  /react-icons@5.0.1:
+    resolution: {integrity: sha512-WqLZJ4bLzlhmsvme6iFdgO8gfZP17rfjYEJ2m9RsZjZ+cc4k1hTzknEz63YS1MeT50kVzoa1Nz36f4BEx+Wigw==}
     peerDependencies:
       react: '*'
     peerDependenciesMeta:

@@ -76,36 +76,39 @@ const cleanupIds = async () => {
         await SteamClient.Apps.RemoveShortcut(app.appid);
     }
 }
-
-export async function executeAction(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult> {
+//* this is where you will be assuming the type of content and if the case is amibigous you can use type unions and deal with each possiblitiy outside the function
+export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult<Content> | null> { 
 
     const logger = new Logger("executeAction");
     logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
     logger.debug("Args: ", args);
-    const res = await serverAPI.callPluginMethod<{}, ContentResult>("execute_action", {
+    const res = await serverAPI.callPluginMethod<{}, ContentResult<Content | LaunchOptions | ContentError>>("execute_action", {
         actionSet: actionSet,
         actionName: actionName,
         ...args
     });
 
-    if ((res.result as ContentResult).Type === 'RunExe') {
+    if (!res.success) { //TODO: need to handle server response errors as well, idk if you wanna make it show the modal too
+        const errorMsg = res.result;
+        return null;
+    }
 
-        const newLaunchOptions = (res.result as ContentResult).Content as LaunchOptions;
+    if (res.result.Type === 'RunExe') {
+        const newLaunchOptions = res.result.Content as LaunchOptions; //only acceptable if this is gauranteed that in this case (res.result.Type === 'RunExe') Content is indeed LaunchOptions
         // @ts-ignore
         if (args.appId) {
             // @ts-ignore
             const id = parseInt(args.appId);
             const details = await getAppDetails(id)
             logger.log("details: ", details);
-            const oldLaunchOptions = {
+            const oldLaunchOptions: LaunchOptions = { //TODO: what happens if details is null? should it be handled specifically or should it be a allowed to set properties of undefined
                 Name: details?.strDisplayName,
                 Exe: details?.strShortcutExe,
                 WorkingDir: details?.strShortcutStartDir,
                 Options: details?.strShortcutLaunchOptions,
                 CompatToolName: details?.strCompatToolName,
                 Compatibility: details?.strCompatToolName ? true : false
-
-            } as LaunchOptions;
+            };
             logger.debug("run with options: ", newLaunchOptions);
 
             //const launchOptions = await SteamClient.Apps.GetLaunchOptionsForApp(parseInt(args.appId))
@@ -132,17 +135,17 @@ export async function executeAction(serverAPI: ServerAPI, actionSet: string, act
             //  runApp(id);
         }
 
-        return {} as ContentResult;
+        return null; //* does caller need to be able to distinguish this case or not
     }
-    if ((res.result as ContentResult).Type === 'Error') {
 
-        const error = (res.result as ContentResult).Content as ContentError;
+    if (res.result.Type === 'Error') {
+        const error = res.result.Content as ContentError; //only acceptable if this is gauranteed that in this case (res.result.Type === 'Error') Content is indeed ContentError
         showModal(<ErrorModal Error={error} />);
         logger.error("result: ", res);
-        return {} as ContentResult;
+        return null;
     }
 
-    return res.result as ContentResult;
+    return res.result as ContentResult<Content>; //only acceptable because we've handle the other possibilities explicitly
 }
 
 export async function getAppDetails(appId: number): Promise<AppDetails | null> {

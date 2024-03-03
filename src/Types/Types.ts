@@ -145,9 +145,9 @@ export interface MenuAction extends Content {
   InstalledOnly?: boolean;
 }
 
-export interface ContentResult {
+export interface ContentResult<T> {
   Type: string;
-  Content?: Content;
+  Content: T;
 }
 export interface Content { }
 
