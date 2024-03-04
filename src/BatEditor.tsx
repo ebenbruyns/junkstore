@@ -21,35 +21,26 @@ export const BatEditor: VFC<EditorProperties> = ({
     const [batData, setBatData] = useState([{ Id: 0, GameId: 0, Path: '', Content: '' }] as FileData[]);
     //const [editorText, setEditorText] = useState("test" as string);
     const [selectedBat, setSelectedBat] = useState({ Id: 0, GameId: 0, Content: "", Path: "" } as FileData);
-    const focusRef = useRef(null);
+    const focusRef = useRef<HTMLTextAreaElement>(null);
     const [actionSetName, setActionSetName] = useState("" as string);
     const OnInit = async () => {
-        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
-            serverAPI, initActionSet,
-            initAction,
-
-            { content_id: contentId, }
-        )
-        const setName = result?.Content.SetName;
-        if (setName == null) {
+        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(serverAPI, initActionSet, initAction, { content_id: contentId });
+        if (result === null) {
             return;
         }
+        const setName = result.Content.SetName;
         setActionSetName(setName);
-        const data = await executeAction<ExecuteGetActionSetArgs, FilesData>(serverAPI, setName,
-            "GetContent",
-            {
-                content_id: contentId,
-            })
-        const res = data?.Content.Files;
-        if (res == null) {
+        const data = await executeAction<ExecuteGetActionSetArgs, FilesData>(serverAPI, setName, "GetContent", { content_id: contentId });
+        if (data === null) {
             return;
         }
+        const res = data.Content.Files;
         setBatData(res);
         if (res.length > 0) {
             setSelectedBat(res[0] as FileData);
         }
 
-    }
+    };
 
     useEffect(() => {
         OnInit();
@@ -75,29 +66,34 @@ export const BatEditor: VFC<EditorProperties> = ({
                     focusable={false}
                     style={{ margin: "0px" }}>
                     <Focusable
-                        // @ts-ignore
                         style={{ background: "inherit" }}>
 
                         <Focusable
 
                             onSecondaryActionDescription="Save bat files"
-                            onSecondaryButton={async (_) => {
-                                const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>(serverAPI, actionSetName,
+                            onSecondaryButton={async () => {
+                                const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>( //* will SaveContent always return this type? if so remove the check below, if not put all the possibities here
+                                    serverAPI,
+                                    actionSetName,
                                     "SaveContent",
                                     {
                                         content_id: contentId,
                                         inputData: batData
-                                    });
-                                if (result?.Type === "Refresh") {
-                                    const tmp = result.Content as SaveRefresh
+                                    }
+                                );
+                                if (result === null) {
+                                    return;
+                                }
+                                if (result.Type === "Refresh") { //remove check if this is the only type
+                                    const tmp = result.Content;
                                     if (tmp.Refresh) {
-                                        refreshParent()
+                                        refreshParent();
                                     }
                                 }
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                 closeModal();
                             }}
-                            onCancel={(_) => {
+                            onCancel={() => {
                                 closeModal();
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
                             }}
@@ -133,7 +129,6 @@ export const BatEditor: VFC<EditorProperties> = ({
                                             noFocusRing={true}
                                             onFocusCapture={() => {
                                                 if (focusRef && focusRef.current != null)
-                                                    // @ts-ignore
                                                     focusRef.current.focus();
                                             }}>
                                             <textarea

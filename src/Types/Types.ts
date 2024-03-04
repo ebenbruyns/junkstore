@@ -151,6 +151,8 @@ export interface ContentResult<T> {
 }
 export interface ContentType { }
 
+export interface EmptyContent extends ContentType { }
+
 export interface StoreTabsContent extends ContentType {
   Tabs: TabContent[];
 }
