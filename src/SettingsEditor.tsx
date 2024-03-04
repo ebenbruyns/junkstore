@@ -99,7 +99,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                             //     flex: "1",
                             // }}
                             onSecondaryActionDescription="Save Settings"
-                            onSecondaryButton={async (_) => {
+                            onSecondaryButton={async () => {
                                 logger.log("Saving config: ", confData)
                                 const result = await executeAction(serverAPI,
                                     actionSetName,
@@ -112,7 +112,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
 
                             }}
-                        // onCancel={(_) => {
+                        // onCancel={() => {
 
                         //     //Router.Navigate("/game/" + tabindex + "/" + shortname)
                         // }}

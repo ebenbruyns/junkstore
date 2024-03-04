@@ -110,7 +110,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
             <ModalRoot className={confEditorRootClass} closeModal={closeModal}>
                 <Focusable
                     style={{ display: "flex", minHeight: '400px' }}
-                    onCancel={(_) => {
+                    onCancel={() => {
                         closeModal();
                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                     }}
@@ -122,7 +122,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             paddingTop: '20px'
                         }}
                         onSecondaryActionDescription="Save config"
-                        onSecondaryButton={async (_) => {
+                        onSecondaryButton={async () => {
                             logger.log("Saving config: ", confData);
                             const result = await executeAction(serverAPI,
                                 actionSetName,
@@ -186,7 +186,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     }}
                                     onOKButton={() => { }}
                                     onSecondaryActionDescription="Save config"
-                                    onSecondaryButton={async (_) => {
+                                    onSecondaryButton={async () => {
                                         logger.log("Saving config: ", confData)
                                         const result = await executeAction<ExecuteGetActionSetArgs,SaveRefresh /*| SomeOtherContentPossibility */>(serverAPI, //pass multiple possible Content types with a union
                                             actionSetName,
@@ -210,7 +210,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                         closeModal();
                                     }}
-                                    onCancel={(_) => {
+                                    onCancel={() => {
                                         closeModal();
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                     }}
