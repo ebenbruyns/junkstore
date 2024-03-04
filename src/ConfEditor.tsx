@@ -110,10 +110,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
             <ModalRoot className={confEditorRootClass} closeModal={closeModal}>
                 <Focusable
                     style={{ display: "flex", minHeight: '400px' }}
-                    onCancel={() => {
-                        closeModal();
-                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                    }}
+                    onCancel={() => closeModal()}
                     onCancelActionDescription="Go back to Game Details"
                 >
                     <Focusable
@@ -150,9 +147,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         { data: 2, label: "Expert" },
                                         { data: 3, label: "All" },
                                     ]}
-                                    onChange={(e) => {
-                                        setModeLevel(e.data);
-                                    }}
+                                    onChange={(e) => setModeLevel(e.data)}
                                     selectedOption={modeLevel}
                                 />
                             </div>
@@ -180,10 +175,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     // @ts-ignore
                                     focusableIfNoChildren={true}
                                     noFocusRing={true}
-                                    onFocusCapture={() => {
-                                        if (focusRef && focusRef.current != null)
-                                            focusRef.current.focus();
-                                    }}
+                                    onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()}
                                     onOKButton={() => { }}
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async () => {
@@ -210,10 +202,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                         closeModal();
                                     }}
-                                    onCancel={() => {
-                                        closeModal();
-                                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                                    }}
+                                    onCancel={() => closeModal()}
                                     onCancelActionDescription="Go back to Game Details"
                                 >
 
@@ -222,9 +211,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         ref={focusRef}
                                         style={{ width: "100%", height: "200px" }}
                                         value={confData.Autoexec}
-                                        onChange={(e) => {
-                                            setConfData({ ...confData, Autoexec: e.target.value });
-                                        }} />
+                                        onChange={(e) => setConfData({ ...confData, Autoexec: e.target.value })} />
                                 </Focusable>
                             </PanelSection>
                         )}
@@ -236,15 +223,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         }}
                     >
                         <Focusable
-                            onActivate={() => {
-                                // WIP
-                                // showModal(
-                                //   <DetailsModal
-                                //     sectionHelpText={sectionHelpText}
-                                //     helpText={helpText}
-                                //   />
-                                // );
-                            }}
+                            onActivate={() => {}}
                             style={{
                                 minHeight: 0,
                                 position: "sticky",

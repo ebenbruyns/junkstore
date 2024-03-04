@@ -200,9 +200,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 // let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
                 // if (gamepadWindowInstance) {
                 //     closeModal();
-                setTimeout(async () => {
-                    unregister();
-                }, 1000);
+                setTimeout(async () => unregister(), 1000);
                 // }
             }
         });

@@ -170,9 +170,7 @@ export const FieldEditor: VFC<{
       >
         <Focusable
           style={{ width: "100%" }}
-          onFocus={() => {
-            updateHelpText(field);
-          }}
+          onFocus={() => updateHelpText(field)}
         >
           <Field
             field={field}

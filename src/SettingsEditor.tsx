@@ -126,9 +126,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                                         { data: 2, label: "Expert" },
                                         { data: 3, label: "All" },
                                     ]}
-                                    onChange={(e) => {
-                                        setModeLevel(e.data);
-                                    }}
+                                    onChange={(e) => setModeLevel(e.data)}
                                     selectedOption={modeLevel} />
                                 {confData.Sections?.map((section) => {
                                     if (section && modeLevel >= section.ModeLevel)

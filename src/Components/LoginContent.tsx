@@ -61,7 +61,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             const id = parseInt(SteamClientId);
             logger.debug("Shortcut configured: ", id);
             // @ts-ignore
-            const app = appStore.allApps.find(a => { a.appid == id; });
+            const app = appStore.allApps.find(a =>  a.appid == id);
             if (app) {
                 logger.debug("Shortcut found: ", id);
                 return id;

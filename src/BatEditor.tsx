@@ -94,10 +94,7 @@ export const BatEditor: VFC<EditorProperties> = ({
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                 closeModal();
                             }}
-                            onCancel={() => {
-                                closeModal();
-                                //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                            }}
+                            onCancel={() => closeModal()}
                             onCancelActionDescription="Go back to Game Details"
                         >
                             <PanelSection title={"Configuration: " + contentId}>
@@ -128,10 +125,8 @@ export const BatEditor: VFC<EditorProperties> = ({
                                             // @ts-ignore
                                             focusableIfNoChildren={true}
                                             noFocusRing={true}
-                                            onFocusCapture={() => {
-                                                if (focusRef && focusRef.current != null)
-                                                    focusRef.current.focus();
-                                            }}>
+                                            onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()
+                                            }>
                                             <textarea
                                                 ref={focusRef}
                                                 style={{ width: "calc( 100% - 10px )", height: "200px " }}
