@@ -122,7 +122,6 @@ export const BatEditor: VFC<EditorProperties> = ({
                                                 }} />
                                         </Focusable>
                                         <Focusable
-                                            // @ts-ignore
                                             focusableIfNoChildren={true}
                                             noFocusRing={true}
                                             onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()

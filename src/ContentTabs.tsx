@@ -1,12 +1,3 @@
-/**
- * Renders a component that displays a set of tabs, each containing a StorePage component.
- * @param {Object} props - The component properties.
- * @param {ServerAPI} props.serverAPI - The server API object.
- * @param {StoreTabsContent} props.tabs - The content of the tabs.
- * @param {string} props.initActionSet - The initial action set.
- * @param {string} props.initAction - The initial action.
- * @returns {JSX.Element} - The rendered component.
- */
 import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentError, ContentResult, ContentType, ExecuteArgs, ExecuteGetContentArgs, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
@@ -147,7 +138,6 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
                         activeTab={currentTab}
                         onShowTab={(tabID: string) => setCurrentTab(tabID)}
                         tabs={getContent()}
-                        //@ts-ignore
                         canBeHeaderBackground={'on-outer-scroll'}
                     />
                 </DialogControlsSection>}

@@ -2,14 +2,6 @@ import { ButtonItem, ModalRoot, Navigation, PanelSection, PanelSectionRow, Serve
 import { VFC } from "react";
 import { StoreContent } from "./Types/Types";
 import QRCode from "react-qr-code";
-/**
- * Renders the main menu of the Junk Store.
- * @param content - The content of the store.
- * @param initActionSet - The initial action set.
- * @param initAction - The initial action.
- * @returns A React component that renders the main menu of the Junk Store.
- */
-// @ts-ignore
 
 export const showQrModal = (url: string) => {
     showModal(
@@ -34,10 +26,8 @@ export const showQrModal = (url: string) => {
 };
 
 export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initActionSet: string; initAction: string }> = ({
-    // @ts-ignore
     serverApi,
     content,
-    // @ts-ignore
     initAction,
     initActionSet }) => {
 

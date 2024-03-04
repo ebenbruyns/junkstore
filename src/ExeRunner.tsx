@@ -39,10 +39,8 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
        
         logger.debug("setName: ", setName);
         logger.debug("result: ", actionSetResult);
-        // @ts-ignore
         const id = parseInt(contentId)
         const details = await getAppDetails(id)
-        // @ts-ignore
         if (details == null) {
             logger.error("details is null"); return;
 
@@ -83,7 +81,6 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
             <ModalRoot
                 className={exeRunnerRootClass}
                 bAllowFullSize={true}
-                // @ts-ignore
                 bAllowFullSizeMobile={true}
                 closeModal={closeModal}
             >
@@ -95,7 +92,6 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     const runExe = async () => {
                         setBusy(true);
                         logger.debug(`steamclientid ${parseInt(contentId)}`)
-                        // @ts-ignore
                         const appDetails = await getAppDetails(parseInt(contentId))
                         logger.debug("app details: ", appDetails)
                         if (appDetails == null) {
@@ -104,7 +100,6 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         }
 
                         const compatToolName = appDetails.strCompatToolName
-                        //@ts-ignore
                         const startDir = appDetails.strShortcutStartDir
 
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
@@ -142,7 +137,6 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     }
                     return (
                         <ScrollPanelGroup
-                            // @ts-ignore
                             focusable={false} style={{ margin: "0px" }}>
                             <PanelSection>
                                 <DialogButton

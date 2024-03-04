@@ -27,7 +27,6 @@ export async function configureShortcut(id: Number, launchOptions: LaunchOptions
         await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
         await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-        //@ts-ignore
         const defaultProton = settingsStore.settings.strCompatTool;
 
         if (launchOptions.Compatibility) {
@@ -56,9 +55,7 @@ export async function executeAction<Arguments, Content>(serverAPI: ServerAPI, ac
 
     if (res.result.Type === 'RunExe') {
         const newLaunchOptions = res.result.Content as LaunchOptions; //only acceptable if this is gauranteed that in this case (res.result.Type === 'RunExe') Content is indeed LaunchOptions
-        // @ts-ignore
         if (args.appId) {
-            // @ts-ignore
             const id = parseInt(args.appId);
             const details = await getAppDetails(id)
             logger.log("details: ", details);
@@ -77,7 +74,6 @@ export async function executeAction<Arguments, Content>(serverAPI: ServerAPI, ac
                 logger.log("data: ", data)
                 if (!data.bRunning) {
                     // This might not work in desktop mode.
-                    // @ts-ignore
                     let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
                     if (gamepadWindowInstance) {
                         setTimeout(async () => {

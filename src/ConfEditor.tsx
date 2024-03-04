@@ -172,7 +172,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         {confData?.AutoexecEnabled && confData?.Autoexec && (
                             <PanelSection title="[Autoexec]">
                                 <Focusable
-                                    // @ts-ignore
                                     focusableIfNoChildren={true}
                                     noFocusRing={true}
                                     onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()}
@@ -231,7 +230,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                 top: "40px",
                                 margin: '0 20px'
                             }}
-                            // @ts-ignore
                             focusable={true}
                             noFocusRing={false}
                         >

@@ -303,7 +303,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
             await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
             await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-            //@ts-ignore
             const defaultProton = settingsStore.settings.strCompatTool;
             if (launchOptions.Compatibility && launchOptions.Compatibility == true) {
                 logger.debug("Setting compatibility", launchOptions.CompatToolName);
@@ -348,7 +347,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     };
 
     const cleanupIds = async () => {
-        // @ts-ignore
         const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824);
         for (const app of apps) {
             SteamClient.Apps.RemoveShortcut(app.appid); 
