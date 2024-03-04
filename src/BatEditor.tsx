@@ -73,7 +73,7 @@ export const BatEditor: VFC<EditorProperties> = ({
 
                             onSecondaryActionDescription="Save bat files"
                             onSecondaryButton={async () => {
-                                const saveRefreshResult = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>( //* will SaveContent always return this type? if so remove the check below, if not put all the possibities here
+                                const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>( //* will SaveContent always return this type? if so remove the check below, if not put all the possibities here
                                     serverAPI,
                                     actionSetName,
                                     "SaveContent",
@@ -82,11 +82,11 @@ export const BatEditor: VFC<EditorProperties> = ({
                                         inputData: batData
                                     }
                                 );
-                                if (saveRefreshResult === null) {
+                                if (result === null) {
                                     return;
                                 }
-                                if (saveRefreshResult.Type === "Refresh") { //remove check if this is the only type
-                                    const tmp = saveRefreshResult.Content;
+                                if (result.Type === "Refresh") { //remove check if this is the only type
+                                    const tmp = result.Content;
                                     if (tmp.Refresh) {
                                         refreshParent();
                                     }
