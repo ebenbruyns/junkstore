@@ -1,7 +1,7 @@
 import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, ContentType, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
+import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
@@ -20,8 +20,10 @@ interface GameDetailsItemProperties {
 
 
 export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
-    serverAPI, shortname, closeModal, initActionSet,
-    // @ts-ignore
+    serverAPI,
+    shortname,
+    closeModal,
+    initActionSet,
     initAction,
     clearActiveGame
 }) => {
@@ -29,7 +31,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const logger = new Logger("GameDetailsItem");
     logger.log("GameDetailsItem startup");
     const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-    const [gameData, setGameData] = useState<ContentResult<ContentType>>({ Type: "Empty", Content: { Details: {} } });
+    const [gameData, setGameData] = useState<ContentResult<GameDetails | EmptyContent>>({ Type: "Empty", Content: { Details: {} } });
     logger.log("GameDetailsItem gameData", gameData);
     const [steamClientID, setSteamClientID] = useState("");
     logger.log("GameDetailsItem steamClientID", steamClientID);
@@ -39,7 +41,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
         Description: ""
-    } as ProgressUpdate);
+    });
     logger.log("GameDetailsItem progress", progress);
 
     const installingRef = useRef(installing);
@@ -69,36 +71,39 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const onInit = async () => {
         try {
             logger.debug("onInit starting");
-            const res = await executeAction<ExecuteGetGameDetailsArgs, GameDetails>(serverAPI, initActionSet,
+            const res = await executeAction<ExecuteGetGameDetailsArgs, GameDetails>( //* see comments in BatEditor and ConfEditor
+                serverAPI,
+                initActionSet,
                 "GetDetails",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
-            logger.debug("onInit data", res);
+                }
+            );
 
             logger.debug("onInit res", res);
-            if (res == null) {
-                logger.error("onInit res is null");
+            if (res === null) {
                 return;
             }
             setGameData(res);
-            if (res.Type === "GameDetails") {
-              setSteamClientID((res.Content as GameDetails).SteamClientID);
+            if (res.Type === "GameDetails") { //* see above
+                setSteamClientID(res.Content.SteamClientID);
             }
             logger.debug("onInit finished");
-            const actionRes = await executeAction<ExecuteGetGameDetailsArgs, ScriptActions>(serverAPI, initActionSet,
+            const actionRes = await executeAction<ExecuteGetGameDetailsArgs, ScriptActions>(
+                serverAPI,
+                initActionSet,
                 "GetGameScriptActions",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
+                }
+            );
             logger.debug("onInit actionRes", actionRes);
-            if (actionRes == null) {
-                logger.error("onInit actionRes is null");
+            if (actionRes === null) {
                 return;
             }
-            if (actionRes.Type === "ScriptSet") {
+            if (actionRes.Type === "ScriptSet") { //* see above
                 const scriptActions = actionRes.Content as ScriptActions;
                 logger.debug("onInit scriptActions", scriptActions);
                 setScriptActions(scriptActions.Actions);
@@ -115,31 +120,33 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             try {
                 logger.debug("updateProgress");
 
-                executeAction<ExecuteGetGameDetailsArgs, ProgressUpdate>(serverAPI, initActionSet,
+                executeAction<ExecuteGetGameDetailsArgs, ProgressUpdate>(
+                    serverAPI,
+                    initActionSet,
                     "GetProgress",
                     {
                         shortname: shortname,
                         inputData: ""
-                    }).then((res) => {
-                        if (res == null) {
-                            logger.error("updateProgress res is null");
+                    }
+                ).then((res) => {
+                    if (res === null) {
+                        return;
+                    }
+                    const progressUpdate = res.Content;
+                    if (progressUpdate != null) {
+                        logger.debug(progressUpdate);
+                        setProgress(progressUpdate);
+                        logger.debug(progressUpdate.Percentage);
+                        if (progressUpdate.Percentage >= 100) {
+                            setInstalling(false);
+                            logger.debug("setInstalling(false)");
+                            install();
                             return;
                         }
-                        const progressUpdate = res.Content ;
-                        if (progressUpdate != null) {
-                            logger.debug(progressUpdate);
-                            setProgress(progressUpdate);
-                            logger.debug(progressUpdate.Percentage);
-                            if (progressUpdate.Percentage >= 100) {
-                                setInstalling(false);
-                                logger.debug("setInstalling(false)");
-                                install();
-                                return;
-                            }
-                        }
-                    }).catch((e) => {
-                        logger.error('Error in progress updater', e);
-                    });
+                    }
+                }).catch((e) => {
+                    logger.error('Error in progress updater', e);
+                });
             } catch (e) {
                 logger.error('Error in progress updater', e);
             }
@@ -161,12 +168,15 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     }, [installing]);
     const uninstall = async () => {
         try {
-            await executeAction<ExecuteGetGameDetailsArgs, ContentType>(serverAPI, initActionSet,
+            await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
+                serverAPI,
+                initActionSet,
                 "Uninstall",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
+                }
+            );
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
             setSteamClientID("");
         } catch (error) {
@@ -176,30 +186,36 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const download = async () => {
         try {
 
-            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(serverAPI, initActionSet,
+            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
+                serverAPI,
+                initActionSet,
                 "Download",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
+                }
+            );
             if (result?.Type == "Progress") {
-              setInstalling(true);
+                setInstalling(true);
             }
         } catch (error) {
             logger.error(error);
         }
     };
-    const update = async () => {
+    const update = async () => { //* maybe combine this into one function with download
         try {
 
-            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(serverAPI, initActionSet,
+            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
+                serverAPI,
+                initActionSet,
                 "Update",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
+                }
+            );
             if (result?.Type == "Progress") {
-              setInstalling(true);
+                setInstalling(true);
             }
 
         } catch (error) {
@@ -227,19 +243,22 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(serverAPI, actionSet, actionId, args);
 
         if (result?.Type == "Progress") {
-          setInstalling(true);
+            setInstalling(true);
         }
 
     };
     const cancelInstall = async () => {
         try {
             setInstalling(false);
-            await executeAction(serverAPI, initActionSet,
+            await executeAction(
+                serverAPI,
+                initActionSet,
                 "CancelInstall",
                 {
                     shortname: shortname,
                     inputData: ""
-                });
+                }
+            );
 
         } catch (error) {
             logger.error(error);
@@ -277,9 +296,9 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         // @ts-ignore
         const apps = appStore.allApps.filter(app => app.appid == id);
         if (apps.length == 0) {
-          return await getSteamId();
+            return await getSteamId();
         } else {
-          return id;
+            return id;
         }
     };
 
@@ -292,14 +311,17 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     };
     const configureShortcut = async (id: Number) => {
         setSteamClientID(id.toString());
-        const result = await executeAction<ExecuteInstallArgs, ContentType>(serverAPI, initActionSet,
+        const result = await executeAction<ExecuteInstallArgs, ContentType>(
+            serverAPI,
+            initActionSet,
             "Install",
             {
                 shortname: shortname,
                 steamClientID: id.toString(),
                 inputData: ""
-            });
-        const name = (gameData.Content as GameDetails).Name;
+            }
+        );
+        const name = (gameData.Content as GameDetails).Name; //* this should be dealt with
         // @ts-ignore
         const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.appid != id);
         for (const app of apps) {
@@ -335,30 +357,32 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             setInstalling(false);
 
         }
-        const imageResult = await executeAction<ExecuteGetGameDetailsArgs, GameImages>(serverAPI, initActionSet,
+        const imageResult = await executeAction<ExecuteGetGameDetailsArgs, GameImages>( //* see above
+            serverAPI,
+            initActionSet,
             "GetJsonImages",
             {
                 shortname: shortname,
                 inputData: ""
-            });
+            }
+        );
         if (imageResult == null) {
-            logger.error("imageResult is null");
             return;
         }
-        if (imageResult.Type == "Images") {
+        if (imageResult.Type == "Images") { //* see above
             const images = imageResult.Content as GameImages;
             logger.debug("images", images);
             if (images.Grid !== null) {
-              SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
+                SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
             }
             if (images.Hero !== null) {
-              SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
+                SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
             }
             if (images.Logo !== null) {
-              SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
+                SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
             }
             if (images.GridH !== null) {
-              SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
+                SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
             }
         }
 

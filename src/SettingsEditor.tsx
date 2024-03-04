@@ -55,12 +55,11 @@ export const SettingsEditor: VFC<EditorProperties> = ({
             }
         )
         logger.log("OnInit result: ", result)
-        
-        const setName = result?.Content.SetName;
-        if (setName == null) {
-            logger.error("setName is null");
+        if (!result) {
             return;
         }
+        
+        const setName = result.Content.SetName;
         logger.log("SetName: ", setName)
         setActionSetName(setName);
         const data = await executeAction<ExecuteGetActionSetArgs, ConfData>(
@@ -71,12 +70,11 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                 content_id: contentId
             }
         )
-
-        const res = data?.Content 
-        if (res == null) {
-            logger.error("res is null");
+        if (!data) {
             return;
         }
+
+        const res = data.Content 
         setConfData(res);
 
     }
