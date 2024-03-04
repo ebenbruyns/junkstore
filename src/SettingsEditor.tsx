@@ -118,7 +118,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                         // }}
                         // onCancelActionDescription="Go back to Game Details"
                         >
-                            <PanelSection title={"Configuration: "}>
+                            <PanelSection title="Configuration: ">
                                 <Dropdown
                                     rgOptions={[
                                         { data: 0, label: "Basic" },

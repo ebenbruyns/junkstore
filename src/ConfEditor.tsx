@@ -141,7 +141,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             closeModal();
                         }}
                     >
-                        <PanelSection title={"Configuration: "}>
+                        <PanelSection title="Configuration: ">
                             <div style={{ marginBottom: '10px'}}>
                                 <Dropdown
                                     rgOptions={[
