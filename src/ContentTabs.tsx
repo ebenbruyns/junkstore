@@ -7,9 +7,9 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, gamepadUIClasses, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
+import { ActionSet, ContentError, ContentResult, ContentType, ExecuteArgs, ExecuteGetContentArgs, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
@@ -22,6 +22,7 @@ import { LoginContent } from "./Components/LoginContent";
 import { ConfEditor } from "./ConfEditor";
 import { FaCog, FaSlidersH } from "react-icons/fa";
 import { GameDetailsItem } from "./Components/GameDetailsItem";
+
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     tabs: StoreTabsContent;
@@ -101,13 +102,13 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initA
                 logger.debug("initActionSet or initAction is empty");
                 return;
             }
-            const data = await executeAction(serverAPI, initActionSet,
+            const data = await executeAction<ExecuteArgs, ActionSet>(serverAPI, initActionSet,
                 initAction,
                 {
-                    inputData: "",
+
                 }
             );
-            const result = data.Content as ActionSet;
+            const result = data?.Content as ActionSet;
             setActionSetName(result.SetName);
             setContent(tabs);
             //setCurrentTab("0");
@@ -186,7 +187,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     const logger = new Logger("Content");
     const state = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`)
     const savedState = parseContentState(state);
-    const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
+    const [content, setContent] = useState<null | ContentResult<ContentType | string>>({ Type: "Empty", Content: "" });
     const [actionSetName, setActionSetName] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState(savedState ? savedState?.searchQuery : "");
     const [filterInstalled, setFilterInstalled] = useState(savedState ? savedState?.filterInstalled : true);
@@ -248,23 +249,25 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     }, [initActionSet, initAction]);
 
     const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
-        if (!setName) return;
+        if (!setName) {
+            return;
+        }
         try {
-            const data = await executeAction(serverAPI, setName,
+            const data = await executeAction<ExecuteGetContentArgs, ContentType | string>(serverAPI, setName,
                 "GetContent",
                 {
                     filter,
                     installed: String(installed),
                     limited: String(limited)
                 });
-            setContent(data as ContentResult);
+            setContent(data);
         } catch (error) {
             logger.error("GetContent: ", error);
         }
     };
     useEffect(() => {
         logger.log("Content: ", content);
-        if (content.Type !== "Empty" && content.Type !== "Error") {
+        if (content?.Type !== "Empty" && content?.Type !== "Error") {
             if (activeGame && activeGame !== "") {
                 logger.debug("activeGame: ", activeGame);
                 showModal(<GameDetailsItem serverAPI={serverAPI} shortname={activeGame} initActionSet={actionSetName} initAction="" clearActiveGame={clearActiveGame} />)
@@ -289,28 +292,28 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     const onInit = async () => {
         try {
             logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const data = await executeAction(serverAPI, initActionSet,
+            const data = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, initActionSet,
                 initAction,
                 {
-                    inputData: ""
+
                 });
             logger.debug("init result: ", data);
-            const result = data.Content as ActionSet;
+            const result = data?.Content as ActionSet;
             setActionSetName(result.SetName);
-            const menu = await executeAction(serverAPI, result.SetName,
+            const menu = await executeAction<ExecuteArgs, MenuAction>(serverAPI, result.SetName,
                 "GetContent",
                 {
                     inputData: ""
                 });
             setContent(menu);
             logger.debug("GetContent result: ", menu);
-            const actionRes = await executeAction(serverAPI, result.SetName,
+            const actionRes = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, result.SetName,
                 "GetScriptActions",
                 {
                     inputData: ""
-                }) as ContentResult;
+                });
             logger.debug("onInit actionRes", actionRes);
-            if (actionRes.Type === "ScriptSet") {
+            if (actionRes?.Type === "ScriptSet") {
                 const scriptActions = actionRes.Content as ScriptActions;
                 logger.debug("onInit scriptActions", scriptActions);
                 setScriptActions(scriptActions.Actions);
@@ -321,7 +324,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         }
     };
     const configEditor = () => {
-        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
+        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" refreshParent={() => { }} />);
     };
     const runScript = async (actionSet: string, actionId: string, args: any) => {
         const result = await executeAction(serverAPI, actionSet, actionId, args);
@@ -361,7 +364,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
 
     return (
         <>
-            {content.Type === "GameGrid" && (
+            {content?.Type === "GameGrid" && (
                 <Focusable
                     onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
                     onOptionsButton={() => setLimited(!limited)}
@@ -403,20 +406,20 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                         games={(content.Content as GameDataList).Games}
                         initActionSet={actionSetName}
                         initAction=""
-                   
+
                         setActiveGame={activeGameSetter}
                         clearActiveGame={clearActiveGame}
                     />
                 </Focusable>
             )}
-            {content.Type === "StoreTabs" &&
+            {content?.Type === "StoreTabs" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="horizontal"
                     initAction={initAction}
                     initActionSet={initActionSet}
                 />}
-            {content.Type === "SideBarPage" &&
+            {content?.Type === "SideBarPage" &&
                 <ContentTabs serverAPI={serverAPI}
                     tabs={content.Content as StoreTabsContent}
                     layout="vertical"
@@ -424,7 +427,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                     initActionSet={initActionSet}
                 />
             }
-            {content.Type === "MainMenu" &&
+            {content?.Type === "MainMenu" &&
                 <MainMenu //key={initActionSet + "_" + initAction} 
                     serverApi={serverAPI}
                     content={content.Content as StoreContent}
@@ -432,22 +435,22 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                     initAction=""
                 />
             }
-            {content.Type === "Text" &&
+            {content?.Type === "Text" &&
                 <TextContent //key={initActionSet + "_" + initAction} 
                     content={content.Content as string}
                 />
             }
-            {content.Type === "Html" &&
+            {content?.Type === "Html" &&
                 <HtmlContent //key={initActionSet + "_" + initAction}
                     content={content.Content as string}
                 />
             }
-            {content.Type === "Error" &&
+            {content?.Type === "Error" &&
                 <ErrorDisplay //key={initActionSet + "_" + initAction}
                     error={content.Content as ContentError}
                 />
             }
-            {content.Type === "Empty" && <Loading />}
+            {content?.Type === "Empty" && <Loading />}
         </>
     );
 };

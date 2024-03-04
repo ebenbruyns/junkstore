@@ -4,7 +4,7 @@ import {
     quickAccessControlsClasses
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh, ExecuteGetActionSetArgs } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
@@ -45,7 +45,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction<ActionSet>( //supposedly here we know that this action will return this type of Content
+        const result = await executeAction<ExecuteGetActionSetArgs,ActionSet>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             initActionSet,
             initAction,
@@ -63,7 +63,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
         const setName = result.Content.SetName;
         logger.log("SetName: ", setName)
         setActionSetName(setName);
-        const data = await executeAction<ConfData>( //supposedly here we know that this action will return this type of Content
+        const data = await executeAction<ExecuteGetActionSetArgs, ConfData>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             setName,
             "GetContent",
@@ -82,7 +82,9 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }
     const handleSectionChange = (section: Section) => {
-        if (!confData) return;
+        if (!confData) {
+          return;
+        }
         const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s); //as per type def Sections should always be defined
         
         setConfData({ ...confData, Sections: updatedSections });
@@ -186,7 +188,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async (_) => {
                                         logger.log("Saving config: ", confData)
-                                        const result = await executeAction<SaveRefresh /*| SomeOtherContentPossibility */>(serverAPI, //pass multiple possible Content types with a union
+                                        const result = await executeAction<ExecuteGetActionSetArgs,SaveRefresh /*| SomeOtherContentPossibility */>(serverAPI, //pass multiple possible Content types with a union
                                             actionSetName,
                                             "SaveContent",
                                             {

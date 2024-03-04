@@ -1,6 +1,6 @@
 import { DialogButton, DialogLabel, ServerAPI } from "decky-frontend-lib";
 import { ReactElement, VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, LaunchOptions, LoginStatus, SettingsData } from "../Types/Types";
+import { ActionSet, ContentError, ContentResult, ContentType, ExecuteArgs, GetSettingArgs, LaunchOptions, LoginStatus, SettingsData } from "../Types/Types";
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
 import { ErrorDisplay } from "./ErrorDisplay";
@@ -9,22 +9,27 @@ import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 
 export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
     const logger = new Logger("LoginContent");
-    const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
+    const [content, setContent] = useState<ContentResult<ContentType>>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState<string>("");
     const [LoggedIn, setLoggedIn] = useState<string>("false");
     const [SteamClientId, setSteamClientId] = useState<string>("");
     useEffect(() => {
-        if (actionSetName !== "")
+        if (actionSetName !== "") {
             updateLoginStatus();
+        }
     }
         , [LoggedIn, actionSetName]);
     const updateLoginStatus = async () => {
         logger.debug("Updating login status with actionSetName: ", actionSetName);
-        const result = await executeAction(serverAPI, actionSetName,
+        const result = await executeAction<ExecuteArgs, ContentType>(serverAPI, actionSetName,
             "GetContent",
             {
                 inputData: ""
             });
+        if (result == null) {
+            logger.error("Login status is null");
+            return;
+        }
         setContent(result);
         logger.debug("Login status: ", result);
     };
@@ -66,14 +71,22 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     };
     const login = async () => {
         try {
-            const data = await executeAction(serverAPI, actionSetName,
+            const data = await executeAction<ExecuteArgs, LaunchOptions>(serverAPI, actionSetName,
                 "LoginLaunchOptions",
                 {
                     inputData: ""
                 });
 
-            const launchOptions = data.Content as LaunchOptions;
-            setContent(data as ContentResult);
+            const launchOptions = data?.Content;
+            if (launchOptions == null) {
+                logger.error("LaunchOptions is null");
+                return;
+            }
+            if (data == null) {
+                logger.error("data is null");
+                return;
+            }
+            setContent(data);
             const id = await getSteamClientId(launchOptions);
             const gameId = gameIDFromAppID(id);
 
@@ -93,21 +106,19 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             logger.error("Login: ", error);
         }
     };
-    const runLogin = async (id: number) => {
-        setTimeout(() => {
-
-            let gid = gameIDFromAppID(id);
-            SteamClient.Apps.RunGame(gid, "", -1, 100);
-        }, 500);
-    };
+    
     const logout = async () => {
         try {
-            const data = await executeAction(serverAPI, actionSetName,
+            const data = await executeAction<ExecuteArgs, LoginStatus>(serverAPI, actionSetName,
                 "Logout",
                 {
                     inputData: ""
                 });
             setLoggedIn("false");
+            if (data == null) {
+                logger.error("login status is null");
+                return;
+            }
             setContent(data);
         } catch (error) {
             logger.error("Logout: ", error);
@@ -116,23 +127,24 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     const onInit = async () => {
         try {
             logger.debug(`Initializing LoginContent with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const data = await executeAction(serverAPI, initActionSet,
+            const data = await executeAction<ExecuteArgs, ActionSet>(serverAPI, initActionSet,
                 initAction,
                 {
                     inputData: ""
                 });
             logger.debug("init result: ", data);
-            const result = data.Content as ActionSet;
+            const result = data?.Content as ActionSet;
             setActionSetName(result.SetName);
-            const tmp = await executeAction(serverAPI, result.SetName,
+            const tmp = await executeAction<GetSettingArgs, SettingsData>(serverAPI, result.SetName,
                 "GetSetting",
                 {
                     name: "LoginSteamClientId",
                     inputData: ""
                 });
-            const settings = tmp.Content as SettingsData;
-            if (settings.value !== "")
-                setSteamClientId(settings.value);
+            const settings = tmp?.Content as SettingsData;
+            if (settings.value !== "") {
+              setSteamClientId(settings.value);
+            }
             setLoggedIn("unknown");
 
         } catch (error) {

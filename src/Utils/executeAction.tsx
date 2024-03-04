@@ -1,6 +1,6 @@
 import { AppDetails, LifetimeNotification, ServerAPI, showModal } from "decky-frontend-lib";
 import { ContentError, ContentResult, LaunchOptions } from "../Types/Types";
-import Logger, { log } from "./logger";
+import Logger from "./logger";
 import { ErrorModal } from "../ErrorModal";
 import { gameIDFromAppID } from "./gameIDFromAppID";
 
@@ -8,40 +8,6 @@ export interface GameStateUpdate {
     unAppID: number;
     nInstanceID: number;
     bRunning: boolean;
-}
-class StateStack {
-    public peekState(): any | undefined {
-        return this.stack[this.stack.length - 1];
-    }
-    private static instance: StateStack;
-    private stack: any[];
-
-    private constructor() {
-        this.stack = [];
-    }
-
-    public static getInstance(): StateStack {
-        if (!StateStack.instance) {
-            StateStack.instance = new StateStack();
-        }
-        return StateStack.instance;
-    }
-
-    public pushState(state: any): void {
-        this.stack.push(state);
-    }
-
-    public popState(): any | undefined {
-        return this.stack.pop();
-    }
-
-    public clearStack(): void {
-        this.stack = [];
-    }
-
-    public getStackSize(): number {
-        return this.stack.length;
-    }
 }
 
 
@@ -57,6 +23,7 @@ export async function configureShortcut(id: Number, launchOptions: LaunchOptions
     const logger = new Logger("configureShortcut");
 
     if (launchOptions) {
+        logger.debug("launchOptions: ", launchOptions);
         await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
         await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
@@ -69,15 +36,9 @@ export async function configureShortcut(id: Number, launchOptions: LaunchOptions
     }
 }
 
-const cleanupIds = async () => {
-    // @ts-ignore
-    const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824)
-    for (const app of apps) {
-        await SteamClient.Apps.RemoveShortcut(app.appid);
-    }
-}
+
 //* this is where you will be assuming the type of content and if the case is amibigous you can use type unions and deal with each possiblitiy outside the function
-export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: {}): Promise<ContentResult<Content> | null> { 
+export async function executeAction<Arguments, Content>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: Arguments): Promise<ContentResult<Content> | null> { 
 
     const logger = new Logger("executeAction");
     logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
@@ -89,7 +50,7 @@ export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: st
     });
 
     if (!res.success) { //TODO: need to handle server response errors as well, idk if you wanna make it show the modal too
-        const errorMsg = res.result;
+        //const errorMsg = res.result;
         return null;
     }
 
@@ -102,12 +63,12 @@ export async function executeAction<Content>(serverAPI: ServerAPI, actionSet: st
             const details = await getAppDetails(id)
             logger.log("details: ", details);
             const oldLaunchOptions: LaunchOptions = { //TODO: what happens if details is null? should it be handled specifically or should it be a allowed to set properties of undefined
-                Name: details?.strDisplayName,
-                Exe: details?.strShortcutExe,
-                WorkingDir: details?.strShortcutStartDir,
-                Options: details?.strShortcutLaunchOptions,
+                Name: details?.strDisplayName || "",
+                Exe: details?.strShortcutExe || "",
+                WorkingDir: details?.strShortcutStartDir || "",
+                Options: details?.strShortcutLaunchOptions || "",
                 CompatToolName: details?.strCompatToolName,
-                Compatibility: details?.strCompatToolName ? true : false
+                Compatibility: !!details?.strCompatToolName
             };
             logger.debug("run with options: ", newLaunchOptions);
 

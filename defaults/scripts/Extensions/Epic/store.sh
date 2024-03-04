@@ -127,8 +127,7 @@ function Epic_move(){
 
 function Epic_install(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    rm $PROGRESS_LOG
-
+    rm $PROGRESS_LOG &>> ${DECKY_PLUGIN_LOG_DIR}/${1}.log
     RESULT=$($EPICCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
     mkdir -p "${HOME}/.compat/${1}"
     ARGS=$($ARGS_SCRIPT "${1}")

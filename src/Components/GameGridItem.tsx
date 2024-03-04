@@ -110,8 +110,12 @@ const ScreenBoundChecker: VFC<ScreenBoundCheckerProps> = ({ imgAreaWidth, imgAre
     const topRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && onEnterBounds(), { root: null, threshold: 0 });
-        if (topRef.current) observer.observe(topRef.current);
-        return () => { if (topRef.current) observer.unobserve(topRef.current); };
+        if (topRef.current) {
+          observer.observe(topRef.current);
+        }
+        return () => { if (topRef.current) {
+                         observer.unobserve(topRef.current);
+                       } };
     }, []);
 
     return (

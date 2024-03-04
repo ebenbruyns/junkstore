@@ -17,25 +17,29 @@ window.JunkStoreLoggerDisable = () => {
 };
 
 export const log = (name: string) => {
-    if(isLoggerEnabled())
-    return console.info.bind(
-        window.console,
-        `%c Junk Store %c ${name} %c`,
-        'background: #16a085; color: black;',
-        'background: #1abc9c; color: black;',
-        'background: transparent;',
-    );
-    else return function (..._: any[]) { }
+    if (isLoggerEnabled()) {
+      return console.info.bind(
+          window.console,
+          `%c Junk Store %c ${name} %c`,
+          'background: #16a085; color: black;',
+          'background: #1abc9c; color: black;',
+          'background: transparent;',
+      );
+    } else {
+      return function (..._: any[]) { }
+    }
 };
 
 export const debug = (name: string) => {
-    if (isLoggerEnabled())
-    return console.debug.bind(window.console,
-        `%c Junk Store %c ${name} %c`,
-        'background: #16a085; color: black;',
-        'background: #1abc9c; color: black;',
-        'color: blue;');
-     else return function (..._: any[]) { }
+    if (isLoggerEnabled()) {
+      return console.debug.bind(window.console,
+          `%c Junk Store %c ${name} %c`,
+          'background: #16a085; color: black;',
+          'background: #1abc9c; color: black;',
+          'color: blue;');
+    } else {
+      return function (..._: any[]) { }
+    }
 }
 
 export const error = (name: string) => {

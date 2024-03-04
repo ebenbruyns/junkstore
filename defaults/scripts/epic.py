@@ -13,20 +13,27 @@ import sharedgameset
 import re
 
 
+class CmdException(Exception):
+    pass
+
 class Epic(sharedgameset.GameSet):
     def __init__(self, db_file, setNameConfig=None):
         super().__init__(db_file, setNameConfig)
 
-    legendary_cmd = os.environ['LEGENDARY']
+    legendary_cmd = os.path.expanduser( os.environ['LEGENDARY'])
 
     def execute_shell(self, cmd):
-        # print(f"Executing {cmd}")
-
+       
         result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  shell=True, env=os.environ).communicate()[0].decode()
-        # print(f"Result: {result}")
-        return json.loads(result)
+                                  shell=True).communicate()[0].decode()
+       
+        #[cli] ERROR: Game is out of date, please update or launch with update check skipping!
+        if "[cli] ERROR:" in result:
+            raise CmdException(result) 
+        else: 
+            print(f" result: {result}", file=sys.stderr)      
+            return json.loads(result)
 
     # sample json for game returned from legendary list --json
 
@@ -61,9 +68,14 @@ class Epic(sharedgameset.GameSet):
 
     def get_parameters(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch} "))
-        return " ".join(result['egl_parameters'])
+        try:
+            result = self.execute_shell(
+            f"{self.legendary_cmd} launch {game_id} --json {offline_switch} ")
+            return " ".join(result['egl_parameters'])
+        except CmdException as e:
+            raise e
+
+        
 
     def has_updates(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
@@ -76,11 +88,11 @@ class Epic(sharedgameset.GameSet):
 
     def get_lauch_options(self, game_id, steam_command, name, offline):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
         launcher = os.environ['LAUNCHER']
-        script_path = os.path.expanduser(
-            launcher)
+        result = self.execute_shell(
+            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}")
+       
+        script_path = os.path.expanduser(launcher)
         return json.dumps(
             {
                 'Type': 'LaunchOptions',

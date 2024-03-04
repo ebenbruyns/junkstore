@@ -4,7 +4,7 @@ import {
     ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, ExecuteGetActionSetArgs } from "./Types/Types";
 import { SectionEditor } from "./Components/SectionEditor";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
@@ -46,7 +46,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction(
+        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI,
             initActionSet,
             initAction,
@@ -55,11 +55,15 @@ export const SettingsEditor: VFC<EditorProperties> = ({
             }
         )
         logger.log("OnInit result: ", result)
-
-        const setName = (result.Content as ActionSet).SetName;
+        
+        const setName = result?.Content.SetName;
+        if (setName == null) {
+            logger.error("setName is null");
+            return;
+        }
         logger.log("SetName: ", setName)
         setActionSetName(setName);
-        const data = await executeAction(
+        const data = await executeAction<ExecuteGetActionSetArgs, ConfData>(
             serverAPI,
             setName,
             "GetContent",
@@ -68,7 +72,11 @@ export const SettingsEditor: VFC<EditorProperties> = ({
             }
         )
 
-        const res = data.Content as ConfData
+        const res = data?.Content 
+        if (res == null) {
+            logger.error("res is null");
+            return;
+        }
         setConfData(res);
 
     }

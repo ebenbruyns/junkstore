@@ -1,21 +1,24 @@
 import { Dropdown, Focusable, ServerAPI } from "decky-frontend-lib";
-import { VFC, useEffect, useRef, useState } from "react";
+import { VFC, useEffect, useState } from "react";
 import Logger from "./Utils/logger";
 import { LogFile } from "./Types/Types";
 import { ScrollableWindowRelative } from './ScrollableWindow';
 
 
 export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    const [logs, setLogs] = useState([] as LogFile[]);
-    const [selectedLog, setSelectedLog] = useState("");
+    const [logs, setLogs] = useState<LogFile[]>([] as LogFile[]);
     const [logContent, setLogContent] = useState("");
     const logger = new Logger("LogViewer");
-    const focusRef = useRef(null);
     const fetchLogs = async () => {
         try {
-            const response = await serverAPI.callPluginMethod("get_logs", {});
+            const response = await serverAPI.callPluginMethod<object, LogFile[]>("get_logs", {});
             logger.log(response);
-            setLogs(response.result as LogFile[]);
+            if (response.result instanceof Array) {
+                setLogs(response.result);
+                if (response.result.length > 0) {
+                    setLogContent(response.result[0].Content);
+                }
+            }
         } catch (e) {
             logger.error(e);
         }
@@ -25,14 +28,7 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         fetchLogs();
     }, []);
 
-    const handleLogSelect = async (logFileName: string) => {
-        try {
-            const response = await serverAPI.callPluginMethod("get_log_content", { fileName: logFileName });
-            setLogContent(response.result as string);
-        } catch (e) {
-            logger.error(e);
-        }
-    };
+
 
     return (
         <Focusable

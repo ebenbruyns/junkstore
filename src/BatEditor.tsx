@@ -3,7 +3,7 @@ import {
     PanelSection, Dropdown, ModalRoot, ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ActionSet, FileData, FilesData, SaveRefresh } from "./Types/Types";
+import { ActionSet, ExecuteGetActionSetArgs, FileData, FilesData, SaveRefresh } from "./Types/Types";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
@@ -24,23 +24,30 @@ export const BatEditor: VFC<EditorProperties> = ({
     const focusRef = useRef(null);
     const [actionSetName, setActionSetName] = useState("" as string);
     const OnInit = async () => {
-        const result = await executeAction(
+        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI, initActionSet,
             initAction,
 
             { content_id: contentId, }
         )
-        const setName = (result.Content as ActionSet).SetName;
+        const setName = result?.Content.SetName;
+        if (setName == null) {
+            return;
+        }
         setActionSetName(setName);
-        const data = await executeAction(serverAPI, setName,
+        const data = await executeAction<ExecuteGetActionSetArgs, FilesData>(serverAPI, setName,
             "GetContent",
             {
                 content_id: contentId,
             })
-        const res = (data.Content as FilesData).Files;
+        const res = data?.Content.Files;
+        if (res == null) {
+            return;
+        }
         setBatData(res);
-        if (res.length > 0)
+        if (res.length > 0) {
             setSelectedBat(res[0] as FileData);
+        }
 
     }
 
@@ -75,13 +82,13 @@ export const BatEditor: VFC<EditorProperties> = ({
 
                             onSecondaryActionDescription="Save bat files"
                             onSecondaryButton={async (_) => {
-                                const result = await executeAction(serverAPI, actionSetName,
+                                const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>(serverAPI, actionSetName,
                                     "SaveContent",
                                     {
                                         content_id: contentId,
-                                        inputData: batData,
+                                        inputData: batData
                                     });
-                                if (result.Type === "Refresh") {
+                                if (result?.Type === "Refresh") {
                                     const tmp = result.Content as SaveRefresh
                                     if (tmp.Refresh) {
                                         refreshParent()
