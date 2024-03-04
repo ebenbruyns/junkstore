@@ -173,13 +173,13 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             logger.error(error);
         }
     };
-    const download = async () => {
+    const download = async (update: boolean) => {
         try {
 
             const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
                 serverAPI,
                 initActionSet,
-                "Download",
+                update?"Update":"Download",
                 {
                     shortname: shortname
                 }
@@ -191,28 +191,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             logger.error(error);
         }
     };
-    const update = async () => { //* maybe combine this into one function with download 
-        //  (This needs to be seperate as it requires different 
-        //  backend calls, it's also more flexible for the backend 
-        //  to have this seperated)
-        try {
-
-            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
-                serverAPI,
-                initActionSet,
-                "Update",
-                {
-                    shortname: shortname
-                }
-            );
-            if (result?.Type == "Progress") {
-                setInstalling(true);
-            }
-
-        } catch (error) {
-            logger.error(error);
-        }
-    };
+    
     const runScript = async (actionSet: string, actionId: string, args: any) => {
         const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
             logger.log("runscript game state update: ", data);
@@ -453,7 +432,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                             steamClientID={steamClientID}
                             closeModal={closeModal}
                             installing={installing}
-                            installer={download}
+                            installer={() => download(false)}
                             progress={progress}
                             cancelInstall={cancelInstall}
                             uninstaller={uninstall}
@@ -462,7 +441,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                             runner={runner}
                             actions={scriptActions}
                             resetLaunchOptions={resetLaunchOptions}
-                            updater={update}
+                            updater={()=> download(true)}
                             scriptRunner={runScript}
                             clearActiveGame={clearActiveGame}
                             reloadData={reloadData}
