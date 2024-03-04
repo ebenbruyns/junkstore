@@ -27,13 +27,11 @@ class Epic(sharedgameset.GameSet):
         result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   shell=True).communicate()[0].decode()
-       
-        #[cli] ERROR: Game is out of date, please update or launch with update check skipping!
+
         if "[cli] ERROR:" in result:
-            raise CmdException(result) 
-        else: 
-            print(f" result: {result}", file=sys.stderr)      
-            return json.loads(result)
+            raise CmdException(result)
+        print(f" result: {result}", file=sys.stderr)
+        return json.loads(result)
 
     # sample json for game returned from legendary list --json
 
@@ -44,16 +42,19 @@ class Epic(sharedgameset.GameSet):
         self.insert_data(games_list)
 
     def get_working_dir(self, game_id, offline):
-        offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
-        print(result['working_directory'])
+        self.get_directory(offline, game_id, 'working_directory')
 
     def get_game_dir(self, game_id, offline):
+        self.get_directory(offline, game_id, 'game_directory')
+
+    def get_directory(self, offline, game_id, type):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
-        print(result['game_directory'])
+        result = self.execute_shell(
+            os.path.expanduser(
+                f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"
+            )
+        )
+        print(result[type])
 
     def get_login_status(self, offline):
         offline_switch = "--offline" if offline else ""
