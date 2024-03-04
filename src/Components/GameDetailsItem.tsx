@@ -1,7 +1,7 @@
 import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameData, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
+import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
@@ -352,7 +352,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         if (imageResult == null) {
             return;
         }
-        const images = imageResult.Content as GameImages;
+        const images = imageResult.Content;
         logger.debug("images", images);
         if (images.Grid !== null) {
             SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
@@ -374,7 +374,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         // @ts-ignore
         const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824);
         for (const app of apps) {
-            await SteamClient.Apps.RemoveShortcut(app.appid); // is the await needed here?
+            SteamClient.Apps.RemoveShortcut(app.appid); 
         }
     };
 
@@ -398,7 +398,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             if (gameData.Type !== "GameDetails") {
                 return id;
             }
-            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameData).Name);
+            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
             return id;
         }
     };

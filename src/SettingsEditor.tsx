@@ -46,7 +46,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
+        const actionSetResult = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI,
             initActionSet,
             initAction,
@@ -54,28 +54,27 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                 content_id: contentId
             }
         )
-        logger.log("OnInit result: ", result)
-        if (!result) {
+        logger.log("OnInit result: ", actionSetResult)
+        if (!actionSetResult) {
             return;
         }
         
-        const setName = result.Content.SetName;
-        logger.log("SetName: ", setName)
-        setActionSetName(setName);
-        const data = await executeAction<ExecuteGetActionSetArgs, ConfData>(
+        logger.log("SetName: ", actionSetResult.Content.SetName)
+        
+        const configDataResult = await executeAction<ExecuteGetActionSetArgs, ConfData>(
             serverAPI,
-            setName,
+            actionSetResult.Content.SetName,
             "GetContent",
             {
                 content_id: contentId
             }
         )
-        if (!data) {
+        if (!configDataResult) {
             return;
         }
 
-        const res = data.Content 
-        setConfData(res);
+        setActionSetName(actionSetResult.Content.SetName);
+        setConfData(configDataResult.Content);
 
     }
     const handleSectionChange = (section: Section) => {

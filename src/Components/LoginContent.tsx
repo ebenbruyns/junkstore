@@ -1,6 +1,10 @@
 import { DialogButton, DialogLabel, ServerAPI } from "decky-frontend-lib";
 import { ReactElement, VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, ContentType, ExecuteArgs, GetSettingArgs, LaunchOptions, LoginStatus, SettingsData } from "../Types/Types";
+import {
+    ActionSet, ContentError, ContentResult, ContentType,
+    ExecuteArgs, ExecuteLoginArgs, GetSettingArgs, LaunchOptions, LoginStatus,
+    SaveSettingsArgs, SettingsData
+} from "../Types/Types";
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
 import { ErrorDisplay } from "./ErrorDisplay";
@@ -17,8 +21,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         if (actionSetName !== "") {
             updateLoginStatus();
         }
-    }
-        , [LoggedIn, actionSetName]);
+    }, [LoggedIn, actionSetName]);
     const updateLoginStatus = async () => {
         logger.debug("Updating login status with actionSetName: ", actionSetName);
         const result = await executeAction<ExecuteArgs, ContentType>(serverAPI, actionSetName,
@@ -36,16 +39,17 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     const createShortcut = async (launchOptions: LaunchOptions) => {
         logger.debug("Creating shortcut for login");
         const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "");
-        setSteamClientId(id.toString());
+        
         await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetAppHidden(id, false);
         await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
-        await executeAction(serverAPI, actionSetName,
+        await executeAction<SaveSettingsArgs, ContentType>(serverAPI, actionSetName,
             "SaveSetting",
             {
                 name: "LoginSteamClientId",
                 value: id.toString()
             });
+        setSteamClientId(id.toString());
         return id;
     };
     const getSteamClientId = async (launchOptions: LaunchOptions) => {
@@ -71,35 +75,30 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     };
     const login = async () => {
         try {
-            const data = await executeAction<ExecuteArgs, LaunchOptions>(serverAPI, actionSetName,
-                "LoginLaunchOptions",
-                {
-                    inputData: ""
-                });
-
-            const launchOptions = data?.Content;
+            const launchOptionsResult = await executeAction<ExecuteArgs, LaunchOptions>(serverAPI, actionSetName,
+                "LoginLaunchOptions", {});
+            if (launchOptionsResult == null) {
+                logger.error("launchOptionsResult is null");
+                return;
+            }
+            const launchOptions = launchOptionsResult?.Content;
             if (launchOptions == null) {
                 logger.error("LaunchOptions is null");
                 return;
             }
-            if (data == null) {
-                logger.error("data is null");
-                return;
-            }
-            setContent(data);
+            
+            
             const id = await getSteamClientId(launchOptions);
             const gameId = gameIDFromAppID(id);
 
-            await executeAction(serverAPI, actionSetName,
+            await executeAction<ExecuteLoginArgs, ContentType>(serverAPI, actionSetName,
                 "Login",
                 {
-                    inputData: "",
                     appId: String(id),
                     gameId: String(gameId)
-
                 });
 
-
+            setContent(launchOptionsResult);            
             setLoggedIn("true");
 
         } catch (error) {
@@ -114,11 +113,12 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                 {
                     inputData: ""
                 });
-            setLoggedIn("false");
+            
             if (data == null) {
                 logger.error("login status is null");
                 return;
             }
+            setLoggedIn("false");
             setContent(data);
         } catch (error) {
             logger.error("Logout: ", error);
@@ -134,7 +134,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                 });
             logger.debug("init result: ", data);
             const result = data?.Content as ActionSet;
-            setActionSetName(result.SetName);
+            
             const tmp = await executeAction<GetSettingArgs, SettingsData>(serverAPI, result.SetName,
                 "GetSetting",
                 {
@@ -145,6 +145,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
             if (settings.value !== "") {
               setSteamClientId(settings.value);
             }
+            setActionSetName(result.SetName);
             setLoggedIn("unknown");
 
         } catch (error) {

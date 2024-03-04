@@ -45,7 +45,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction<ExecuteGetActionSetArgs,ActionSet>( //supposedly here we know that this action will return this type of Content
+        const actionSetResult = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI,
             initActionSet,
             initAction,
@@ -54,16 +54,16 @@ export const ConfEditor: VFC<EditorProperties> = ({
             }
         )
         
-        logger.log("OnInit result: ", result)
-        if (!result) {
+        logger.log("OnInit result: ", actionSetResult)
+        if (!actionSetResult) {
             closeModal();
             return;
         }
 
-        const setName = result.Content.SetName;
+        const setName = actionSetResult.Content.SetName;
         logger.log("SetName: ", setName)
-        setActionSetName(setName);
-        const data = await executeAction<ExecuteGetActionSetArgs, ConfData>( //supposedly here we know that this action will return this type of Content
+       
+        const configDataResult = await executeAction<ExecuteGetActionSetArgs, ConfData>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             setName,
             "GetContent",
@@ -72,13 +72,13 @@ export const ConfEditor: VFC<EditorProperties> = ({
             }
         )
 
-        if (!data) {
+        if (!configDataResult) {
             closeModal();
             return;
         }
 
-        const res = data.Content
-        setConfData(res);
+        setActionSetName(setName);
+        setConfData(configDataResult.Content);
 
     }
     const handleSectionChange = (section: Section) => {

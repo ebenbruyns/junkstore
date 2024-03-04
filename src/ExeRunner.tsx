@@ -21,7 +21,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
         logger.debug("initAction: ", initAction);
         logger.debug("contentId: ", contentId);
         const gameId = gameIDFromAppID(parseInt(contentId))
-        const result = await executeAction<ExecuteGetExeActionSetArgs, ActionSet>(
+        const actionSetResult = await executeAction<ExecuteGetExeActionSetArgs, ActionSet>(
             serverAPI, initActionSet,
             initAction,
 
@@ -31,14 +31,14 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                 content_id: contentId,
             }
         )
-        const setName = result?.Content.SetName;
+        const setName = actionSetResult?.Content.SetName;
         if (setName == null) {
             logger.error("setName is null");
             return;
         }
-        setActionSetName(setName);
+       
         logger.debug("setName: ", setName);
-        logger.debug("result: ", result);
+        logger.debug("result: ", actionSetResult);
         // @ts-ignore
         const id = parseInt(contentId)
         const details = await getAppDetails(id)
@@ -49,7 +49,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
         }
         else {
 
-            const data = await executeAction<ExecuteGetFilesDataArgs, FilesData>(serverAPI, setName,
+            const filesDataResult = await executeAction<ExecuteGetFilesDataArgs, FilesData>(serverAPI, setName,
                 "GetContent",
                 {
 
@@ -58,13 +58,13 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     SteamClientId: contentId,
                     shortName: shortName
                 })
-            const res = data?.Content;
-            if (res == null) {
+            if (filesDataResult?.Content == null) {
                 logger.error("res is null");
                 return;
             }
-            logger.debug("FilesData: ", res);
-            setFilesData(res);
+            logger.debug("FilesData: ", filesDataResult?.Content);
+            setActionSetName(setName);
+            setFilesData(filesDataResult?.Content);
         }
 
     }
@@ -96,20 +96,23 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         setBusy(true);
                         logger.debug(`steamclientid ${parseInt(contentId)}`)
                         // @ts-ignore
-                        const res = await getAppDetails(parseInt(contentId))
-                        logger.debug("app details: ", res)
-                        if (res == null) {
+                        const appDetails = await getAppDetails(parseInt(contentId))
+                        logger.debug("app details: ", appDetails)
+                        if (appDetails == null) {
                             logger.error("app details is null")
                             return;
                         }
 
-                        const compatToolName = res.strCompatToolName
+                        const compatToolName = appDetails.strCompatToolName
                         //@ts-ignore
-                        const startDir = res.strShortcutStartDir
+                        const startDir = appDetails.strShortcutStartDir
 
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
                         const gameId = gameIDFromAppID(parseInt(contentId))
-                        const result = await executeAction<ExecuteRunBinaryArgs, SaveRefresh>(serverAPI, actionSetName, "RunBinary"
+                        const result = await executeAction<ExecuteRunBinaryArgs, SaveRefresh>(
+                            serverAPI,
+                            actionSetName,
+                            "RunBinary"
                             , {
                                 gameId: String(gameId),
                                 appId: String(contentId),
@@ -142,19 +145,18 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                             // @ts-ignore
                             focusable={false} style={{ margin: "0px" }}>
                             <PanelSection>
-                                <DialogButton onOKButton={runExe} onClick={runExe} onSecondaryButton={setExecutable} onSecondaryActionDescription="Set game executable">{file.Path}</DialogButton>
+                                <DialogButton
+                                    onOKButton={runExe}
+                                    onClick={runExe}
+                                    onSecondaryButton={setExecutable}
+                                    onSecondaryActionDescription="Set game executable">
+                                    {file.Path}
+                                </DialogButton>
                             </PanelSection>
                         </ScrollPanelGroup >)
                 })
                 }
-
-
-
-
-
-
             </ModalRoot >
         </>
     );
-
 };

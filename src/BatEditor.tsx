@@ -24,22 +24,23 @@ export const BatEditor: VFC<EditorProperties> = ({
     const focusRef = useRef<HTMLTextAreaElement>(null);
     const [actionSetName, setActionSetName] = useState("" as string);
     const OnInit = async () => {
-        const result = await executeAction<ExecuteGetActionSetArgs, ActionSet>(serverAPI, initActionSet, initAction, { content_id: contentId });
-        if (result === null) {
+        const actionSetResult = await executeAction<ExecuteGetActionSetArgs, ActionSet>(serverAPI, initActionSet, initAction, { content_id: contentId });
+        if (actionSetResult === null) {
             return;
         }
-        const setName = result.Content.SetName;
-        setActionSetName(setName);
-        const data = await executeAction<ExecuteGetActionSetArgs, FilesData>(serverAPI, setName, "GetContent", { content_id: contentId });
-        if (data === null) {
+        const setName = actionSetResult.Content.SetName;
+        
+        const fileDataResult = await executeAction<ExecuteGetActionSetArgs, FilesData>(serverAPI, setName, "GetContent", { content_id: contentId });
+        if (fileDataResult === null) {
             return;
         }
-        const res = data.Content.Files;
-        setBatData(res);
+        const res = fileDataResult.Content.Files;
+       
         if (res.length > 0) {
             setSelectedBat(res[0] as FileData);
         }
-
+        setBatData(res);
+        setActionSetName(setName);
     };
 
     useEffect(() => {
@@ -57,12 +58,12 @@ export const BatEditor: VFC<EditorProperties> = ({
             <ModalRoot
                 className={batEditorRootClass}
                 bAllowFullSize={true}
-                // @ts-ignore
+               
                 bAllowFullSizeMobile={true}
                 closeModal={closeModal}
             >
                 <ScrollPanelGroup
-                    // @ts-ignore
+                  
                     focusable={false}
                     style={{ margin: "0px" }}>
                     <Focusable
@@ -72,7 +73,7 @@ export const BatEditor: VFC<EditorProperties> = ({
 
                             onSecondaryActionDescription="Save bat files"
                             onSecondaryButton={async () => {
-                                const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>( //* will SaveContent always return this type? if so remove the check below, if not put all the possibities here
+                                const saveRefreshResult = await executeAction<ExecuteGetActionSetArgs, SaveRefresh>( //* will SaveContent always return this type? if so remove the check below, if not put all the possibities here
                                     serverAPI,
                                     actionSetName,
                                     "SaveContent",
@@ -81,11 +82,11 @@ export const BatEditor: VFC<EditorProperties> = ({
                                         inputData: batData
                                     }
                                 );
-                                if (result === null) {
+                                if (saveRefreshResult === null) {
                                     return;
                                 }
-                                if (result.Type === "Refresh") { //remove check if this is the only type
-                                    const tmp = result.Content;
+                                if (saveRefreshResult.Type === "Refresh") { //remove check if this is the only type
+                                    const tmp = saveRefreshResult.Content;
                                     if (tmp.Refresh) {
                                         refreshParent();
                                     }

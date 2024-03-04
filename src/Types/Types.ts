@@ -183,6 +183,9 @@ export interface ExecuteArgs {
 export interface GetSettingArgs extends ExecuteArgs {
   name: string;
 }
+export interface SaveSettingsArgs extends GetSettingArgs {
+  value: string;
+}
 
 export interface ExecuteGetGameDetailsArgs extends ExecuteArgs {
   shortname: string;
@@ -198,15 +201,16 @@ export interface ExecuteGetContentArgs extends ExecuteArgs {
   installed: string;
   limited: string;
 }
-export interface ExecuteGetExeActionSetArgs extends ExecuteArgs {
+
+export interface ExecuteLoginArgs extends ExecuteArgs {
   gameId: string;
   appId: string;
-  content_id: string;
+}
+export interface ExecuteGetExeActionSetArgs extends ExecuteLoginArgs {
+   content_id: string;
 }
 
-export interface ExecuteGetFilesDataArgs extends ExecuteArgs {
-  gameId: string;
-  appId: string;
+export interface ExecuteGetFilesDataArgs extends ExecuteLoginArgs {
   SteamClientId: string;
   shortName: string;
 }
