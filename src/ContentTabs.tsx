@@ -339,7 +339,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                                 appId: ""
                             };
 
-                            runScript(initActionSet, action.ActionId, args);
+                            runScript(actionSetName, action.ActionId, args);
 
                         }}
                     >{action.Title}</MenuItem>);
