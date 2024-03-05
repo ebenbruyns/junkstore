@@ -27,7 +27,6 @@ export async function configureShortcut(id: Number, launchOptions: LaunchOptions
         await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
         await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-        const defaultProton = settingsStore.settings.strCompatTool;
 
         if (launchOptions.Compatibility) {
             await SteamClient.Apps.SpecifyCompatTool(id, launchOptions.CompatToolName);
