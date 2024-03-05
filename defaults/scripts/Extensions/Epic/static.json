@@ -394,7 +394,7 @@
           "Id": "Refresh",
           "Title": "Refresh Games List",
           "Type": "Refresh",
-          "Command": "./scripts/junk-store.sh Epic init"
+          "Command": "./scripts/junk-store.sh Epic refresh"
         }
       ]
     }

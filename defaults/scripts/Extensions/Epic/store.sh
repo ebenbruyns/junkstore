@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-# ACTIONS+=()
+#ACTIONS+=(refresh)
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
@@ -14,6 +14,11 @@ fi
 
 function Epic_init() {
     $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE #> /dev/null
+}
+
+function Epic_refresh() {
+    TEMP=$(Epic_init)
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Refreshed\"}}"
 }
 function Epic_getgames(){
     if [ -z "${1}" ]; then
