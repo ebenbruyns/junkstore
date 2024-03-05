@@ -37,18 +37,20 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         logger.debug("Login status: ", result);
     };
     const createShortcut = async (launchOptions: LaunchOptions) => {
-        logger.debug("Creating shortcut for login");
+        logger.debug("Creating shortcut for login: ", launchOptions);
         const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "");
-        
+        logger.debug("Shortcut created for login: ", id);
         await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
         await SteamClient.Apps.SetAppHidden(id, false);
         await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
+        logger.debug("Saving shortcut for login: ", id);
         await executeAction<SaveSettingsArgs, ContentType>(serverAPI, actionSetName,
             "SaveSetting",
             {
                 name: "LoginSteamClientId",
                 value: id.toString()
             });
+        logger.debug("Shortcut created for login: ", id);
         setSteamClientId(id.toString());
         return id;
     };
@@ -76,6 +78,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         try {
             const launchOptionsResult = await executeAction<ExecuteArgs, LaunchOptions>(serverAPI, actionSetName,
                 "LoginLaunchOptions", {});
+            logger.debug("launchOptionsResult: ", launchOptionsResult);
             if (launchOptionsResult == null) {
                 logger.error("launchOptionsResult is null");
                 return;

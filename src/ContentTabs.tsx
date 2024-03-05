@@ -282,29 +282,23 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     const onInit = async () => {
         try {
             logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const data = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, initActionSet,
+            const actionSetResult = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, initActionSet,
                 initAction,
-                {
-
-                });
-            logger.debug("init result: ", data);
-            const result = data?.Content as ActionSet;
-            setActionSetName(result.SetName);
+                {});
+            logger.debug("init result: ", actionSetResult);
+            const result = actionSetResult?.Content as ActionSet;
             const menu = await executeAction<ExecuteArgs, MenuAction>(serverAPI, result.SetName,
                 "GetContent",
-                {
-                    inputData: ""
-                });
-            setContent(menu);
+                {});
             logger.debug("GetContent result: ", menu);
-            const actionRes = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, result.SetName,
+            const scriptActionResult = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, result.SetName,
                 "GetScriptActions",
-                {
-                    inputData: ""
-                });
-            logger.debug("onInit actionRes", actionRes);
-            if (actionRes?.Type === "ScriptSet") {
-                const scriptActions = actionRes.Content as ScriptActions;
+                {});
+            logger.debug("onInit actionRes", scriptActionResult);
+            setActionSetName(result.SetName);
+            setContent(menu);
+            if (scriptActionResult?.Type === "ScriptSet") {
+                const scriptActions = scriptActionResult.Content as ScriptActions;
                 logger.debug("onInit scriptActions", scriptActions);
                 setScriptActions(scriptActions.Actions);
             }
@@ -318,6 +312,8 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     };
     const runScript = async (actionSet: string, actionId: string, args: any) => {
         const result = await executeAction(serverAPI, actionSet, actionId, args);
+        if (result?.Type == "RefreshContent")
+            onInit()
         logger.debug("runScript result", result);
 
     };

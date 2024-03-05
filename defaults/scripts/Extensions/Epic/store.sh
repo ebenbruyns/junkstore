@@ -18,7 +18,7 @@ function Epic_init() {
 
 function Epic_refresh() {
     TEMP=$(Epic_init)
-    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Refreshed\"}}"
+    echo "{\"Type\": \"RefreshContent\", \"Content\": {\"Message\": \"Refreshed\"}}"
 }
 function Epic_getgames(){
     if [ -z "${1}" ]; then
@@ -38,7 +38,13 @@ function Epic_getgames(){
     fi
     IMAGE_PATH=""
     TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
-   
+    # This might be a bit fragile, but it should work for now.
+    # checking if the Game's content is empty, if it is, then we need to refresh the list
+    #{"Type": "GameGrid", "Content": {"NeedsLogin": "true", "Games": []}}
+    if [[ $TEMP == "{\"Type\": \"GameGrid\", \"Content\": {\"NeedsLogin\": \"true\", \"Games\": []}}" ]]; then
+        TEMP=$(Epic_init)
+        TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+    fi
     echo $TEMP
 }
 function Epic_saveplatformconfig(){
@@ -242,7 +248,28 @@ function launchoptions () {
 }
 function Epic_login(){
     get_steam_env
-    launchoptions "/bin/flatpak" "run com.github.derrod.legendary auth" "" "Epic Games Login" "Epic"
+    launchoptions "${LEGENDARY}" "auth" "." "Epic Games Login" 
+}
+function loginlaunchoptions () {
+    Exe=$1 
+    Options=$2 
+    WorkingDir=$3 
+    Name=$4 
+    Compatibility=$5
+    CompatTooName=$6
+    JSON="{\"Type\": \"LaunchOptions\", \"Content\": {
+        \"Exe\": \"${Exe}\",
+        \"Options\": \"${Options}\",
+        \"WorkingDir\": \"${WorkingDir}\",
+        \"Name\": \"${Name}\",
+        \"Compatibility\": \"${Compatibility}\",
+        \"CompatToolName\": \"${CompatTooName}\"
+    }}"
+    echo $JSON
+}
+function Epic_login-launch-options(){
+    get_steam_env
+    loginlaunchoptions  "${LEGENDARY}" "auth" "." "Epic Games Login" 
 }
 
 
