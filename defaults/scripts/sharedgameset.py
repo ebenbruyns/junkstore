@@ -46,7 +46,7 @@ class GameSet:
         c = conn.cursor()
         
         res = c.execute("PRAGMA journal_mode=WAL;")
-        print(f"PRAGMA journal_mode=WAL; {res.fetchall()}", file=sys.stderr)
+        c.execute("PRAGMA synchronous=OFF;")
         conn.commit()
 
         return conn
