@@ -108,7 +108,7 @@ class Epic(sharedgameset.GameSet):
             })
 
     def insert_data(self, games_list):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
 
         for game in games_list:
@@ -172,7 +172,7 @@ class Epic(sharedgameset.GameSet):
         conn.close()
 
     def insert_game(self, game):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
 
     # [DLManager] INFO: = Progress: 0.51% (368/72002), Running for 00:01:58, ETA: 06:23:02

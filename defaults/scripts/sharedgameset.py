@@ -1,4 +1,8 @@
 
+import argparse
+import json
+import sys
+import sqlite3
 
 import argparse
 import os
@@ -37,8 +41,18 @@ class GameSet:
         json_str = sys.stdin.read()
         return json.loads(json_str)
 
-    def create_tables(self):
+    def get_connection(self):
         conn = sqlite3.connect(self.db_file)
+        c = conn.cursor()
+        
+        res = c.execute("PRAGMA journal_mode=WAL;")
+        print(f"PRAGMA journal_mode=WAL; {res.fetchall()}", file=sys.stderr)
+        conn.commit()
+
+        return conn
+
+    def create_tables(self):
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute(
             'CREATE TABLE IF NOT EXISTS configs (id INTEGER PRIMARY KEY, section TEXT, key TEXT, value TEXT, config_set_id INTEGER, FOREIGN KEY(config_set_id) REFERENCES config_set(id))')
@@ -56,7 +70,7 @@ class GameSet:
         conn.close()
 
     def get_games_with_images(self,  image_prefix, filter_str, installed, isLimited, urlencode, needsLogin):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         limited_clause = ""
         if (isLimited.lower() == "true"):
@@ -103,7 +117,7 @@ class GameSet:
             return data
 
     def create_empty_config_set(self, shortname, forkname, version, platform):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         config_set_id = 0
         c.execute("select id from config_set where ShortName = ? AND forkname = ? AND version = ? AND platform = ?",
@@ -116,7 +130,7 @@ class GameSet:
         conn.close()
 
     def add_missing_config_sets(self, name):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         query = "insert into config_set (ShortName, forkname, version, platform) select Game.ShortName, '', '', 'dos' from Game LEFT JOIN config_set ON Game.ShortName = config_set.ShortName AND config_set.platform = 'dos' WHERE config_set.id IS NULL"
         c.execute(query)
@@ -124,7 +138,7 @@ class GameSet:
         conn.close()
 
     def get_config(self, shortnames, forkname, version, platform):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         config = configparser.ConfigParser()
         autoexec_text = ""
@@ -162,7 +176,7 @@ class GameSet:
         return config, autoexec_text
 
     def store_config_in_database(self, shortname, forkname, version, platform, sections, autoexec):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         config_set_id = 0
         c.execute("select id from config_set where ShortName = ? AND forkname = ? AND version = ? AND platform = ?",
@@ -194,7 +208,7 @@ class GameSet:
         # with open(filename, 'w') as f:
         #     json.dump(config_data, f)
         # try:
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         config_set_id = 0
         c.execute("select id from config_set where ShortName = ? AND forkname = ? AND version = ? AND platform = ?",
@@ -273,7 +287,7 @@ class GameSet:
             config_data = self.load_conf_data_from_json(
                 os.path.expanduser(
                     filepath))
-            conn = sqlite3.connect(self.db_file)
+            conn = self.get_connection()
             c = conn.cursor()
 
             autoexec_text = ""
@@ -331,7 +345,7 @@ class GameSet:
         return None
 
     def get_base64_images(self, game_id, image_prefix="", url_encode=False):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("SELECT ImagePath FROM Images join Game on Game.ID = Images.GameID WHERE ShortName=? order by Images.SortOrder", (game_id,))
         images = []
@@ -354,7 +368,7 @@ class GameSet:
         return encoded_data
 
     def get_game_data(self, shortname, image_prefix, urlencode, platform, forkname, version):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
 
         c = conn.cursor()
 
@@ -435,7 +449,7 @@ class GameSet:
         return html
 
     def get_editors(self, shortname, platform, forkname, version):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("SELECT ID FROM Game WHERE ShortName=?", (shortname,))
         game_id = c.fetchone()[0]
@@ -491,7 +505,7 @@ class GameSet:
         return editors
 
     def get_setting(self, name):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("SELECT value FROM Settings WHERE name=?", (name,))
         result = c.fetchone()
@@ -502,7 +516,7 @@ class GameSet:
             return json.dumps({'Type': 'Setting', 'Content': {'name': name, 'value': ''}})
 
     def save_setting(self, name, value):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("SELECT COUNT(*) FROM Settings WHERE name=?",
                   (name,))
@@ -518,7 +532,7 @@ class GameSet:
         return json.dumps({'Type': 'Success', 'Content': {'success': True}})
 
     def add_steam_client_id(self, shortname, steam_client_id):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("UPDATE Game SET SteamClientID=? WHERE ShortName=?",
                   (steam_client_id, shortname))
@@ -526,7 +540,7 @@ class GameSet:
         conn.close()
 
     def clear_steam_client_id(self, shortname):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("UPDATE Game SET SteamClientID='' WHERE ShortName=?",
                   (shortname,))
