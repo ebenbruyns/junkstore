@@ -7,9 +7,9 @@
  * @param {string} props.initAction - The initial action.
  * @returns {JSX.Element} - The rendered component.
  */
-import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, joinClassNames } from "decky-frontend-lib";
+import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, StoreContent, StoreTabsContent } from "./Types/Types";
+import { ActionSet, ContentType, ContentError, ContentResult, StoreContent, StoreTabsContent, GameDataList } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
@@ -18,348 +18,177 @@ import { GridContent, contentTabsContainerClass } from "./Components/GridContain
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
-import { useCachedData } from './hooks/useCachedData';
+import { useCachedState } from './hooks/useCachedState';
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
-    tabs: StoreTabsContent;
+    content: StoreTabsContent;
     initActionSet: string;
     initAction: string;
-    layout: string;
+    layout: 'horizontal' | 'vertical';
     subActionSet: string;
 }
 export interface StoreTabsState {
     currentTab: string;
 }
 
-export const parseTabsState = (state: string | null): StoreTabsState => {
-    if (!state || state === "") {
-        return {
-            currentTab: "-1"
-        };
-    }
-    return JSON.parse(state) as StoreTabsState;
-};
-
-interface ContentData {
-    serverAPI: ServerAPI;
-    content: Content;
-    initActionSet: string;
-    initAction: string;
-    subActionSet: string;
-}
-
-export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs: content, initAction, initActionSet, layout, subActionSet: actionSetName }) => {
+export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, content, initAction, initActionSet, layout, subActionSet }) => {
     const logger = new Logger("StoreTabs");
-    const state = localStorage.getItem(`${initActionSet}_${initAction}_tabs`);
-    const savedState = parseTabsState(state);
-    // logger.debug("Initial Saved state: ", savedState);
-    const { cacheData, setCacheData } = useCachedData(initActionSet, initAction, 'tabs', { currentTab: "-1" });
-    // const [currentTab, setCurrentTab] = useState(savedState ? savedState?.currentTab : "-1");
-    // const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
-    // const [actionSetName, setActionSetName] = useState("");
-    // console.log('con tabs', content, actionSetName);
+    const { cacheState: cacheData, setCacheState: setCacheData } = useCachedState(initActionSet, initAction, 'tabcontent', { currentTab: "-1" });
 
-    const getTabs = () => {
+    const getTabs: () => Tab[] = () => {
         return content.Tabs.map((tab, index) => ({
             title: tab.Title,
-            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
+            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={subActionSet} initAction={tab.ActionId} />,
             id: index.toString()
         }));
     };
-    const getPages = () => {
+
+    const getPages: () => SidebarNavigationPage[] = () => {
         return content.Tabs.map((tab) => ({
             title: tab.Title,
-            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} />,
-            identifier: tab.Title
-
-        } as SidebarNavigationPage));
-
+            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={subActionSet} initAction={tab.ActionId} />,
+            identifier: tab.Title,
+            hideTitle: true
+        }));
     };
 
     return (
-        <DialogBody key={initActionSet + "_" + initAction}>
-            {layout === "horizontal" && content.Tabs.length > 0 &&
-                <DialogControlsSection
-                    className={joinClassNames(contentTabsContainerClass, 'gamepadlibrary_GamepadLibrary_ZBBhe')}
-                    key={initActionSet + "_" + initAction + "horizontal"}
-                >
+        <DialogBody key={initActionSet + "_" + initAction} className={contentTabsContainerClass}>
+            {content.Tabs.length === 0 ? <Loading /> : (layout === "horizontal" ? (
+                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} className='gamepadlibrary_GamepadLibrary_ZBBhe'>
                     <Tabs
                         key="0"
                         activeTab={cacheData.currentTab}
                         onShowTab={(tabID: string) => setCacheData({ currentTab: tabID })}
                         tabs={getTabs()}
+                        autoFocusContents={true}
                         //@ts-ignore
-                        canBeHeaderBackground={'on-outer-scroll'}
-                    />
-                </DialogControlsSection>}
-            {layout === "vertical" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "vertical"} style={{ height: "calc(100%)" }}>
-                    <SidebarNavigation key="1" pages={getPages()} showTitle
-
+                        canBeHeaderBackground={'always'}
                     />
                 </DialogControlsSection>
-            }
-            {content.Tabs.length === 0 && <Loading />}
+            ) : (
+                <DialogControlsSection key={initActionSet + "_" + initAction + "vertical"} style={{ height: "100%" }}>
+                    <SidebarNavigation key="1" pages={getPages()} />
+                </DialogControlsSection>
+            ))}
         </DialogBody>
     );
 };
 
-export interface ContentState {
-    searchQuery: string;
-    filterInstalled: boolean;
-    limited: boolean;
-    activeGame: string;
-};
-
-// function useContent() {
-//     logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-//     const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
-//     logger.debug("init result: ", actionSetRes);
-//     if (!actionSetRes) return;
-//     const actionSet = actionSetRes.Content;
-//     logger.debug("Action set: ", actionSet);
-//     const contentRes = await executeAction(serverAPI, actionSet.SetName, "GetContent", { inputData: "" });
-//     setActionSetName(actionSet.SetName);
-//     setContent(contentRes);
-//     logger.debug("GetContent result: ", contentRes);
-// }
-
-export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; padTop?: boolean; }> = ({
-    serverAPI, initActionSet, initAction, padTop = true, }) => {
+export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
     const logger = new Logger("Content");
-    // const state = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`)
-    // const savedState = parseContentState(state);
-    const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
-    const [actionSetName, setActionSetName] = useState<string>("");
-    // const [searchQuery, setSearchQuery] = useState(savedState ? savedState?.searchQuery : "");
-    // const [filterInstalled, setFilterInstalled] = useState(savedState ? savedState?.filterInstalled : true);
-    // const [limited, setLimited] = useState(savedState ? savedState?.limited : true);
-    // const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-    // const [activeGame, setActiveGame] = useState(savedState ? savedState?.activeGame : "");
-    // console.log('content', initAction, initActionSet, actionSetName);
-    // const saveState = () => {
-    //     logger.debug("Saving state");
-    //     const state = {
-    //         searchQuery,
-    //         filterInstalled,
-    //         limited,
-    //         activeGame
-    //     };
-    //     logger.debug("State: ", state);
-    //     localStorage.setItem(`${initActionSet}_${initAction}_searchquery`, JSON.stringify(state));
-    // };
+    const [content, setContent] = useState<ContentResult<ContentType>>({ Type: "Empty", Content: {} });
+    const [actionSetName, setActionSetName] = useState("");
 
-    // const loadState = () => {
-    //     logger.debug("Loading state");
-    //     const savedState = localStorage.getItem(`${initActionSet}_${initAction}_searchquery`);
-    //     logger.debug("Saved state: ", savedState);
-    //     if (savedState) {
-    //         const state = JSON.parse(savedState);
-    //         setSearchQuery(state.searchQuery);
-    //         setFilterInstalled(state.filterInstalled);
-    //         setLimited(state.limited);
-    //         setActiveGame(state.activeGame);
-    //     }
-    // };
-    // const activeGameSetter = (shortname: string) => {
-    //     logger.debug("Setting active game: ", shortname);
-    //     setActiveGame(shortname);
-    // }
-    // const clearActiveGame = () => {
-    //     logger.debug("Clearing active game");
-    //     setActiveGame("");
-    // }
-    // useEffect(() => {
-    //     logger.debug("Saving state on useEffect");
-    //     saveState();
-    // }
-    //     , [searchQuery, filterInstalled, limited, activeGame]);
-
-    // useEffect(() => {
-
-
-    //     loadState();
-
-    //     const handleBeforeUnload = () => {
-    //         saveState();
-    //     };
-
-    //     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    //     return () => {
-    //         window.removeEventListener("beforeunload", handleBeforeUnload);
-    //     };
-    // }, [initActionSet, initAction]);
-
-    const getContentArgs = async (actionArgs: {[param: string]: string}) => {
-            const data = await executeAction(serverAPI, actionSetName, "GetContent", actionArgs);
-            logger.log('refreshed', data)
-            setContent(data as ContentResult);
-
-    };
-
-    const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
-        if (!setName) return;
-        try {
-            const data = await executeAction(serverAPI, setName,
-                "GetContent",
-                {
-                    filter,
-                    installed: String(installed),
-                    limited: String(limited)
-                });
-            }
-            catch (e){
-
-            }
+    const { cacheState: gridContentCache, setCacheState: setGridContentCache, hadCache: hadGridCache } = useCachedState(
+        initActionSet,
+        initAction,
+        'gridcontentparams',
+        {
+            filter: "",
+            installed: true,
         }
-
-    // useEffect(() => {
-    //     logger.log("Content: ", content);
-    //     if (content.Type !== "Empty" && content.Type !== "Error") {
-    //         if (activeGame && activeGame !== "") {
-    //             logger.debug("activeGame: ", activeGame);
-    //             showModal(<GameDetailsItem serverAPI={serverAPI} shortname={activeGame} initActionSet={actionSetName} initAction="" clearActiveGame={clearActiveGame} />)
-    //         }
-    //         else {
-    //             logger.debug("No active game");
-    //         }
-    //     }
-    // }, [content]);
-
-    // useEffect(() => {
-    //     // logger.log(`Search query: ${searchQuery}, Filter installed: ${filterInstalled}, Limited: ${limited}, Action set name: ${actionSetName}`);
-    //     fetchData(actionSetName);
-    // }, [ actionSetName]);
+    );
 
     useEffect(() => {
-        onInit();
-        // loadState();
+        (async () => {
+            try {
+                logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
+                const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
+                logger.debug("init result: ", actionSetRes);
+                if (actionSetRes === null) return;
 
+                const actionSet = actionSetRes.Content;
+                logger.debug("Action set: ", actionSet);
+                const contentRes = await getContent(actionSet.SetName, hadGridCache ? stringifyArgs(gridContentCache) : { inputData: "" });
+                logger.debug("GetContent result: ", contentRes);
+                if (contentRes === null) return;
+
+                setActionSetName(actionSet.SetName);
+                setContent(contentRes);
+            } catch (error) {
+                logger.error("OnInit: ", error);
+            }
+        })();
     }, []);
 
-    const onInit = async () => {
-        try {
-            logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
-            logger.debug("init result: ", actionSetRes);
-            if (!actionSetRes) return logger.error('action result is null');
-            const actionSet = actionSetRes.Content;
-            logger.debug("Action set: ", actionSet);
-            const contentRes = await executeAction(serverAPI, actionSet.SetName, "GetContent", { inputData: "" });
-            setActionSetName(actionSet.SetName);
+    const getContent = async (actionSet: string, actionArgs: { [param: string]: string; }) => executeAction<ContentResult<ContentType>>(serverAPI, actionSet, "GetContent", actionArgs);
+
+    const refreshContent = (args: { [param: string]: any; }, onFinish?: () => void) => {
+        (async () => {
+            const contentRes = await getContent(actionSetName, stringifyArgs(args));
+            if (contentRes === null) {
+                return;
+            }
             setContent(contentRes);
-            // logger.debug("GetContent result: ", contentRes);
-            // const actionRes = await executeAction(serverAPI, result.SetName,
-            //     "GetScriptActions",
-            //     {
-            //         inputData: ""
-            //     }) as ContentResult;
-            // logger.debug("onInit actionRes", actionRes);
-            // if (actionRes.Type === "ScriptSet") {
-            //     const scriptActions = actionRes.Content as ScriptActions;
-            //     logger.debug("onInit scriptActions", scriptActions);
-            //     setScriptActions(scriptActions.Actions);
-            // }
-
-        } catch (error) {
-            logger.error("OnInit: ", error);
-        }
+            onFinish?.();
+        })();
     };
-    // const configEditor = () => {
-    //     showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
-    // };
-    // const runScript = async (actionSet: string, actionId: string, args: any) => {
-    //     const result = await executeAction(serverAPI, actionSet, actionId, args);
-    //     logger.debug("runScript result", result);
 
-    // };
-    // const actionsMenu = (e: any) => {
-    //     showContextMenu(
-    //         <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-    //             {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
+    switch (content.Type) {
+        case "GameGrid":
+            return <GridContent
+                content={content.Content as GameDataList}
+                serverAPI={serverAPI}
+                actionSetName={actionSetName}
+                refreshContent={refreshContent}
+                argsCache={gridContentCache}
+                setArgsCache={setGridContentCache}
+            />;
 
+        case "StoreTabs":
+            return <ContentTabs serverAPI={serverAPI}
+                content={content.Content as StoreTabsContent}
+                layout="horizontal"
+                initAction={initAction}
+                initActionSet={initActionSet}
+                subActionSet={actionSetName}
+            />;
 
-    //                 return (<MenuItem onSelected={
-    //                     async () => {
-    //                         const args = {
-    //                             shortname: "",
-    //                             steamClientID: "",
-    //                             startDir: "",
-    //                             compatToolName: "",
-    //                             inputData: "",
-    //                             gameId: "",
-    //                             appId: ""
-    //                         };
+        case "SideBarPage":
+            return <ContentTabs serverAPI={serverAPI}
+                content={content.Content as StoreTabsContent}
+                layout="vertical"
+                initAction={initAction}
+                initActionSet={initActionSet}
+                subActionSet={actionSetName}
+            />;
 
-    //                         runScript(initActionSet, action.ActionId, args);
+        case "MainMenu":
+            return <MainMenu //key={initActionSet + "_" + initAction} 
+                serverApi={serverAPI}
+                content={content.Content as StoreContent}
+                initActionSet={actionSetName}
+                initAction=""
+            />;
 
-    //                     }}
-    //                 >{action.Title}</MenuItem>);
+        case "Text":
+            return <TextContent //key={initActionSet + "_" + initAction} 
+                content={content.Content as string}
+            />;
 
-    //             })}
+        case "Html":
+            return <HtmlContent //key={initActionSet + "_" + initAction}
+                content={content.Content as string}
+            />;
 
+        case "Error":
+            return <ErrorDisplay //key={initActionSet + "_" + initAction}
+                error={content.Content as ContentError}
+            />;
 
-    //         </Menu>,
-    //         e.currentTarget ?? window
-    //     );
-    // };
+        case "Empty":
+            return <Loading />;
 
-    return (
-        <>
-            {content.Type === "GameGrid" && (
-                <GridContent
-                    content={content.Content}
-                    serverAPI={serverAPI}
-                    initAction={initAction}
-                    initActionSet={initActionSet}
-                    actionSetName={actionSetName}
-                    refreshContent={getContentArgs}
-                />
-            )}
-            {content.Type === "StoreTabs" &&
-                <ContentTabs serverAPI={serverAPI}
-                    tabs={content.Content as StoreTabsContent}
-                    layout="horizontal"
-                    initAction={initAction}
-                    initActionSet={initActionSet}
-                    subActionSet={actionSetName}
-                />}
-            {content.Type === "SideBarPage" &&
-                <ContentTabs serverAPI={serverAPI}
-                    tabs={content.Content as StoreTabsContent}
-                    layout="vertical"
-                    initAction={initAction}
-                    initActionSet={initActionSet}
-                    subActionSet={actionSetName}
-                />
-            }
-            {content.Type === "MainMenu" &&
-                <MainMenu //key={initActionSet + "_" + initAction} 
-                    serverApi={serverAPI}
-                    content={content.Content as StoreContent}
-                    initActionSet={'MainMenu'}
-                    initAction=""
-                />
-            }
-            {content.Type === "Text" &&
-                <TextContent //key={initActionSet + "_" + initAction} 
-                    content={content.Content as string}
-                />
-            }
-            {content.Type === "Html" &&
-                <HtmlContent //key={initActionSet + "_" + initAction}
-                    content={content.Content as string}
-                />
-            }
-            {content.Type === "Error" &&
-                <ErrorDisplay //key={initActionSet + "_" + initAction}
-                    error={content.Content as ContentError}
-                />
-            }
-            {content.Type === "Empty" && <Loading />}
-        </>
-    );
+        default:
+            return null;
+    }
 };
 
-
+function stringifyArgs(args: { [param: string]: any; }) {
+    let out: { [param: string]: string; } = {};
+    for (let key in args) {
+        out[key] = String(args[key]);
+    }
+    return out;
+}

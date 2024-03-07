@@ -1,6 +1,6 @@
-import { DialogButton, Focusable, Menu, MenuItem, ServerAPI, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
-import { ContentResult, GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
-import { VFC, memo, useEffect, useState } from "react";
+import { DialogButton, Focusable, Menu, MenuItem, ServerAPI, Spinner, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
+import { GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
+import { Dispatch, SetStateAction, VFC, memo, useEffect, useState } from "react";
 import GameGridItem from './GameGridItem';
 import { GameDetailsItem } from './GameDetailsItem';
 import Logger from "../Utils/logger";
@@ -8,99 +8,62 @@ import { FaSlidersH, FaCog } from 'react-icons/fa';
 import { LoginContent } from './LoginContent';
 import { executeAction } from '../Utils/executeAction';
 import { ConfEditor } from '../ConfEditor';
-import { useCachedData } from '../hooks/useCachedData';
-import { Loading } from './Loading';
 
 export const contentTabsContainerClass = 'content-tabs-container';
+export const gridContentContainerClass = 'grid-content-container';
 
-interface ContentState {
-    searchQuery: string;
-    filterInstalled: boolean;
-    limited: boolean;
-    // activeGame: string;
-};
-
-
-function parseContentState(state: string | null): ContentState {
-    if (!state || state === "") {
-        return {
-            searchQuery: "",
-            filterInstalled: true,
-            limited: true,
-            // activeGame: ""
-        };
-    }
-    return JSON.parse(state);
+interface GridContentArgs {
+    filter?: string;
+    installed?: boolean;
+    limited?: boolean;
 }
 
-interface ContentGridProps {
+interface GridContentCache {
+    filter: string;
+    installed: boolean;
+}
+
+interface GridContentProps {
     content: GameDataList;
     serverAPI: ServerAPI;
-    initActionSet: string;
-    initAction: string;
     actionSetName: string;
-    refreshContent?: (actionArgs: { [param: string]: string; }) => Promise<void>;
+    refreshContent: (actionArgs: GridContentArgs, onFinish?: () => void) => void;
+    argsCache: GridContentCache;
+    setArgsCache: Dispatch<SetStateAction<GridContentCache>>;
 }
 
-export const GridContent: VFC<ContentGridProps> = ({ content: initialContent, serverAPI, initAction, initActionSet, actionSetName }) => {
+export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionSetName, refreshContent, argsCache, setArgsCache }) => {
     const logger = new Logger('ContentGrid');
-
-    const { cacheData, setCacheData, hadCache } = useCachedData(
-        initActionSet,
-        initAction,
-        'gridcontent',
-        {
-            searchQuery: "",
-            filterInstalled: true,
-            limited: true
-        }
-    );
-
-    const [content, setContent] = useState<ContentResult>(initialContent);
-    const [mounted, setMounted] = useState(false);
-    const [ready, setReady] = useState(!hadCache);
-    const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-
+    const [isLimited, setIsLimited] = useState(true);
+    const [isLimitedLoading, setIsLimitedLoading] = useState(false);
+    const [installedFilterLoading, setInstalledLoading] = useState(false);
+    const [scriptActions, setScriptActions] = useState<MenuAction[] | null>();
 
     useEffect(() => {
         (async () => {
-            const actionRes = await executeAction<ScriptActions>(serverAPI, actionSetName, "GetScriptActions", { inputData: "" });
-            logger.debug("onInit actionRes", actionRes);
-            if (!actionRes) return;
-            // if (actionRes.Type === "ScriptSet") {
-            const scriptActions = actionRes.Content;
-            logger.debug("onInit scriptActions", scriptActions);
-            setScriptActions(scriptActions.Actions);
-            
+            try {
+                const actionRes = await executeAction<ScriptActions>(serverAPI, actionSetName, "GetScriptActions", { inputData: "" });
+                logger.debug("onInit actionRes", actionRes);
+                if (!actionRes) {
+                    return;
+                }
+                // if (actionRes.Type === "ScriptSet") {
+                const scriptActions = actionRes.Content;
+                logger.debug("onInit scriptActions", scriptActions);
+                setScriptActions(scriptActions.Actions);
+            }
+            catch (e) {
+                logger.error(e);
+            }
         })();
-        logger.log('mounted grid content');
-        setMounted(true);
     }, []);
-
-    logger.log('grid render', content, ready);
-    useEffect(() => {
-        if (hadCache) refreshContent(() => setReady(true));
-    }, [cacheData]);
-
-
-
-    const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args);
-        logger.debug("runScript result", result);
-
-    };
-    const configEditor = () => {
-        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
-    };
 
     const actionsMenu = (e: any) => {
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-                {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
-
-
-                    return (<MenuItem onSelected={
-                        async () => {
+                {scriptActions?.map((action) =>
+                    <MenuItem
+                        onSelected={async () => {
                             const args = {
                                 shortname: "",
                                 steamClientID: "",
@@ -110,63 +73,88 @@ export const GridContent: VFC<ContentGridProps> = ({ content: initialContent, se
                                 gameId: "",
                                 appId: ""
                             };
-
-                            runScript(initActionSet, action.ActionId, args);
-
+                            const result = await executeAction(serverAPI, actionSetName, action.ActionId, args);
+                            logger.debug("runScript result", result);
                         }}
-                    >{action.Title}</MenuItem>);
-
-                })}
-
-
+                    >
+                        {action.Title}
+                    </MenuItem>
+                )}
             </Menu>,
             e.currentTarget ?? window
         );
     };
 
-    const refreshContent = async (after?: () => void) => {
-        logger.log('refreshing');
-        const data = await executeAction<GameDataList>(serverAPI,
-            actionSetName,
-            "GetContent",
-            {
-                filter: cacheData.searchQuery,
-                installed: String(cacheData.filterInstalled),
-                limited: String(cacheData.limited)
-            }
-        );
-        logger.log('refreshed', data);
-        setContent(data?.Content);
-        after?.();
-    };
+    const updateCache: <Param extends keyof GridContentArgs>(param: Param, value: GridContentArgs[Param], onFinish?: () => void) => void =
+        (param, value, onFinish) => {
+            const newCache = { ...argsCache, [param]: value, limited: isLimited };
+            refreshContent(newCache, () => {
+                setArgsCache(newCache);
+                onFinish?.();
+            });
+        };
 
-    return (!ready ? <Loading /> :
+    return (
         <Focusable
-            onSecondaryButton={() => setCacheData(cache => ({ ...cache, filterInstalled: !cache.filterInstalled }))}
-            onOptionsButton={() => setCacheData(cache => ({ ...cache, limited: !cache.limited }))}
-            onSecondaryActionDescription="Toggle Installed Filter"
-            onOptionsActionDescription={cacheData.limited ? "Show All" : "Limit Results"}
-            style={{ paddingTop: '15px' }}
+            className={gridContentContainerClass}
+            onSecondaryButton={() => {
+                setInstalledLoading(true);
+                updateCache('installed', !argsCache.installed, () => setInstalledLoading(false));
+            }}
+            onOptionsButton={() => {
+                setIsLimitedLoading(true);
+                refreshContent({ ...argsCache, limited: !isLimited }, () => {
+                    setIsLimited(!isLimited);
+                    setIsLimitedLoading(false);
+                });
+            }}
+            onSecondaryActionDescription={
+                <div style={{ display: 'flex', gap: '4px' }}>
+                    <text>Toggle Installed Filter</text>
+                    {installedFilterLoading && <Spinner style={{ width: '20px' }} />}
+                </div>
+            }
+            onOptionsActionDescription={
+                <div style={{ display: 'flex', gap: '4px' }}>
+                    <text>{isLimited ? 'Show All' : 'Limit Results'}</text>
+                    {isLimitedLoading && <Spinner style={{ width: '20px' }} />}
+                </div>
+            }
         >
-            {/* {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />} //this should probably be changed */}
+            <style>{`
+                .${contentTabsContainerClass} .${gamepadTabbedPageClasses.TabContentsScroll} {
+                    scroll-padding-top: calc( var(--basicui-header-height) + 140px ) !important;
+                    scroll-padding-bottom: 80px;
+                }
+                .${contentTabsContainerClass} .${gamepadTabbedPageClasses.TabContents} .${gridContentContainerClass} {
+                    padding-top: 15px;
+                }
+            `}</style>
             <Focusable style={{ display: "flex", gap: '15px' }}>
                 <div style={{ width: '100%' }}>
                     <TextField
                         placeholder="Search"
-                        value={cacheData.searchQuery}
-                        onChange={(e) => setCacheData(cache => ({ ...cache, searchQuery: e.target.value }))}
+                        value={argsCache.filter}
+                        onChange={(e) => updateCache('filter', e.target.value)}
                     />
                 </div>
                 <DialogButton
                     onClick={actionsMenu}
-                    onOKButton={actionsMenu}
+                    disabled={!scriptActions}
                     style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                 >
                     <FaSlidersH style={{ verticalAlign: 'middle' }} />
                 </DialogButton>
                 <DialogButton
-                    onClick={configEditor}
-                    onOKButton={configEditor}
+                    onClick={() => showModal(
+                        <ConfEditor
+                            serverAPI={serverAPI}
+                            initActionSet={actionSetName}
+                            initAction="GetTabConfigActions"
+                            contentId="0"
+                            refreshParent={() => refreshContent({ ...argsCache, limited: isLimited })}
+                        />
+                    )}
                     style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}
                 >
                     <FaCog style={{ verticalAlign: 'middle' }} />
@@ -177,29 +165,33 @@ export const GridContent: VFC<ContentGridProps> = ({ content: initialContent, se
                     <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
                 </div>
             )}
-            <GridContainer
+            {argsCache.installed && (
+                <div style={{ margin: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ backgroundColor: '#8b929a66', flex: 'auto', height: '1px' }} />
+                    <div style={{ color: '#ffffffb3', fontSize: '12px', textTransform: 'uppercase' }}>
+                        Installed
+                    </div>
+                    <div style={{ backgroundColor: '#8b929a66', flex: 'auto', height: '1px' }} />
+                </div>
+            )}
+            <GridItems
                 serverAPI={serverAPI}
                 games={content.Games ?? []}
                 initActionSet={actionSetName}
                 initAction=""
-
-            // setActiveGame={activeGameSetter}
-            // clearActiveGame={clearActiveGame}
             />
         </Focusable>
     );
 };
 
-interface GridContainerProperties {
+interface GridItemsProperties {
     games: GameData[];
     serverAPI: ServerAPI;
     initActionSet: string;
     initAction: string;
-    // setActiveGame: (shortname: string) => void;
-    // clearActiveGame: () => void;
 }
 
-const GridContainer: VFC<GridContainerProperties> = memo(({ serverAPI, games, initActionSet, initAction, /*setActiveGame, clearActiveGame*/ }) => {
+const GridItems: VFC<GridItemsProperties> = memo(({ serverAPI, games, initActionSet, initAction}) => {
     const logger = new Logger("GridContainer");
 
     const imgAreaWidth = '120px';
@@ -207,12 +199,6 @@ const GridContainer: VFC<GridContainerProperties> = memo(({ serverAPI, games, in
 
     return (
         <>
-            <style>{`
-                .${contentTabsContainerClass} .${gamepadTabbedPageClasses.TabContentsScroll} {
-                    scroll-padding-top: calc( var(--basicui-header-height) + 140px ) !important;
-                    scroll-padding-bottom: 80px;
-                }
-            `}</style>
             <Focusable
                 style={{
                     display: "grid",
@@ -231,9 +217,17 @@ const GridContainer: VFC<GridContainerProperties> = memo(({ serverAPI, games, in
                         imgAreaHeight={imgAreaHeight}
                         onClick={() => {
                             logger.debug("onClick game: ", game);
-                            logger.debug("setActiveGame", game.ShortName);
+                            // logger.debug("setActiveGame", game.ShortName);
                             // setActiveGame(game.ShortName);
-                            showModal(<GameDetailsItem serverAPI={serverAPI} shortname={game.ShortName} initActionSet={initActionSet} initAction={initAction} clearActiveGame={() => { }} />);
+                            showModal(
+                                <GameDetailsItem
+                                    serverAPI={serverAPI}
+                                    shortname={game.ShortName}
+                                    initActionSet={initActionSet}
+                                    initAction={initAction}
+                                    clearActiveGame={() => { }}
+                                />
+                            );
                         }}
                     />
                 ))}
@@ -241,4 +235,4 @@ const GridContainer: VFC<GridContainerProperties> = memo(({ serverAPI, games, in
         </>
     );
 });
-export default GridContainer;
+export default GridItems;
