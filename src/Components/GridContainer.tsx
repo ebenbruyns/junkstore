@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, VFC, memo, useEffect, useState } from "react"
 import GameGridItem from './GameGridItem';
 import { GameDetailsItem } from './GameDetailsItem';
 import Logger from "../Utils/logger";
-import { FaSlidersH, FaCog } from 'react-icons/fa';
+import { FaSlidersH, FaCog, FaRegCheckCircle } from 'react-icons/fa';
 import { LoginContent } from './LoginContent';
 import { executeAction } from '../Utils/executeAction';
 import { ConfEditor } from '../ConfEditor';
@@ -111,7 +111,8 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
             }}
             onSecondaryActionDescription={
                 <div style={{ display: 'flex', gap: '4px' }}>
-                    <text>Toggle Installed Filter</text>
+                    <text>Toggle Installed</text>
+                    {argsCache.installed && <FaRegCheckCircle style={{ alignSelf: 'center' }} size='14px'/>}
                     {installedFilterLoading && <Spinner style={{ width: '20px' }} />}
                 </div>
             }
