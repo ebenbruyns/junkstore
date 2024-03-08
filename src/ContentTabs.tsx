@@ -94,13 +94,13 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         (async () => {
             try {
                 logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-                const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, { inputData: "" });
+                const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, {});
                 logger.debug("init result: ", actionSetRes);
                 if (actionSetRes === null) return;
 
                 const actionSet = actionSetRes.Content;
                 logger.debug(`Getting Content ${hadGridCache ? 'with args cache' : ''}`, hadGridCache ? gridContentCache : '');
-                const contentRes = await getContent(actionSet.SetName, hadGridCache ? stringifyArgs(gridContentCache) : { inputData: "" });
+                const contentRes = await getContent(actionSet.SetName, hadGridCache ? stringifyArgs(gridContentCache) : {});
                 logger.debug("GetContent result: ", contentRes);
                 if (contentRes === null) return;
 
