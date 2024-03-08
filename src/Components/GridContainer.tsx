@@ -1,5 +1,5 @@
 import { DialogButton, Focusable, Menu, MenuItem, ServerAPI, Spinner, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
-import { GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
+import { ContentResult, ContentType, GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
 import { Dispatch, SetStateAction, VFC, memo, useEffect, useState } from "react";
 import GameGridItem from './GameGridItem';
 import { GameDetailsItem } from './GameDetailsItem';
@@ -43,13 +43,11 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
         (async () => {
             try {
                 const actionRes = await executeAction<ScriptActions>(serverAPI, initActionSet, "GetScriptActions", { inputData: "" });
-                logger.debug("onInit actionRes", actionRes);
+                logger.debug('Get sscript actions result', actionRes);
                 if (!actionRes) {
                     return;
                 }
-                // if (actionRes.Type === "ScriptSet") {
                 const scriptActions = actionRes.Content;
-                logger.debug("onInit scriptActions", scriptActions);
                 setScriptActions(scriptActions.Actions);
             }
             catch (e) {
@@ -73,7 +71,10 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                                 gameId: "",
                                 appId: ""
                             };
-                            const result = await executeAction(serverAPI, initActionSet, action.ActionId, args);
+                            const result = await executeAction<ContentResult<ContentType>>(serverAPI, initActionSet, action.ActionId, args);
+                            if (result?.Type == "RefreshContent") {
+                                refreshContent({...argsCache, limited: isLimited});
+                            }
                             logger.debug("runScript result", result);
                         }}
                     >
