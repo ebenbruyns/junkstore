@@ -86,7 +86,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         'gridcontentparams',
         {
             filter: "",
-            installed: true,
+            installed: false,
         }
     );
 
@@ -99,7 +99,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 if (actionSetRes === null) return;
 
                 const actionSet = actionSetRes.Content;
-                logger.debug("Action set: ", actionSet);
+                logger.debug(`Getting Content ${hadGridCache ? 'with args cache' : ''}`, hadGridCache ? gridContentCache : '');
                 const contentRes = await getContent(actionSet.SetName, hadGridCache ? stringifyArgs(gridContentCache) : { inputData: "" });
                 logger.debug("GetContent result: ", contentRes);
                 if (contentRes === null) return;
@@ -116,6 +116,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
 
     const refreshContent = (args: { [param: string]: any; }, onFinish?: () => void) => {
         (async () => {
+            logger.debug("Refreshing Content with args: ", args);
             const contentRes = await getContent(actionSetName, stringifyArgs(args));
             if (contentRes === null) {
                 return;
@@ -128,16 +129,17 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
     switch (content.Type) {
         case "GameGrid":
             return <GridContent
-                content={content.Content as GameDataList}
                 serverAPI={serverAPI}
-                actionSetName={actionSetName}
+                content={content.Content as GameDataList}
+                initActionSet={actionSetName}
                 refreshContent={refreshContent}
                 argsCache={gridContentCache}
                 setArgsCache={setGridContentCache}
             />;
 
         case "StoreTabs":
-            return <ContentTabs serverAPI={serverAPI}
+            return <ContentTabs
+                serverAPI={serverAPI}
                 content={content.Content as StoreTabsContent}
                 layout="horizontal"
                 initAction={initAction}
@@ -146,7 +148,8 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
             />;
 
         case "SideBarPage":
-            return <ContentTabs serverAPI={serverAPI}
+            return <ContentTabs
+                serverAPI={serverAPI}
                 content={content.Content as StoreTabsContent}
                 layout="vertical"
                 initAction={initAction}

@@ -26,13 +26,13 @@ interface GridContentCache {
 interface GridContentProps {
     content: GameDataList;
     serverAPI: ServerAPI;
-    actionSetName: string;
+    initActionSet: string;
     refreshContent: (actionArgs: GridContentArgs, onFinish?: () => void) => void;
     argsCache: GridContentCache;
     setArgsCache: Dispatch<SetStateAction<GridContentCache>>;
 }
 
-export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionSetName, refreshContent, argsCache, setArgsCache }) => {
+export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initActionSet, refreshContent, argsCache, setArgsCache }) => {
     const logger = new Logger('ContentGrid');
     const [isLimited, setIsLimited] = useState(true);
     const [isLimitedLoading, setIsLimitedLoading] = useState(false);
@@ -42,7 +42,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
     useEffect(() => {
         (async () => {
             try {
-                const actionRes = await executeAction<ScriptActions>(serverAPI, actionSetName, "GetScriptActions", { inputData: "" });
+                const actionRes = await executeAction<ScriptActions>(serverAPI, initActionSet, "GetScriptActions", { inputData: "" });
                 logger.debug("onInit actionRes", actionRes);
                 if (!actionRes) {
                     return;
@@ -73,7 +73,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
                                 gameId: "",
                                 appId: ""
                             };
-                            const result = await executeAction(serverAPI, actionSetName, action.ActionId, args);
+                            const result = await executeAction(serverAPI, initActionSet, action.ActionId, args);
                             logger.debug("runScript result", result);
                         }}
                     >
@@ -87,8 +87,8 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
 
     const updateCache: <Param extends keyof GridContentArgs>(param: Param, value: GridContentArgs[Param], onFinish?: () => void) => void =
         (param, value, onFinish) => {
-            const newCache = { ...argsCache, [param]: value, limited: isLimited };
-            refreshContent(newCache, () => {
+            const newCache = { ...argsCache, [param]: value };
+            refreshContent({ ...newCache, limited: isLimited }, () => {
                 setArgsCache(newCache);
                 onFinish?.();
             });
@@ -149,7 +149,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
                     onClick={() => showModal(
                         <ConfEditor
                             serverAPI={serverAPI}
-                            initActionSet={actionSetName}
+                            initActionSet={initActionSet}
                             initAction="GetTabConfigActions"
                             contentId="0"
                             refreshParent={() => refreshContent({ ...argsCache, limited: isLimited })}
@@ -162,7 +162,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
             </Focusable>
             {content.NeedsLogin === "true" && (
                 <div style={{ paddingTop: '15px' }}>
-                    <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
+                    <LoginContent serverAPI={serverAPI} initActionSet={initActionSet} initAction="GetLoginActions" />
                 </div>
             )}
             {argsCache.installed && (
@@ -177,7 +177,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, actionS
             <GridItems
                 serverAPI={serverAPI}
                 games={content.Games ?? []}
-                initActionSet={actionSetName}
+                initActionSet={initActionSet}
                 initAction=""
             />
         </Focusable>
