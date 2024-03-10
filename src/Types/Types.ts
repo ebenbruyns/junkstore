@@ -198,8 +198,8 @@ export interface ExecuteGetActionSetArgs extends ExecuteArgs {
 }
 export interface ExecuteGetContentArgs extends ExecuteArgs {
   filter?: string;
-  installed: string;
-  limited: string;
+  installed?: string;
+  limited?: string;
 }
 
 export interface ExecuteLoginArgs extends ExecuteArgs {

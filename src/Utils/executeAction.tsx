@@ -1,5 +1,5 @@
 import { AppDetails, LifetimeNotification, ServerAPI, showModal } from "decky-frontend-lib";
-import { ContentError, ContentResult, LaunchOptions } from "../Types/Types";
+import { ContentError, ContentResult, ContentType, ExecuteArgs, LaunchOptions } from "../Types/Types";
 import Logger from "./logger";
 import { ErrorModal } from "../ErrorModal";
 import { gameIDFromAppID } from "./gameIDFromAppID";
@@ -36,11 +36,11 @@ export async function configureShortcut(id: Number, launchOptions: LaunchOptions
 
 
 //* this is where you will be assuming the type of content and if the case is amibigous you can use type unions and deal with each possiblitiy outside the function
-export async function executeAction<Arguments, Content>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: Arguments): Promise<ContentResult<Content> | null> { 
+export async function executeAction<Arguments extends ExecuteArgs, Content extends ContentType>(serverAPI: ServerAPI, actionSet: string, actionName: string, args: Arguments): Promise<ContentResult<Content> | null> { 
 
     const logger = new Logger("executeAction");
-    logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
-    logger.debug("Args: ", args);
+    // logger.log(`actionSet: ${actionSet}, actionName: ${actionName}`);
+    // logger.debug("Args: ", args);
     const res = await serverAPI.callPluginMethod<{}, ContentResult<Content | LaunchOptions | ContentError>>("execute_action", {
         actionSet: actionSet,
         actionName: actionName,
