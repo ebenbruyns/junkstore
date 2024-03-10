@@ -237,4 +237,3 @@ const GridItems: VFC<GridItemsProperties> = memo(({ serverAPI, games, initAction
         </>
     );
 });
-export default GridItems;

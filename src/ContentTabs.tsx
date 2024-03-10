@@ -14,7 +14,7 @@ import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
-import { GridContent, contentTabsContainerClass } from "./Components/GridContainer";
+import { GridContent, contentTabsContainerClass } from "./Components/GridContent";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
