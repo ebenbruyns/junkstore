@@ -1,9 +1,9 @@
 import { VFC, useEffect, useState } from "react";
 import { ExeRunnerProperties } from "./Types/EditorProperties";
 import { executeAction, getAppDetails } from "./Utils/executeAction";
-import { ActionSet, FilesData, SaveRefresh } from "./Types/Types";
+import { ActionSet, ExecuteGetExeActionSetArgs, ExecuteGetFilesDataArgs, ExecuteRunBinaryArgs, FilesData, SaveRefresh } from "./Types/Types";
 import { DialogButton, ModalRoot, PanelSection, ScrollPanelGroup, SteamSpinner } from "decky-frontend-lib";
-import Logger, { log } from "./Utils/logger";
+import Logger from "./Utils/logger";
 import { gameIDFromAppID } from "./Utils/gameIDFromAppID";
 
 const exeRunnerRootClass = 'exe-runner-modal-root';
@@ -13,7 +13,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
 }) => {
     const logger = new Logger("ExeRunner");
     const [actionSetName, setActionSetName] = useState("" as string);
-    const [filesData, setFilesData] = useState({} as FilesData);
+    const [filesData, setFilesData] = useState<FilesData>({ Files: [] } as FilesData);
     const [busy, setBusy] = useState(false);
     const OnInit = async () => {
         logger.debug("OnInit");
@@ -21,7 +21,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
         logger.debug("initAction: ", initAction);
         logger.debug("contentId: ", contentId);
         const gameId = gameIDFromAppID(parseInt(contentId))
-        const result = await executeAction(
+        const actionSetResult = await executeAction<ExecuteGetExeActionSetArgs, ActionSet>(
             serverAPI, initActionSet,
             initAction,
 
@@ -31,21 +31,23 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                 content_id: contentId,
             }
         )
-        const setName = (result.Content as ActionSet).SetName;
-        setActionSetName(setName);
+        const setName = actionSetResult?.Content.SetName;
+        if (setName == null) {
+            logger.error("setName is null");
+            return;
+        }
+       
         logger.debug("setName: ", setName);
-        logger.debug("result: ", result);
-        // @ts-ignore
+        logger.debug("result: ", actionSetResult);
         const id = parseInt(contentId)
         const details = await getAppDetails(id)
-        // @ts-ignore
         if (details == null) {
             logger.error("details is null"); return;
 
         }
         else {
 
-            const data = await executeAction(serverAPI, setName,
+            const filesDataResult = await executeAction<ExecuteGetFilesDataArgs, FilesData>(serverAPI, setName,
                 "GetContent",
                 {
 
@@ -54,9 +56,13 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     SteamClientId: contentId,
                     shortName: shortName
                 })
-            const res = (data.Content as FilesData);
-            logger.debug("FilesData: ", res);
-            setFilesData(res);
+            if (filesDataResult?.Content == null) {
+                logger.error("res is null");
+                return;
+            }
+            logger.debug("FilesData: ", filesDataResult?.Content);
+            setActionSetName(setName);
+            setFilesData(filesDataResult?.Content);
         }
 
     }
@@ -75,7 +81,6 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
             <ModalRoot
                 className={exeRunnerRootClass}
                 bAllowFullSize={true}
-                // @ts-ignore
                 bAllowFullSizeMobile={true}
                 closeModal={closeModal}
             >
@@ -87,33 +92,34 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     const runExe = async () => {
                         setBusy(true);
                         logger.debug(`steamclientid ${parseInt(contentId)}`)
-                        // @ts-ignore
-                        const res = await getAppDetails(parseInt(contentId))
-                        logger.debug("app details: ", res)
-                        if (res == null) {
+                        const appDetails = await getAppDetails(parseInt(contentId))
+                        logger.debug("app details: ", appDetails)
+                        if (appDetails == null) {
                             logger.error("app details is null")
                             return;
                         }
 
-                        const compatToolName = res.strCompatToolName
-                        //@ts-ignore
-                        const startDir = res.strShortcutStartDir
+                        const compatToolName = appDetails.strCompatToolName
+                        const startDir = appDetails.strShortcutStartDir
 
                         const gameExe = file.Path.startsWith(startDir) ? file.Path.substring(startDir.length + 1) : file.Path
                         const gameId = gameIDFromAppID(parseInt(contentId))
-                        const result = await executeAction(serverAPI, actionSetName, "RunBinary"
+                        const result = await executeAction<ExecuteRunBinaryArgs, SaveRefresh>(
+                            serverAPI,
+                            actionSetName,
+                            "RunBinary"
                             , {
                                 gameId: String(gameId),
                                 appId: String(contentId),
-                                SteamClientID: contentId,
-                                GameShortname: shortName,
+                                SteamClientId: contentId,
+                                shortName: shortName,
                                 GameExe: gameExe,
 
                                 AdditionalArguments: false,
                                 CompatToolName: compatToolName
 
                             });
-                        if (result.Type === "Refresh") {
+                        if (result?.Type === "Refresh") {
                             const tmp = result.Content as SaveRefresh
                             if (tmp.Refresh) {
                                 refreshParent()
@@ -131,22 +137,20 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     }
                     return (
                         <ScrollPanelGroup
-                            // @ts-ignore
                             focusable={false} style={{ margin: "0px" }}>
                             <PanelSection>
-                                <DialogButton onOKButton={runExe} onClick={runExe} onSecondaryButton={setExecutable} onSecondaryActionDescription="Set game executable">{file.Path}</DialogButton>
+                                <DialogButton
+                                    onOKButton={runExe}
+                                    onClick={runExe}
+                                    onSecondaryButton={setExecutable}
+                                    onSecondaryActionDescription="Set game executable">
+                                    {file.Path}
+                                </DialogButton>
                             </PanelSection>
                         </ScrollPanelGroup >)
                 })
                 }
-
-
-
-
-
-
             </ModalRoot >
         </>
     );
-
 };

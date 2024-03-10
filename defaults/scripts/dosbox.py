@@ -48,7 +48,7 @@ class Dosbox (sharedgameset.GameSet):
             return None, None
 
     def store_config_in_database(self, shortname, forkname, version, platform, sections, autoexec):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         config_set_id = 0
         c.execute("select id from config_set where ShortName = ? AND forkname = ? AND version = ? AND platform = ?",
@@ -85,7 +85,7 @@ class Dosbox (sharedgameset.GameSet):
             f.write(autoexec_text)
 
     def update_bat_files(self, shortname, batfiles):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         for batfile in batfiles:
             c.execute("select id from Game where ShortName = ?", (shortname,))
@@ -106,7 +106,7 @@ class Dosbox (sharedgameset.GameSet):
         return json.dumps({'Type': 'Success', 'Content': {'success': True}})
 
     def lookup_title(self, shortname):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("SELECT Title FROM Game WHERE ShortName=?", (shortname,))
         result = c.fetchone()
@@ -123,7 +123,7 @@ class Dosbox (sharedgameset.GameSet):
         return ""
 
     def write_bat_files(self,  shortname):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("""select id, GameId, Path, content from batfiles where GameId = (select id from game where shortname = ?)""", (shortname,))
         rows = c.fetchall()
@@ -142,7 +142,7 @@ class Dosbox (sharedgameset.GameSet):
                 f.write(content)
 
     def get_json_bat_files(self, shortname):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute("""select id, GameId, Path, content from batfiles where GameId = (select id from game where shortname = ?)""", (shortname,))
         rows = c.fetchall()
@@ -157,7 +157,7 @@ class Dosbox (sharedgameset.GameSet):
         return json.dumps({'Type': 'FileContent', 'Content': {'Files': result}})
 
     def get_zip_for_shortname(self, shortname, urlencode):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
         c.execute(
             "SELECT ZipFileName FROM ZipFiles JOIN Game on Game.ID = ZipFiles.GameID WHERE ShortName=?", (shortname,))

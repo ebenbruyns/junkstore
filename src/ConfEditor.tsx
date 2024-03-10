@@ -4,7 +4,7 @@ import {
     quickAccessControlsClasses
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh } from "./Types/Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh, ExecuteGetActionSetArgs } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
 // import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
@@ -45,7 +45,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction<ActionSet>( //supposedly here we know that this action will return this type of Content
+        const actionSetResult = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI,
             initActionSet,
             initAction,
@@ -54,16 +54,16 @@ export const ConfEditor: VFC<EditorProperties> = ({
             }
         )
         
-        logger.log("OnInit result: ", result)
-        if (!result) {
+        logger.log("OnInit result: ", actionSetResult)
+        if (!actionSetResult) {
             closeModal();
             return;
         }
 
-        const setName = result.Content.SetName;
+        const setName = actionSetResult.Content.SetName;
         logger.log("SetName: ", setName)
-        setActionSetName(setName);
-        const data = await executeAction<ConfData>( //supposedly here we know that this action will return this type of Content
+       
+        const configDataResult = await executeAction<ExecuteGetActionSetArgs, ConfData>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             setName,
             "GetContent",
@@ -72,17 +72,19 @@ export const ConfEditor: VFC<EditorProperties> = ({
             }
         )
 
-        if (!data) {
+        if (!configDataResult) {
             closeModal();
             return;
         }
 
-        const res = data.Content
-        setConfData(res);
+        setActionSetName(setName);
+        setConfData(configDataResult.Content);
 
     }
     const handleSectionChange = (section: Section) => {
-        if (!confData) return;
+        if (!confData) {
+          return;
+        }
         const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s); //as per type def Sections should always be defined
         
         setConfData({ ...confData, Sections: updatedSections });
@@ -108,10 +110,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
             <ModalRoot className={confEditorRootClass} closeModal={closeModal}>
                 <Focusable
                     style={{ display: "flex", minHeight: '400px' }}
-                    onCancel={(_) => {
-                        closeModal();
-                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                    }}
+                    onCancel={() => closeModal()}
                     onCancelActionDescription="Go back to Game Details"
                 >
                     <Focusable
@@ -120,7 +119,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             paddingTop: '20px'
                         }}
                         onSecondaryActionDescription="Save config"
-                        onSecondaryButton={async (_) => {
+                        onSecondaryButton={async () => {
                             logger.log("Saving config: ", confData);
                             const result = await executeAction(serverAPI,
                                 actionSetName,
@@ -139,7 +138,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             closeModal();
                         }}
                     >
-                        <PanelSection title={"Configuration: "}>
+                        <PanelSection title="Configuration: ">
                             <div style={{ marginBottom: '10px'}}>
                                 <Dropdown
                                     rgOptions={[
@@ -148,9 +147,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         { data: 2, label: "Expert" },
                                         { data: 3, label: "All" },
                                     ]}
-                                    onChange={(e) => {
-                                        setModeLevel(e.data);
-                                    }}
+                                    onChange={(e) => setModeLevel(e.data)}
                                     selectedOption={modeLevel}
                                 />
                             </div>
@@ -175,18 +172,14 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         {confData?.AutoexecEnabled && confData?.Autoexec && (
                             <PanelSection title="[Autoexec]">
                                 <Focusable
-                                    // @ts-ignore
                                     focusableIfNoChildren={true}
                                     noFocusRing={true}
-                                    onFocusCapture={() => {
-                                        if (focusRef && focusRef.current != null)
-                                            focusRef.current.focus();
-                                    }}
+                                    onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()}
                                     onOKButton={() => { }}
                                     onSecondaryActionDescription="Save config"
-                                    onSecondaryButton={async (_) => {
+                                    onSecondaryButton={async () => {
                                         logger.log("Saving config: ", confData)
-                                        const result = await executeAction<SaveRefresh /*| SomeOtherContentPossibility */>( //pass multiple possible Content types with a union
+                                        const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh /*| SomeOtherContentPossibility */>( //pass multiple possible Content types with a union
                                             serverAPI,
                                             actionSetName,
                                             "SaveContent",
@@ -209,10 +202,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
                                         closeModal();
                                     }}
-                                    onCancel={(_) => {
-                                        closeModal();
-                                        //Router.Navigate("/game/" + tabindex + "/" + shortname)
-                                    }}
+                                    onCancel={() => closeModal()}
                                     onCancelActionDescription="Go back to Game Details"
                                 >
 
@@ -221,9 +211,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                         ref={focusRef}
                                         style={{ width: "100%", height: "200px" }}
                                         value={confData.Autoexec}
-                                        onChange={(e) => {
-                                            setConfData({ ...confData, Autoexec: e.target.value });
-                                        }} />
+                                        onChange={(e) => setConfData({ ...confData, Autoexec: e.target.value })} />
                                 </Focusable>
                             </PanelSection>
                         )}
@@ -235,15 +223,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         }}
                     >
                         <Focusable
-                            onActivate={() => {
-                                // WIP
-                                // showModal(
-                                //   <DetailsModal
-                                //     sectionHelpText={sectionHelpText}
-                                //     helpText={helpText}
-                                //   />
-                                // );
-                            }}
+                            onActivate={() => {}}
                             style={{
                                 minHeight: 0,
                                 position: "sticky",
@@ -251,7 +231,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                 top: "40px",
                                 margin: '0 20px'
                             }}
-                            // @ts-ignore
                             focusable={true}
                             noFocusRing={false}
                         >

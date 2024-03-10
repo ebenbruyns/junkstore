@@ -1,15 +1,6 @@
-/**
- * Renders a component that displays a set of tabs, each containing a StorePage component.
- * @param {Object} props - The component properties.
- * @param {ServerAPI} props.serverAPI - The server API object.
- * @param {StoreTabsContent} props.tabs - The content of the tabs.
- * @param {string} props.initActionSet - The initial action set.
- * @param {string} props.initAction - The initial action.
- * @returns {JSX.Element} - The rendered component.
- */
-import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs, TextField, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentType, ContentError, ContentResult, StoreContent, StoreTabsContent, GameDataList } from "./Types/Types";
+import { ActionSet, ContentType, ContentError, ContentResult, ExecuteArgs, ExecuteGetContentArgs, StoreContent, StoreTabsContent, GameDataList } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
@@ -94,7 +85,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         (async () => {
             try {
                 logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-                const actionSetRes = await executeAction<ActionSet>(serverAPI, initActionSet, initAction, {});
+                const actionSetRes = await executeAction<ExecuteArgs,ActionSet>(serverAPI, initActionSet, initAction, {});
                 logger.debug("init result: ", actionSetRes);
                 if (actionSetRes === null) return;
 
@@ -112,7 +103,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
         })();
     }, []);
 
-    const getContent = async (actionSet: string, actionArgs: { [param: string]: string; }) => executeAction<ContentResult<ContentType>>(serverAPI, actionSet, "GetContent", actionArgs);
+    const getContent = async (actionSet: string, actionArgs: { [param: string]: string; }) => executeAction<ExecuteGetContentArgs, ContentResult<ContentType>>(serverAPI, actionSet, "GetContent", actionArgs);
 
     const refreshContent = (args: { [param: string]: any; }, onFinish?: () => void) => {
         (async () => {

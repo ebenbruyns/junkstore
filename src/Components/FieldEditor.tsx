@@ -54,7 +54,6 @@ const Field: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
         <div>
           <span>{field.Key + " " + parentValue}</span>
           <TextField
-            // @ts-ignore
             type="number"
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -148,7 +147,6 @@ export const FieldEditor: VFC<{
   //
   return (
     <PanelSectionRow
-      //@ts-ignore
       style={{ display: "flex", flexDirection: "row" }}>
       <style>
         {`
@@ -170,9 +168,7 @@ export const FieldEditor: VFC<{
       >
         <Focusable
           style={{ width: "100%" }}
-          onFocus={() => {
-            updateHelpText(field);
-          }}
+          onFocus={() => updateHelpText(field)}
         >
           <Field
             field={field}

@@ -1,7 +1,15 @@
 #!/bin/bash
 
 function init() {
-    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE > /dev/null
+    for platform in "${PLATFORMS[@]}"; do
+       
+       
+        INIT="${platform}_init"
+        if [[ "$(type -t $INIT)" == "function" ]]; then
+            $0 $platform init
+        fi
+        
+    done
 }
 function getgames(){
     if [ -z "${1}" ]; then

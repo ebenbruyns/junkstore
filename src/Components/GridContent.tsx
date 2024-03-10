@@ -1,5 +1,5 @@
 import { DialogButton, Focusable, Menu, MenuItem, ServerAPI, Spinner, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
-import { ContentResult, ContentType, GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
+import { ContentResult, ContentType, ExecuteArgs, GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
 import { Dispatch, SetStateAction, VFC, memo, useEffect, useState } from "react";
 import GameGridItem from './GameGridItem';
 import { GameDetailsItem } from './GameDetailsItem';
@@ -42,7 +42,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
     useEffect(() => {
         (async () => {
             try {
-                const actionRes = await executeAction<ScriptActions>(serverAPI, initActionSet, "GetScriptActions", { inputData: "" });
+                const actionRes = await executeAction<ExecuteArgs, ScriptActions>(serverAPI, initActionSet, "GetScriptActions", {});
                 logger.debug('Get sscript actions result', actionRes);
                 if (!actionRes) {
                     return;
@@ -71,9 +71,9 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                                 gameId: "",
                                 appId: ""
                             };
-                            const result = await executeAction<ContentResult<ContentType>>(serverAPI, initActionSet, action.ActionId, args);
+                            const result = await executeAction<ExecuteArgs, ContentResult<ContentType>>(serverAPI, initActionSet, action.ActionId, args);
                             if (result?.Type == "RefreshContent") {
-                                refreshContent({...argsCache, limited: isLimited});
+                                refreshContent({ ...argsCache, limited: isLimited });
                             }
                             logger.debug("runScript result", result);
                         }}
@@ -112,7 +112,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
             onSecondaryActionDescription={
                 <div style={{ display: 'flex', gap: '4px' }}>
                     <text>Toggle Installed</text>
-                    {argsCache.installed && <FaRegCheckCircle style={{ alignSelf: 'center' }} size='14px'/>}
+                    {argsCache.installed && <FaRegCheckCircle style={{ alignSelf: 'center' }} size='14px' />}
                     {installedFilterLoading && <Spinner style={{ width: '20px' }} />}
                 </div>
             }
@@ -193,7 +193,7 @@ interface GridItemsProperties {
     initAction: string;
 }
 
-const GridItems: VFC<GridItemsProperties> = memo(({ serverAPI, games, initActionSet, initAction}) => {
+const GridItems: VFC<GridItemsProperties> = memo(({ serverAPI, games, initActionSet, initAction }) => {
     const logger = new Logger("GridContainer");
 
     const imgAreaWidth = '120px';

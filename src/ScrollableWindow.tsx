@@ -26,7 +26,9 @@ export const ScrollableWindow: FC<ScrollableWindowProps> = ({ height, fadeAmount
                 setIsOverflowing(hasOverflow);
             }
         };
-        if (current) trigger();
+        if (current) {
+          trigger();
+        }
     }, [children, height]);
 
     const panel = (

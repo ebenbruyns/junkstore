@@ -4,7 +4,7 @@ import {
     ScrollPanelGroup
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
-import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError } from "./Types/Types";
+import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, ExecuteGetActionSetArgs } from "./Types/Types";
 import { SectionEditor } from "./Components/SectionEditor";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
@@ -22,11 +22,9 @@ export const SettingsEditor: VFC<EditorProperties> = ({
     const logger = new Logger("SettingsEditor")
     logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
     const [confData, setConfData] = useState({} as ConfData);
-    // @ts-ignore
     const focusRef = useRef(null);
     const [modeLevel, setModeLevel] = useState(0 as number);
     const [actionSetName, setActionSetName] = useState("" as string);
-    // @ts-ignore
     const [helpText, setHelpText] = useState({
         Key: "",
         Description: "",
@@ -39,14 +37,13 @@ export const SettingsEditor: VFC<EditorProperties> = ({
         Parents: [],
         EnumValues: [],
     } as KeyValuePair);
-    // @ts-ignore
-    const [sectionHelpText, setSectionHelpText] = useState("" as string);
+    const [sectionHelpText, setSectionHelpText] = useState<string>("");
     useEffect(() => {
         OnInit();
 
     }, []);
     const OnInit = async () => {
-        const result = await executeAction(
+        const actionSetResult = await executeAction<ExecuteGetActionSetArgs, ActionSet>(
             serverAPI,
             initActionSet,
             initAction,
@@ -54,22 +51,27 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                 content_id: contentId
             }
         )
-        logger.log("OnInit result: ", result)
-
-        const setName = (result.Content as ActionSet).SetName;
-        logger.log("SetName: ", setName)
-        setActionSetName(setName);
-        const data = await executeAction(
+        logger.log("OnInit result: ", actionSetResult)
+        if (!actionSetResult) {
+            return;
+        }
+        
+        logger.log("SetName: ", actionSetResult.Content.SetName)
+        
+        const configDataResult = await executeAction<ExecuteGetActionSetArgs, ConfData>(
             serverAPI,
-            setName,
+            actionSetResult.Content.SetName,
             "GetContent",
             {
                 content_id: contentId
             }
         )
+        if (!configDataResult) {
+            return;
+        }
 
-        const res = data.Content as ConfData
-        setConfData(res);
+        setActionSetName(actionSetResult.Content.SetName);
+        setConfData(configDataResult.Content);
 
     }
     const handleSectionChange = (section: Section) => {
@@ -83,7 +85,6 @@ export const SettingsEditor: VFC<EditorProperties> = ({
     return (
         <>
             <ScrollPanelGroup 
-                //@ts-ignore
                 focusable={false}
             >
                 <Focusable style={{ background: "inherit" }}>
@@ -94,7 +95,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                             //     flex: "1",
                             // }}
                             onSecondaryActionDescription="Save Settings"
-                            onSecondaryButton={async (_) => {
+                            onSecondaryButton={async () => {
                                 logger.log("Saving config: ", confData)
                                 const result = await executeAction(serverAPI,
                                     actionSetName,
@@ -107,13 +108,13 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                                 //Router.Navigate("/game/" + tabindex + "/" + shortname)
 
                             }}
-                        // onCancel={(_) => {
+                        // onCancel={() => {
 
                         //     //Router.Navigate("/game/" + tabindex + "/" + shortname)
                         // }}
                         // onCancelActionDescription="Go back to Game Details"
                         >
-                            <PanelSection title={"Configuration: "}>
+                            <PanelSection title="Configuration: ">
                                 <Dropdown
                                     rgOptions={[
                                         { data: 0, label: "Basic" },
@@ -121,9 +122,7 @@ export const SettingsEditor: VFC<EditorProperties> = ({
                                         { data: 2, label: "Expert" },
                                         { data: 3, label: "All" },
                                     ]}
-                                    onChange={(e) => {
-                                        setModeLevel(e.data);
-                                    }}
+                                    onChange={(e) => setModeLevel(e.data)}
                                     selectedOption={modeLevel} />
                                 {confData.Sections?.map((section) => {
                                     if (section && modeLevel >= section.ModeLevel)

@@ -9,8 +9,8 @@
         {
           "Key": "Forkname",
           "Description": "The name of the fork to use for DosBox. This will be used to determine the DosBox binary to use.",
-          "DefaultValue": "DosBoxStaging",
-          "Value": "DosBoxStaging",
+          "DefaultValue": "staging",
+          "Value": "staging",
           "Type": "Enum",
           "Min": 0,
           "Max": 0,

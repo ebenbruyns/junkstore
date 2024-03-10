@@ -25,8 +25,9 @@ export const SectionEditor: VFC<{
     onChange({ ...section, Options: newOptions });
   };
   const OnInit = () => {
-    if (section.Visible)
+    if (section.Visible) {
       setCollapsed(!section.Visible)
+    }
   }
   useEffect(() => {
     OnInit();

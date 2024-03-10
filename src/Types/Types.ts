@@ -151,6 +151,8 @@ export interface ContentResult<T> {
 }
 export interface ContentType { }
 
+export interface EmptyContent extends ContentType { }
+
 export interface StoreTabsContent extends ContentType {
   Tabs: TabContent[];
 }
@@ -175,3 +177,45 @@ export interface Panel {
   Actions: MenuAction[];
 }
 
+export interface ExecuteArgs {
+  inputData?: string|FileData[]|ConfData;
+}
+export interface GetSettingArgs extends ExecuteArgs {
+  name: string;
+}
+export interface SaveSettingsArgs extends GetSettingArgs {
+  value: string;
+}
+
+export interface ExecuteGetGameDetailsArgs extends ExecuteArgs {
+  shortname: string;
+}
+export interface ExecuteInstallArgs extends ExecuteGetGameDetailsArgs {
+  steamClientID: string;
+}
+export interface ExecuteGetActionSetArgs extends ExecuteArgs {
+  content_id: string;
+}
+export interface ExecuteGetContentArgs extends ExecuteArgs {
+  filter?: string;
+  installed?: string;
+  limited?: string;
+}
+
+export interface ExecuteLoginArgs extends ExecuteArgs {
+  gameId: string;
+  appId: string;
+}
+export interface ExecuteGetExeActionSetArgs extends ExecuteLoginArgs {
+   content_id: string;
+}
+
+export interface ExecuteGetFilesDataArgs extends ExecuteLoginArgs {
+  SteamClientId: string;
+  shortName: string;
+}
+export interface ExecuteRunBinaryArgs extends ExecuteGetFilesDataArgs {
+  GameExe: string;
+  AdditionalArguments: boolean;
+  CompatToolName: string;
+}

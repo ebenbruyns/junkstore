@@ -41,9 +41,9 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                                 ...(!hasImage || !isImgLoaded ? { width: '100%', height: '100%', display: 'flex' } : {})
                             }}
                         >
-                            {!hasImage || imgError ? <FaGears style={{ alignSelf: 'center', flex: 'auto', height: '40%', color: '#6767675e' }} /> :
+                            {!hasImage || imgError ? <FaGears style={{ alignSelf: 'center', flex: 'auto', height: '30%', color: '#6767675e' }} /> :
                                 <>
-                                    {!isImgLoaded && <Spinner style={{ alignSelf: 'center', flex: 'auto', height: '40%', color: '#676767db' }} />}
+                                    {!isImgLoaded && <Spinner style={{ alignSelf: 'center', flex: 'auto', height: '25%', color: '#7f7f7f4d' }} />}
                                     <img
                                         key={`img-${gameData.ID}`}
                                         className={'libraryassetimage_Image_24_Au'}
@@ -110,8 +110,12 @@ const ScreenBoundChecker: VFC<ScreenBoundCheckerProps> = ({ imgAreaWidth, imgAre
     const topRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && onEnterBounds(), { root: null, threshold: 0 });
-        if (topRef.current) observer.observe(topRef.current);
-        return () => { if (topRef.current) observer.unobserve(topRef.current); };
+        if (topRef.current) {
+          observer.observe(topRef.current);
+        }
+        return () => { if (topRef.current) {
+                         observer.unobserve(topRef.current);
+                       } };
     }, []);
 
     return (

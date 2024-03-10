@@ -13,19 +13,24 @@ import sharedgameset
 import re
 
 
+class CmdException(Exception):
+    pass
+
 class Epic(sharedgameset.GameSet):
     def __init__(self, db_file, setNameConfig=None):
         super().__init__(db_file, setNameConfig)
 
-    legendary_cmd = os.environ['LEGENDARY']
+    legendary_cmd = os.path.expanduser( os.environ['LEGENDARY'])
 
     def execute_shell(self, cmd):
-        # print(f"Executing {cmd}")
-
+       
         result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  shell=True, env=os.environ).communicate()[0].decode()
-        # print(f"Result: {result}")
+                                  shell=True).communicate()[0].decode()
+
+        if "[cli] ERROR:" in result:
+            raise CmdException(result)
+        print(f" result: {result}", file=sys.stderr)
         return json.loads(result)
 
     # sample json for game returned from legendary list --json
@@ -37,16 +42,19 @@ class Epic(sharedgameset.GameSet):
         self.insert_data(games_list)
 
     def get_working_dir(self, game_id, offline):
-        offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
-        print(result['working_directory'])
+        self.get_directory(offline, game_id, 'working_directory')
 
     def get_game_dir(self, game_id, offline):
+        self.get_directory(offline, game_id, 'game_directory')
+
+    def get_directory(self, offline, game_id, type):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
-        print(result['game_directory'])
+        result = self.execute_shell(
+            os.path.expanduser(
+                f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"
+            )
+        )
+        print(result[type])
 
     def get_login_status(self, offline):
         offline_switch = "--offline" if offline else ""
@@ -61,9 +69,14 @@ class Epic(sharedgameset.GameSet):
 
     def get_parameters(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch} "))
-        return " ".join(result['egl_parameters'])
+        try:
+            result = self.execute_shell(
+            f"{self.legendary_cmd} launch {game_id} --json {offline_switch} ")
+            return " ".join(result['egl_parameters'])
+        except CmdException as e:
+            raise e
+
+        
 
     def has_updates(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
@@ -76,11 +89,11 @@ class Epic(sharedgameset.GameSet):
 
     def get_lauch_options(self, game_id, steam_command, name, offline):
         offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"))
         launcher = os.environ['LAUNCHER']
-        script_path = os.path.expanduser(
-            launcher)
+        result = self.execute_shell(
+            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}")
+       
+        script_path = os.path.expanduser(launcher)
         return json.dumps(
             {
                 'Type': 'LaunchOptions',
@@ -95,7 +108,7 @@ class Epic(sharedgameset.GameSet):
             })
 
     def insert_data(self, games_list):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
 
         for game in games_list:
@@ -159,7 +172,7 @@ class Epic(sharedgameset.GameSet):
         conn.close()
 
     def insert_game(self, game):
-        conn = sqlite3.connect(self.db_file)
+        conn = self.get_connection()
         c = conn.cursor()
 
     # [DLManager] INFO: = Progress: 0.51% (368/72002), Running for 00:01:58, ETA: 06:23:02

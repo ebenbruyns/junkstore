@@ -10,6 +10,8 @@ import {
     ProgressBar,
     FocusableProps,
     afterPatch,
+    Button,
+    joinClassNames,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
@@ -192,11 +194,20 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <ProgressBar nProgress={progress.Percentage} />
                             </div>
                         )}
-                        <Focusable style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                            <DialogButton onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}>
-                                {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
-                            </DialogButton>
-                            <div style={{ display: 'flex', gap: '10px', height: '40px' }}>
+                        <Focusable
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
+                            <div
+                                className={joinClassNames('basicappdetailssectionstyler_AppActionButton_QsZdW', 'appactionbutton_PlayButtonContainer_1FnJ6', installing || steamClientID == "" ? '' : 'appactionbutton_Green_3cI5T')}
+                                style={{ height: '100%', width: '100%' }}
+                            >
+                                <Button
+                                    style={{ display: 'flex', justifyContent: 'left', fontSize: '14px' }}
+                                    className={installing ? 'DialogButton' : 'appactionbutton_PlayButton_3ydig appactionbutton_ButtonChild_2AzIX'}
+                                    onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}>
+                                    {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
+                                </Button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '15px', height: '100%' }}>
                                 {/* actions.length > 0 && ( */}
                                 <DialogButton
                                     onClick={actionsMenu}
