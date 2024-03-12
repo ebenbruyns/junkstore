@@ -113,8 +113,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                                 appId: String(contentId),
                                 SteamClientId: contentId,
                                 shortName: shortName,
-                                GameExe: gameExe,
-
+                                GameExe: gameExe.replace("\\","\\\\"),
                                 AdditionalArguments: false,
                                 CompatToolName: compatToolName
 

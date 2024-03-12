@@ -13,7 +13,7 @@ if [[ "${PLATFORM}" == "Epic" ]]; then
 fi
 
 function Epic_init() {
-    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE #> /dev/null
+    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE &> /dev/null
 }
 
 function Epic_refresh() {

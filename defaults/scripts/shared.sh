@@ -6,10 +6,11 @@ function init() {
        
         INIT="${platform}_init"
         if [[ "$(type -t $INIT)" == "function" ]]; then
-            $0 $platform init
+            TEMP=$($0 $platform init)
         fi
         
     done
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Initialized\"}}"
 }
 function getgames(){
     if [ -z "${1}" ]; then

@@ -65,7 +65,34 @@ class GameSet:
         c.execute(f"CREATE TABLE IF NOT EXISTS BatFiles (id INTEGER PRIMARY KEY, GameID INTEGER, Path TEXT, BatFileName TEXT,  Content TEXT, FOREIGN KEY(GameID) REFERENCES Game(id))")
         c.execute(
             'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, name TEXT UNIQUE, value TEXT)')
+        c.execute(f"CREATE TABLE IF NOT EXISTS Cache (id INTEGER PRIMARY KEY, Key TEXT UNIQUE, Value TEXT, ExpiryDate DateTime)")
+        conn.commit()
+        conn.close()
+    
+    def flush_cache(self):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("DELETE FROM Cache where ExpiryDate < datetime('now')")
+        conn.commit()
+        conn.close()
 
+
+    def get_cache(self, key):
+        self.flush_cache()
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("SELECT Value FROM Cache WHERE Key=?", (key,))
+        result = c.fetchone()
+        conn.close()
+        if result:
+            return result[0]
+        else:
+            return None
+    
+    def add_cache(self, key, value, expiry_date):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("INSERT INTO Cache (Key, Value, ExpiryDate) VALUES (?, ?, ?)", (key, value, expiry_date))
         conn.commit()
         conn.close()
 

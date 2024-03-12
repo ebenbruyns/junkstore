@@ -9,6 +9,7 @@ import zipfile
 import shutil
 import aiohttp
 import os
+import concurrent.futures
 
 
 class Helper:
@@ -36,6 +37,8 @@ class Helper:
                                                          shell=True,
                                                          env=env,
                                                          cwd=Helper.working_directory,
+                                                         start_new_session=True,
+                                                         
                                                          )
             if stream_output:
                 while True:
@@ -256,6 +259,10 @@ class Plugin:
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
 
+        
+
+    # ...
+
     async def execute_action(self, actionSet, actionName, inputData='', gameId='', appId='', *args, **kwargs):
         try:
             decky_plugin.logger.info(
@@ -266,7 +273,7 @@ class Plugin:
 
             if isinstance(inputData, (dict, list)):
                 inputData = json.dumps(inputData)
-
+            
             result = await Helper.execute_action(actionSet, actionName, *args, *kwargs.values(), input_data=inputData, game_id=gameId, app_id=appId)
             if Helper.verbose:
                 decky_plugin.logger.info(f"execute_action result: {result}")

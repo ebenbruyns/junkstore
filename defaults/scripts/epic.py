@@ -1,3 +1,4 @@
+import datetime
 import re
 import json
 import argparse
@@ -11,7 +12,7 @@ import subprocess
 import time
 import sharedgameset
 import re
-
+from datetime import datetime, timedelta
 
 class CmdException(Exception):
     pass
@@ -58,15 +59,28 @@ class Epic(sharedgameset.GameSet):
 
     def get_login_status(self, offline):
         offline_switch = "--offline" if offline else ""
+        cache_key = "egs-login"
+        if offline:
+            cache_key = "egs-login-offline"
+        
+        cache = self.get_cache(cache_key)
+        if cache is not None:
+            return cache
+        
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} status --json {offline_switch}"))
-
+        
         account = result['account']
         if offline:
             account += " (offline)"
         logged_in = account != '<not logged in>'
-        return json.dumps({'Type': 'LoginStatus', 'Content': {'Username': account, 'LoggedIn': logged_in}})
-
+        value = json.dumps({'Type': 'LoginStatus', 'Content': {'Username': account, 'LoggedIn': logged_in}})
+        
+        timeout = datetime.now() + timedelta(hours=1)
+        self.add_cache(cache_key, value, timeout)
+        return value
+        
+    
     def get_parameters(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
         try:
