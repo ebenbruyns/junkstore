@@ -1,0 +1,54 @@
+{
+  "junk-store-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "JunkStoreActions",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Get content",
+          "Type": "TabPage",
+          "Command": "./scripts/get-json.py junk-store-tabs"
+        }
+      ]
+    }
+  },
+  "main-menu-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "MainMenu",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Populate Store",
+          "Type": "GetContent",
+          "Command": "./scripts/get-json.py main-menu-content"
+        }
+      ]
+    }
+  },
+  "junk-store-tabs": {
+    "Type": "StoreTabs",
+    "Content": {
+      "Tabs": []
+    }
+  },
+  "main-menu-content": {
+    "Type": "MainMenu",
+    "Content": {
+      "Panels": [
+        {
+          "Title": "Custom Stores",
+          "Type": "Section",
+          "Actions": [
+            {
+              "ActionId": "JunkStoreInit",
+              "Title": "Games",
+              "Type": "Page"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

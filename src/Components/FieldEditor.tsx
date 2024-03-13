@@ -16,6 +16,8 @@ import { ValueType } from "../Types/Types";
 import { KeyValuePair } from "../Types/Types";
 import { FaCog } from "react-icons/fa";
 
+const fieldEditorRootClass = 'field-editor-root';
+
 type FieldProps = {
   field: KeyValuePair;
   value: any;
@@ -52,7 +54,6 @@ const Field: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
         <div>
           <span>{field.Key + " " + parentValue}</span>
           <TextField
-            // @ts-ignore
             type="number"
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -146,16 +147,16 @@ export const FieldEditor: VFC<{
   //
   return (
     <PanelSectionRow
-      //@ts-ignore
       style={{ display: "flex", flexDirection: "row" }}>
       <style>
         {`
-            .DialogInputLabelGroup {
+            .${fieldEditorRootClass} .DialogInputLabelGroup {
                 margin-bottom: 0;
             }
         `}
       </style>
       <Focusable
+        className={fieldEditorRootClass}
         style={{
           flex: "1",
           display: "flex",
@@ -167,9 +168,7 @@ export const FieldEditor: VFC<{
       >
         <Focusable
           style={{ width: "100%" }}
-          onFocus={() => {
-            updateHelpText(field);
-          }}
+          onFocus={() => updateHelpText(field)}
         >
           <Field
             field={field}

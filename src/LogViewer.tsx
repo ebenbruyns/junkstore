@@ -1,20 +1,24 @@
-import { Dropdown, Field, Focusable, ModalPosition, Panel, PanelSection, ScrollPanelGroup, ServerAPI } from "decky-frontend-lib";
-import { VFC, useEffect, useRef, useState } from "react";
+import { Dropdown, Focusable, ServerAPI } from "decky-frontend-lib";
+import { VFC, useEffect, useState } from "react";
 import Logger from "./Utils/logger";
 import { LogFile } from "./Types/Types";
+import { ScrollableWindowRelative } from './ScrollableWindow';
 
 
 export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
-    const [logs, setLogs] = useState([] as LogFile[]);
-    const [selectedLog, setSelectedLog] = useState("");
+    const [logs, setLogs] = useState<LogFile[]>([] as LogFile[]);
     const [logContent, setLogContent] = useState("");
     const logger = new Logger("LogViewer");
-    const focusRef = useRef(null);
     const fetchLogs = async () => {
         try {
-            const response = await serverAPI.callPluginMethod("get_logs", {});
+            const response = await serverAPI.callPluginMethod<object, LogFile[]>("get_logs", {});
             logger.log(response);
-            setLogs(response.result as LogFile[]);
+            if (response.result instanceof Array) {
+                setLogs(response.result);
+                if (response.result.length > 0) {
+                    setLogContent(response.result[0].Content);
+                }
+            }
         } catch (e) {
             logger.error(e);
         }
@@ -24,71 +28,36 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         fetchLogs();
     }, []);
 
-    const handleLogSelect = async (logFileName: string) => {
-        try {
-            const response = await serverAPI.callPluginMethod("get_log_content", { fileName: logFileName });
-            setLogContent(response.result as string);
-        } catch (e) {
-            logger.error(e);
-        }
-    };
+
 
     return (
-        <ModalPosition>
-            <ScrollPanelGroup
-                // @ts-ignore
-                focusable={false} style={{ margin: "0px" }}>
-                <Focusable
+        <Focusable
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+                height: '100%',
+                padding: '0 15px'
+            }}
+        >
+            {logs.length > 0 && (
+                <>
+                    <Dropdown rgOptions={logs.map((log) => {
+                        return { data: log.FileName, label: log.FileName };
+                    })}
+                        selectedOption={logs[0].FileName}
+                        onChange={(e: any) => {
+                            const temp = logs.find((log) => log.FileName == e.data);
+                            setLogContent(temp?.Content || "");
 
-
-                >
-
-                    {logs.length > 0 && (
-                        <Focusable
-
-                            noFocusRing={false}
-                            style={{
-                                marginTop: "40px",
-                                height: "calc( 100% - 40px )",
-
-                                justifyContent: "center",
-                                margin: "40px",
-                            }}
-                        >
-                            <Focusable style={{ marginBottom: "1em" }}>
-                                <Dropdown rgOptions={logs.map((log) => {
-                                    return { data: log.FileName, label: log.FileName };
-                                })}
-                                    selectedOption={logs[0].FileName}
-                                    onChange={(e: any) => {
-                                        const temp = logs.find((log) => log.FileName == e.data);
-                                        setLogContent(temp?.Content || "");
-
-                                    }} />
-                            </Focusable>
-                            <Focusable
-                                // @ts-ignore
-                                focusableIfNoChildren={true}
-                                noFocusRing={true}
-                                onFocusCapture={() => {
-                                    if (focusRef && focusRef.current != null)
-                                        // @ts-ignore
-                                        focusRef.current.focus();
-                                }}>
-                                <textarea
-                                    ref={focusRef}
-                                    style={{ width: "calc( 100% - 10px )", height: "200px " }}
-                                    value={logContent}
-
-                                />
-                            </Focusable>
-                        </Focusable>
-                    )}
-
-                </Focusable>
-
-
-            </ScrollPanelGroup>
-        </ModalPosition>
+                        }} />
+                    <ScrollableWindowRelative >
+                        <div style={{ padding: '5px 0', whiteSpace: 'pre-wrap' }}>
+                            {logContent}
+                        </div>
+                    </ScrollableWindowRelative>
+                </>
+            )}
+        </Focusable>
     );
 };

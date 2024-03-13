@@ -4,14 +4,15 @@ export DECKY_PLUGIN_RUNTIME_DIR="${HOME}/homebrew/data/Junk-Store"
 export DECKY_PLUGIN_DIR="${HOME}/homebrew/plugins/Junk-Store"
 export DECKY_PLUGIN_LOG_DIR="${HOME}/homebrew/logs/Junk-Store"
 export WORKING_DIR=$DECKY_PLUGIN_DIR
+export Extensions="Extensions"
 ID=$1
 echo $1
 shift
 
-source "${HOME}/homebrew/plugins/Junk-Store/scripts/settings.sh"
+source "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
-SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE)
+SETTINGS=$($EPICCONF --get-env-settings $ID --dbfile $DBFILE --platform Proton --fork "" --version "" --dbfile $DBFILE)
 echo "${SETTINGS}"
 eval "${SETTINGS}"
 
@@ -62,8 +63,17 @@ fi
 #export PROTON_EAC_RUNTIME="${HOME}/.steam/root/steamapps/common/Proton EasyAntiCheat Runtime/"
 
 CMD=$@
-ARGS=$("${HOME}/homebrew/plugins/Junk-Store/scripts/get-epic-args.sh" $ID)
-eval "${CMD} ${ARGS}" # &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+ARGS=$("${ARGS_SCRIPT}" $ID)
+function sync-saves(){
+    if [[ "${OFFLINE_MODE}" == "" ]]; then
+    $LEGENDARY sync-saves $ID
+fi
+}
+sync-saves
+eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+sync-saves
+
+
 # echo "#!/bin/bash" > run.sh
 # echo "${CMD} ${ARGS}" >> run.sh
 # chmod +x run.sh

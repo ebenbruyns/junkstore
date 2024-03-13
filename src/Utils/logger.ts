@@ -1,24 +1,45 @@
-const enableLogger = false;
+const isLoggerEnabled = () => { return localStorage.getItem('enableLogger') === 'true' || false };
+
+declare global {
+    interface Window {
+        JunkStoreLoggerEnable(): void;
+        JunkStoreLoggerDisable(): void;
+    }
+}
+
+window.JunkStoreLoggerEnable = () => {
+    localStorage.setItem('enableLogger', 'true');
+};
+
+
+window.JunkStoreLoggerDisable = () => {
+    localStorage.setItem('enableLogger', 'false');
+};
+
 export const log = (name: string) => {
-    if(enableLogger)
-    return console.info.bind(
-        window.console,
-        `%c Junk Store %c ${name} %c`,
-        'background: #16a085; color: black;',
-        'background: #1abc9c; color: black;',
-        'background: transparent;',
-    );
-    else return function (..._: any[]) { }
+    if (isLoggerEnabled()) {
+      return console.info.bind(
+          window.console,
+          `%c Junk Store %c ${name} %c`,
+          'background: #16a085; color: black;',
+          'background: #1abc9c; color: black;',
+          'background: transparent;',
+      );
+    } else {
+      return function (..._: any[]) { }
+    }
 };
 
 export const debug = (name: string) => {
-    if (enableLogger)
-    return console.debug.bind(window.console,
-        `%c Junk Store %c ${name} %c`,
-        'background: #16a085; color: black;',
-        'background: #1abc9c; color: black;',
-        'color: blue;');
-     else return function (..._: any[]) { }
+    if (isLoggerEnabled()) {
+      return console.debug.bind(window.console,
+          `%c Junk Store %c ${name} %c`,
+          'background: #16a085; color: black;',
+          'background: #1abc9c; color: black;',
+          'color: blue;');
+    } else {
+      return function (..._: any[]) { }
+    }
 }
 
 export const error = (name: string) => {

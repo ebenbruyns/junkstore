@@ -1,12 +1,13 @@
-import { Focusable, ServerAPI, ModalRoot, sleep, ScrollPanelGroup, Panel, ModalPosition, SimpleModal } from "decky-frontend-lib";
+import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
-// import { Panel, ScrollPanelGroup } from "./Scrollable";
+import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
 import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
-import { executeAction } from "../Utils/executeAction";
+import { GameStateUpdate, executeAction } from "../Utils/executeAction";
+
+const gameDetailsRootClass = 'game-details-modal-root';
 
 interface GameDetailsItemProperties {
     serverAPI: ServerAPI;
@@ -14,19 +15,23 @@ interface GameDetailsItemProperties {
     initActionSet: string;
     initAction: string;
     closeModal?: any;
+    clearActiveGame: () => void;
 }
 
 
 export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
-    serverAPI, shortname, closeModal, initActionSet,
-    // @ts-ignore
-    initAction
+    serverAPI,
+    shortname,
+    closeModal,
+    initActionSet,
+    initAction,
+    clearActiveGame
 }) => {
 
     const logger = new Logger("GameDetailsItem");
     logger.log("GameDetailsItem startup");
     const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-    const [gameData, setGameData] = useState<ContentResult>({ Type: "Empty", Content: { Details: {} } } as ContentResult);
+    const [gameData, setGameData] = useState<ContentResult<GameDetails | EmptyContent>>({ Type: "Empty", Content: { Details: {} } });
     logger.log("GameDetailsItem gameData", gameData);
     const [steamClientID, setSteamClientID] = useState("");
     logger.log("GameDetailsItem steamClientID", steamClientID);
@@ -36,7 +41,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
         Description: ""
-    } as ProgressUpdate);
+    });
     logger.log("GameDetailsItem progress", progress);
 
     const installingRef = useRef(installing);
@@ -58,35 +63,44 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         logger.log("GameDetailsItem onInit");
         onInit();
     }, []);
+
+    const reloadData = async () => {
+        setGameData({ Type: "Empty", Content: { Details: {} } });
+        onInit();
+    };
     const onInit = async () => {
         try {
             logger.debug("onInit starting");
-            const res = await executeAction(serverAPI, initActionSet,
+            const gameDetailsResponse = await executeAction<ExecuteGetGameDetailsArgs, GameDetails>(
+                serverAPI,
+                initActionSet,
                 "GetDetails",
                 {
-                    shortname: shortname,
-                    inputData: ""
-                });
-            logger.debug("onInit data", res);
+                    shortname: shortname
+                }
+            );
 
-            logger.debug("onInit res", res);
-            setGameData(res);
-            if (res.Type === "GameDetails")
-                setSteamClientID((res.Content as GameDetails).SteamClientID);
+            logger.debug("onInit res", gameDetailsResponse);
+            if (gameDetailsResponse === null) {
+                return;
+            }
+            setSteamClientID(gameDetailsResponse.Content.SteamClientID);
             logger.debug("onInit finished");
-            const actionRes = await executeAction(serverAPI, initActionSet,
+            const scriptActionResponse = await executeAction<ExecuteGetGameDetailsArgs, ScriptActions>(
+                serverAPI,
+                initActionSet,
                 "GetGameScriptActions",
                 {
-                    shortname: shortname,
-                    inputData: ""
-                }) as ContentResult;
-            logger.debug("onInit actionRes", actionRes);
-            if (actionRes.Type === "ScriptSet") {
-                const scriptActions = actionRes.Content as ScriptActions;
-                logger.debug("onInit scriptActions", scriptActions);
-                setScriptActions(scriptActions.Actions);
+                    shortname: shortname
+                }
+            );
+            logger.debug("onInit actionRes", scriptActionResponse);
+            if (scriptActionResponse === null) {
+                return;
             }
-
+            logger.debug("onInit scriptActions", scriptActionResponse.Content);
+            setGameData(gameDetailsResponse);
+            setScriptActions(scriptActionResponse.Content.Actions);
         } catch (error) {
             logger.error(error);
         }
@@ -98,27 +112,32 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             try {
                 logger.debug("updateProgress");
 
-                executeAction(serverAPI, initActionSet,
+                executeAction<ExecuteGetGameDetailsArgs, ProgressUpdate>(
+                    serverAPI,
+                    initActionSet,
                     "GetProgress",
                     {
-                        shortname: shortname,
-                        inputData: ""
-                    }).then((res) => {
-                        const progressUpdate = res.Content as ProgressUpdate;
-                        if (progressUpdate != null) {
-                            logger.debug(progressUpdate);
-                            setProgress(progressUpdate);
-                            logger.debug(progressUpdate.Percentage);
-                            if (progressUpdate.Percentage >= 100) {
-                                setInstalling(false);
-                                logger.debug("setInstalling(false)");
-                                install();
-                                return;
-                            }
+                        shortname: shortname
+                    }
+                ).then((progressUpdateResponse) => {
+                    if (progressUpdateResponse === null) {
+                        return;
+                    }
+                    const progressUpdate = progressUpdateResponse.Content;
+                    if (progressUpdate != null) {
+                        logger.debug(progressUpdate);
+                        setProgress(progressUpdate);
+                        logger.debug(progressUpdate.Percentage);
+                        if (progressUpdate.Percentage >= 100) {
+                            setInstalling(false);
+                            logger.debug("setInstalling(false)");
+                            install();
+                            return;
                         }
-                    }).catch((e) => {
-                        logger.error('Error in progress updater', e);
-                    });
+                    }
+                }).catch((e) => {
+                    logger.error('Error in progress updater', e);
+                });
             } catch (e) {
                 logger.error('Error in progress updater', e);
             }
@@ -140,64 +159,69 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     }, [installing]);
     const uninstall = async () => {
         try {
-            await executeAction(serverAPI, initActionSet,
+            await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
+                serverAPI,
+                initActionSet,
                 "Uninstall",
                 {
-                    shortname: shortname,
-                    inputData: ""
-                });
+                    shortname: shortname
+                }
+            );
             await SteamClient.Apps.RemoveShortcut(parseInt(steamClientID));
             setSteamClientID("");
         } catch (error) {
             logger.error(error);
         }
     };
-    const download = async () => {
+    const download = async (update: boolean) => {
         try {
 
-            const result = await executeAction(serverAPI, initActionSet,
-                "Download",
+            const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
+                serverAPI,
+                initActionSet,
+                update?"Update":"Download",
                 {
-                    shortname: shortname,
-                    inputData: ""
-                });
-            if (result.Type == "Progress")
+                    shortname: shortname
+                }
+            );
+            if (result?.Type == "Progress") {
                 setInstalling(true);
+            }
         } catch (error) {
             logger.error(error);
         }
     };
-    const update = async () => {
-        try {
-
-            const result = await executeAction(serverAPI, initActionSet,
-                "Update",
-                {
-                    shortname: shortname,
-                    inputData: ""
-                });
-            if (result.Type == "Progress")
-                setInstalling(true);
-
-        } catch (error) {
-            logger.error(error);
-        }
-    };
+    
     const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args)
-        if (result.Type == "Progress")
-            setInstalling(true);
+        const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
+            logger.log("runscript game state update: ", data);
+            if (data.bRunning) {
+                // This might not work in desktop mode.
+                // let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
+                // if (gamepadWindowInstance) {
+                //     closeModal();
+                setTimeout(async () => unregister(), 1000);
+                // }
+            }
+        });
+        const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(serverAPI, actionSet, actionId, args);
 
-    }
+        if (result?.Type == "Progress") {
+            setInstalling(true);
+        }
+
+    };
     const cancelInstall = async () => {
         try {
             setInstalling(false);
-            await executeAction(serverAPI, initActionSet,
+            await executeAction(
+                serverAPI,
+                initActionSet,
                 "CancelInstall",
                 {
-                    shortname: shortname,
-                    inputData: ""
-                });
+                    shortname: shortname
+                }
+            );
 
         } catch (error) {
             logger.error(error);
@@ -206,49 +230,72 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
     const runner = async () => {
 
         setTimeout(async () => {
-            let id = parseInt(steamClientID)
+            let id = parseInt(steamClientID);
             let gid = gameIDFromAppID(id);
+            const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
+                logger.log("data: ", data);
+                if (!data.bRunning) {
+                    // This might not work in desktop mode.
+                    let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance;
+                    if (gamepadWindowInstance) {
+                        setTimeout(async () => {
+                            gamepadWindowInstance.NavigateBack();
+                            unregister();
+                        }, 1000);
+                    }
+                }
+            });
 
             await SteamClient.Apps.RunGame(gid, "", -1, 100);
             closeModal();
         }, 500);
     };
     const checkid = async () => {
-        let id = parseInt(steamClientID)
-        logger.debug("checkid", id)
-        // @ts-ignore
-        const apps = appStore.allApps.filter(app => app.appid == id)
-        if (apps.length == 0)
-            return await getSteamId()
-        else
+        let id = parseInt(steamClientID);
+        logger.debug("checkid", id);
+        const apps = appStore.allApps.filter(app => app.appid == id);
+        if (apps.length == 0) {
+            return await getSteamId();
+        } else {
             return id;
-    }
+        }
+    };
 
     const resetLaunchOptions = async () => {
 
-        let id = await checkid()
-        logger.debug("resetLaunchOptions id:", id)
+        let id = await checkid();
+        logger.debug("resetLaunchOptions id:", id);
         configureShortcut(id);
 
-    }
+    };
     const configureShortcut = async (id: Number) => {
         setSteamClientID(id.toString());
-        const result = await executeAction(serverAPI, initActionSet,
+        const result = await executeAction<ExecuteInstallArgs, ContentType>(
+            serverAPI,
+            initActionSet,
             "Install",
             {
                 shortname: shortname,
-                steamClientID: id.toString(),
-                inputData: ""
-            });
-        const name = (gameData.Content as GameDetails).Name;
-        // @ts-ignore
-        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.appid != id)
+                steamClientID: id.toString()
+            }
+        );
+        if (gameData.Type !== "GameDetails") {
+            return;
+        }
+        const name = (gameData.Content as GameDetails).Name; //* this should be dealt with
+
+        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.appid != id);
         for (const app of apps) {
-            logger.debug("removing shortcut", app.appid)
+            logger.debug("removing shortcut", app.appid);
             await SteamClient.Apps.RemoveShortcut(app.appid);
         }
         await cleanupIds();
 
+
+        if (result == null) {
+            logger.error("install result is null");
+            return;
+        }
         if (result.Type === "LaunchOptions") {
             const launchOptions = result.Content as LaunchOptions;
             //await SteamClient.Apps.SetAppLaunchOptions(gid, "");
@@ -256,46 +303,60 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
             await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
             await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
-            //@ts-ignore
             const defaultProton = settingsStore.settings.strCompatTool;
-
-            if (defaultProton) {
-                await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
+            if (launchOptions.Compatibility && launchOptions.Compatibility == true) {
+                logger.debug("Setting compatibility", launchOptions.CompatToolName);
+                if (defaultProton) {
+                    await SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
+                }
+            }
+            else {
+                logger.debug("Setting compatibility to empty string");
+                await SteamClient.Apps.SpecifyCompatTool(id, "");
             }
             setInstalling(false);
-        }
 
-        const imageResult = await executeAction(serverAPI, initActionSet,
+        }
+        const imageResult = await executeAction<ExecuteGetGameDetailsArgs, GameImages>(
+            serverAPI,
+            initActionSet,
             "GetJsonImages",
             {
-                shortname: shortname,
-                inputData: ""
-            });
-
-        if (imageResult.Type == "Images") {
-            const images = imageResult.Content as GameImages
-            logger.debug("images", images);
-            if (images.Grid !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
-            if (images.Hero !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
-            if (images.Logo !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
-            if (images.GridH !== null) SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
+                shortname: shortname
+            }
+        );
+        if (imageResult == null) {
+            return;
         }
+        const images = imageResult.Content;
+        logger.debug("images", images);
+        if (images.Grid !== null) {
+            SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
+        }
+        if (images.Hero !== null) {
+            SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
+        }
+        if (images.Logo !== null) {
+            SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
+        }
+        if (images.GridH !== null) {
+            SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
+        }
+        
 
-    }
+    };
 
     const cleanupIds = async () => {
-        // @ts-ignore
-        const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824)
+        const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824);
         for (const app of apps) {
-            await SteamClient.Apps.RemoveShortcut(app.appid);
+            SteamClient.Apps.RemoveShortcut(app.appid); 
         }
-    }
+    };
 
     const getSteamId = async () => {
 
         const name = (gameData.Content as GameDetails).Name;
-        // @ts-ignore
-        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824)
+        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824);
         await cleanupIds();
         if (apps.length > 0) {
             const id = apps[0].appid;
@@ -309,12 +370,14 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
         else {
             const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "", "");
+            if (gameData.Type !== "GameDetails") {
+                return id;
+            }
             await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
             return id;
         }
-    }
+    };
     const install = async () => {
-        //updateProgress();
         try {
             const id = await getSteamId();
             configureShortcut(id);
@@ -324,84 +387,64 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         }
     };
     return (
-
-        <>
+        <div className={gameDetailsRootClass}>
             <style>
                 {`
-                            .GenericConfirmDialog {
-                                width: 100% !important;
-                                height: 100% !important;
-                                padding: 0px !important;
-                                margin: 0px !important;
-                            }
-                            .ModalPosition {
-                                scroll-padding: 0px !important;
-                                padding: 0px !important;
-                                margin: -10px !important;
-                            }
-                        `}
+                .${gameDetailsRootClass} .GenericConfirmDialog {
+                    width: 100%;
+                    height: 100%;
+                    padding: 0;
+                    border: 0;
+                    border-radius: 0;
+                    background: #0e172175;
+                    backdrop-filter: blur(8px);
+                }
+                .${gameDetailsRootClass} .gamepaddialog_ModalPosition_30VHl {
+                    padding: 0;
+                }
+                .footer_BasicFooter_3T1iF {
+                    border-top: unset;
+                }
+            `}
             </style>
-
             <ModalRoot
-                // @ts-ignore
-                style={{ width: 800, height: "100%", padding: "0px", margin: "0px", background: parent }}
-                onCancel={closeModal}
-                onEscKeypress={closeModal}
-                closeModal={closeModal} bAllowFullSize={true}>
-                <ModalPosition>
-                    <Focusable>
-                        {gameData.Type === "Empty" && <Loading />}
-                        {gameData.Type === "GameDetails" &&
-
-
-                            <ScrollPanelGroup
-                                // @ts-ignore
-                                focusable={false}
-                                style={{
-                                    background: parent, height: "100%",
-                                    padding: "0px",
-                                    margin: "0px"
-                                }}>
-                                {/* <Focusable style={{ margin: "0px", color: "white", height: "100%", padding: "0px" }} onOptionsButton={install}
-                                // @ts-ignore
-                                focusableIfNoChildren={true}
-
-                            > */}
-
-                                <GameDisplay
-                                    serverApi={serverAPI}
-                                    name={(gameData.Content as GameDetails).Name}
-                                    shortName={(gameData.Content as GameDetails).ShortName}
-                                    description={(gameData.Content as GameDetails).Description}
-                                    images={(gameData.Content as GameDetails).Images}
-                                    steamClientID={steamClientID}
-                                    closeModal={closeModal}
-                                    installing={installing}
-                                    installer={download}
-                                    progress={progress}
-                                    cancelInstall={cancelInstall}
-                                    uninstaller={uninstall}
-                                    editors={(gameData.Content as GameDetails).Editors}
-                                    initActionSet={initActionSet}
-                                    runner={runner}
-                                    actions={scriptActions}
-                                    resetLaunchOptions={resetLaunchOptions}
-                                    updater={update}
-                                    scriptRunner={runScript}
-                                />
-
-                                {/* </Focusable> */}
-                            </ScrollPanelGroup>
-                        }
-                    </Focusable>
-                </ModalPosition>
+                onCancel={() => {
+                    clearActiveGame();
+                    closeModal();
+                }}
+            >
+                <Focusable
+                    style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                    onCancelActionDescription="Go back to Store"
+                >
+                    {gameData.Type === "Empty" && <Loading />}
+                    {gameData.Type === "GameDetails" &&
+                        <GameDisplay
+                            serverApi={serverAPI}
+                            name={(gameData.Content as GameDetails).Name}
+                            shortName={(gameData.Content as GameDetails).ShortName}
+                            description={(gameData.Content as GameDetails).Description}
+                            images={(gameData.Content as GameDetails).Images}
+                            steamClientID={steamClientID}
+                            closeModal={closeModal}
+                            installing={installing}
+                            installer={() => download(false)}
+                            progress={progress}
+                            cancelInstall={cancelInstall}
+                            uninstaller={uninstall}
+                            editors={(gameData.Content as GameDetails).Editors}
+                            initActionSet={initActionSet}
+                            runner={runner}
+                            actions={scriptActions}
+                            resetLaunchOptions={resetLaunchOptions}
+                            updater={()=> download(true)}
+                            scriptRunner={runScript}
+                            clearActiveGame={clearActiveGame}
+                            reloadData={reloadData}
+                        />
+                    }
+                </Focusable>
             </ModalRoot >
-
-
-        </>
-
-
+        </div>
     );
-
-
 };

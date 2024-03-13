@@ -4,11 +4,12 @@ import { GameDetailsItem } from "./GameDetailsItem";
 
 interface GameDetailsPageProperties {
   serverAPI: ServerAPI;
-
+  clearActiveGame: () => void;
 }
 
 export const GameDetailsPage: VFC<GameDetailsPageProperties> = ({
   serverAPI,
+  clearActiveGame
 }) => {
 
   const { initActionSet, initAction, shortname } = useParams<{
@@ -17,7 +18,7 @@ export const GameDetailsPage: VFC<GameDetailsPageProperties> = ({
     shortname: string
   }>();
   return (
-    <GameDetailsItem serverAPI={serverAPI} shortname={shortname} initActionSet={initActionSet} initAction={initAction} />
+    <GameDetailsItem serverAPI={serverAPI} shortname={shortname} initActionSet={initActionSet} initAction={initAction} clearActiveGame={clearActiveGame} />
   )
 }
 

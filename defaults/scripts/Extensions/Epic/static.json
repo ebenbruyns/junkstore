@@ -1,0 +1,402 @@
+{
+  "junk-store-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "JunkStoreActions",
+      "Actions": [
+        {
+          "Id": "GetEpicActions",
+          "Title": "Get Epic store actions",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-actions"
+        },
+        {
+          "Id": "GetContent",
+          "Title": "Get content",
+          "Type": "TabPage",
+          "Command": "./scripts/get-json.py junk-store-tabs"
+        },
+        {
+          "Id": "GetLoginActions",
+          "Title": "Get login status",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-games-login-actions"
+        }
+      ]
+    }
+  },
+  "junk-store-actions-no-tabs": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "JunkStoreActionsNoTabs",
+      "Actions": [
+        {
+          "Id": "GetEpicActions",
+          "Title": "Get Epic store actions",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-actions"
+        },
+        {
+          "Id": "GetContent",
+          "Title": "Get content",
+          "Type": "TabPage",
+          "Command": "./scripts/junk-store.sh Epic getgames"
+        },
+        {
+          "Id": "GetLoginActions",
+          "Title": "Get login status",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-games-login-actions"
+        }
+      ]
+    }
+  },
+  "main-menu-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "MainMenu",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Populate Store",
+          "Type": "GetContent",
+          "Command": "./scripts/get-json.py main-menu-content"
+        },
+        {
+          "Id": "JunkStoreInit",
+          "Title": "Content",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py junk-store-actions"
+        },
+        {
+          "Id": "JunkStoreInitNoTabs",
+          "Title": "Content",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py junk-store-actions-no-tabs"
+        },
+        {
+          "Id": "GetEpicActions",
+          "Title": "Get Epic store actions",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-actions"
+        }
+      ]
+    }
+  },
+  "junk-store-tabs": {
+    "Type": "StoreTabs",
+    "Content": {
+      "Tabs": [
+        { "Title": "Epic", "Type": "GameGrid", "ActionId": "GetEpicActions" }
+      ]
+    }
+  },
+  "epic-games-login-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "EpicGamesLoginActions",
+      "Actions": [
+        {
+          "Id": "Login",
+          "Title": "Login",
+          "Type": "Login",
+          "Command": "./scripts/junk-store.sh Epic login"
+        },
+        {
+          "Id": "LoginLaunchOptions",
+          "Title": "Login",
+          "Type": "Login",
+          "Command": "./scripts/junk-store.sh Epic login-launch-options"
+        },
+        {
+          "Id": "Logout",
+          "Title": "Logout",
+          "Type": "Logout",
+          "Command": "./scripts/junk-store.sh Epic logout"
+        },
+        {
+          "Id": "GetContent",
+          "Title": "Status",
+          "Type": "Status",
+          "Command": "./scripts/junk-store.sh Epic loginstatus"
+        },
+        {
+          "Id": "GetSetting",
+          "Title": "Get settings",
+          "Type": "GetSettings",
+          "Command": "./scripts/junk-store.sh Epic getsetting"
+        },
+        {
+          "Id": "SaveSetting",
+          "Title": "Set settings",
+          "Type": "SaveSettings",
+          "Command": "./scripts/junk-store.sh Epic savesetting"
+        }
+      ]
+    }
+  },
+  "epic-game-script-actions": {
+    "Type": "ScriptSet",
+    "Content": {
+      "Actions": [
+        {
+          "ActionId": "Update",
+          "Title": "Update Game",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "Verify",
+          "Title": "Verify Game",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "Repair",
+          "Title": "Repair Game",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "EnableEOSoverlay",
+          "Title": "Enable EOS overlay",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "DisableEOSoverlay",
+          "Title": "Disable EOS overlay",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+
+        {
+          "ActionId": "ProtonTricks",
+          "Title": "Proton Tricks",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        }
+      ]
+    }
+  },
+  "epic-script-actions": {
+    "Type": "ScriptSet",
+    "Content": {
+      "Actions": [
+        {
+          "ActionId": "Refresh",
+          "Title": "Refresh Games List",
+          "Type": "ScriptAction",
+          "InstalledOnly": "False"
+        }
+      ]
+    }
+  },
+  "epic-exe-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "EpicExeActions",
+      "Actions": [
+        {
+          "Id": "RunBinary",
+          "Title": "Run executable in game folder",
+          "Type": "ScriptAction",
+          "Command": "./scripts/junk-store.sh Epic run-exe"
+        },
+        {
+          "Id": "GetContent",
+          "Title": "Get executable list",
+          "Type": "Content",
+          "Command": "./scripts/junk-store.sh Epic get-exe-list"
+        }
+      ]
+    }
+  },
+  "epic-config-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "EpicPlatformConfigFileActions",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Get the ini files as json",
+          "Type": "IniEditor",
+          "Command": "./scripts/junk-store.sh Epic getplatformconfig"
+        },
+        {
+          "Id": "SaveContent",
+          "Title": "Save the ini files as json",
+          "Type": "IniEditor",
+          "Command": "./scripts/junk-store.sh Epic saveplatformconfig"
+        }
+      ]
+    }
+  },
+  "epic-tab-config-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "EpicTabConfigEditor",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Get the ini files as json",
+          "Type": "IniEditor",
+          "Command": "./scripts/junk-store.sh Epic gettabconfig"
+        },
+        {
+          "Id": "SaveContent",
+          "Title": "Save the ini files as json",
+          "Type": "IniEditor",
+          "Command": "./scripts/junk-store.sh Epic savetabconfig"
+        }
+      ]
+    }
+  },
+  "epic-actions": {
+    "Type": "ActionSet",
+    "Content": {
+      "SetName": "EpicActions",
+      "Actions": [
+        {
+          "Id": "GetContent",
+          "Title": "Get Epic games list",
+          "Type": "GameGrid",
+          "Command": "./scripts/junk-store.sh Epic getgames"
+        },
+        {
+          "Id": "GetDetails",
+          "Title": "Get game details",
+          "Type": "GameDetails",
+          "Command": "./scripts/junk-store.sh Epic getgamedetails"
+        },
+        {
+          "Id": "GetJsonImages",
+          "Title": "Get game images as json",
+          "Type": "GameImages",
+          "Command": "./scripts/junk-store.sh Epic getjsonimages"
+        },
+        {
+          "Id": "Install",
+          "Title": "Install game",
+          "Type": "Install",
+          "Command": "./scripts/junk-store.sh Epic install"
+        },
+        {
+          "Id": "Download",
+          "Title": "Download game",
+          "Type": "Download",
+          "Command": "./scripts/junk-store.sh Epic download"
+        },
+        {
+          "Id": "Update",
+          "Title": "Update game",
+          "Type": "Update",
+          "Command": "./scripts/junk-store.sh Epic update"
+        },
+        {
+          "Id": "Repair",
+          "Title": "Repair game",
+          "Type": "Update",
+          "Command": "./scripts/junk-store.sh Epic repair"
+        },
+        {
+          "Id": "Verify",
+          "Title": "Veirfy game",
+          "Type": "Verify",
+          "Command": "./scripts/junk-store.sh Epic verify"
+        },
+        {
+          "Id": "Import",
+          "Title": "Import game",
+          "Type": "Import",
+          "Command": "./scripts/junk-store.sh Epic import"
+        },
+        {
+          "Id": "Uninstall",
+          "Title": "Uninstall game",
+          "Type": "Uninstall",
+          "Command": "./scripts/junk-store.sh Epic uninstall"
+        },
+        {
+          "Id": "EnableEOSoverlay",
+          "Title": "Enable EOS overlay",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic  enable-eos-overlay"
+        },
+        {
+          "Id": "DisableEOSoverlay",
+          "Title": "Disable EOS overlay",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic disable-eos-overlay"
+        },
+        {
+          "Id": "ProtonTricks",
+          "Title": "Proton Tricks",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic protontricks"
+        },
+        {
+          "Id": "GetProgress",
+          "Title": "Get install progress",
+          "Type": "GetProgress",
+          "Command": "./scripts/junk-store.sh Epic getprogress"
+        },
+        {
+          "Id": "CancelInstall",
+          "Title": "Cancel install",
+          "Type": "CancelInstall",
+          "Command": "./scripts/junk-store.sh Epic cancelinstall"
+        },
+        {
+          "Id": "GetLoginActions",
+          "Title": "Get login status",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-games-login-actions"
+        },
+        {
+          "Id": "GetLaunchOptions",
+          "Title": "Get launch options",
+          "Type": "GetLaunchOptions",
+          "Command": "./scripts/junk-store.sh Epic getlaunchoptions"
+        },
+        {
+          "Id": "GetExeActions",
+          "Title": "Get executable action set to run exe's in game dir",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-exe-actions"
+        },
+        {
+          "Id": "GetGameScriptActions",
+          "Title": "",
+          "Type": "ScriptActions",
+          "Command": "./scripts/get-json.py epic-game-script-actions"
+        },
+        {
+          "Id": "GetScriptActions",
+          "Title": "",
+          "Type": "ScriptActions",
+          "Command": "./scripts/get-json.py epic-script-actions"
+        },
+        {
+          "Id": "GetPlatformConfigFileActions",
+          "Title": "Get dosbox config file actions",
+          "Type": "Init",
+          "Command": "./scripts/get-json.py epic-config-actions"
+        },
+        {
+          "Id": "GetTabConfigActions",
+          "Title": "Get epic tab config file actions",
+          "Type": "Init",
+
+          "Command": "./scripts/get-json.py epic-tab-config-actions"
+        },
+        {
+          "Id": "Refresh",
+          "Title": "Refresh Games List",
+          "Type": "Refresh",
+          "Command": "./scripts/junk-store.sh Epic refresh"
+        }
+      ]
+    }
+  }
+}

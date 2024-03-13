@@ -50,10 +50,26 @@
             "problemMatcher": []
         },
         {
-            "label": "build",
+            "label": "build-local",
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "detail": "Builds plugin locally",
+            "dependsOrder": "sequence",
+            "type": "shell",
+            "dependsOn": [
+                "setup",
+                "settingscheck"
+            ],
+            "command": "which pnpm && pnpm run build && sudo systemctl restart plugin_loader",
+            "problemMatcher": []
+        },
+        {
+            "label": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": false
             },
             "detail": "Build decky-plugin-template",
             "dependsOrder": "sequence",
@@ -62,6 +78,7 @@
                 "settingscheck",
                 "cli-build"
             ],
+            
             "problemMatcher": []
         },
         {

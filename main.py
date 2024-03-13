@@ -9,6 +9,7 @@ import zipfile
 import shutil
 import aiohttp
 import os
+import concurrent.futures
 
 
 class Helper:
@@ -16,12 +17,14 @@ class Helper:
     action_cache = {}
     working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
 
+    verbose = False
+
     @staticmethod
     async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None, websocket=None, stream_output: bool = False, app_id='', game_id=''):
         try:
             if unprivilege:
                 cmd = f'sudo -u {decky_plugin.DECKY_USER} {cmd}'
-            decky_plugin.logger.info("running cmd: " + cmd)
+            decky_plugin.logger.info(f"running cmd: {cmd}")
             if env is None:
                 env = Helper.get_environment()
                 env['APP_ID'] = app_id
@@ -34,6 +37,8 @@ class Helper:
                                                          shell=True,
                                                          env=env,
                                                          cwd=Helper.working_directory,
+                                                         start_new_session=True,
+                                                         
                                                          )
             if stream_output:
                 while True:
@@ -58,8 +63,9 @@ class Helper:
                 # await proc.wait()
                 stdout = stdout.decode()
                 stderr = stderr.decode()
-                # decky_plugin.logger.info(
-                #     f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
+                if Helper.verbose:
+                    decky_plugin.logger.info(
+                        f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
                 return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
 
         except Exception as e:
@@ -94,8 +100,9 @@ class Helper:
             cmd = f"{cmd} {' '.join(encoded_args)}"
 
             res = await Helper.pyexec_subprocess(cmd, input_data, app_id=app_id, game_id=game_id)
-            # decky_plugin.logger.info(
-            #     f"call_script result: {res['stdout'][:100]}")
+            if Helper.verbose:
+                decky_plugin.logger.info(
+                    f"call_script result: {res['stdout'][:100]}")
             return res['stdout']
         except Exception as e:
             decky_plugin.logger.error(f"Error in call_script: {e}")
@@ -104,8 +111,7 @@ class Helper:
     @staticmethod
     def get_action(actionSet, actionName):
         result = None
-        set = Helper.action_cache.get(actionSet)
-        if set:
+        if set := Helper.action_cache.get(actionSet):
             for action in set:
                 if action['Id'] == actionName:
                     result = action
@@ -144,8 +150,9 @@ class Helper:
                 decky_plugin.logger.info(
                     f"execute_action input_data: {input_data}")
                 result = await Helper.call_script(os.path.expanduser(cmd), *args, input_data=input_data, app_id=app_id, game_id=game_id)
-                # decky_plugin.logger.info(
-                #     f"execute_action result: {result}")
+                if Helper.verbose:
+                    decky_plugin.logger.info(
+                        f"execute_action result: {result}")
                 try:
                     json_result = json.loads(result)
                     if json_result['Type'] == 'ActionSet':
@@ -228,7 +235,8 @@ class Plugin:
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
             result = await Helper.execute_action("init", "init")
-            # decky_plugin.logger.info(f"init result: {result}")
+            if Helper.verbose:
+                decky_plugin.logger.info(f"init result: {result}")
             await Helper.start_ws_server()
 
         except Exception as e:
@@ -246,22 +254,29 @@ class Plugin:
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
             result = await Helper.execute_action("init", "init")
-           # decky_plugin.logger.info(f"init result: {result}")
+            if Helper.verbose:
+                decky_plugin.logger.info(f"init result: {result}")
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
+
+        
+
+    # ...
 
     async def execute_action(self, actionSet, actionName, inputData='', gameId='', appId='', *args, **kwargs):
         try:
             decky_plugin.logger.info(
                 f"execute_action: {actionSet} {actionName} ")
             decky_plugin.logger.info(f"execute_action args: {args}")
-            decky_plugin.logger.info(f"execute_action kwargs: {kwargs}")
+            if Helper.verbose:
+                decky_plugin.logger.info(f"execute_action kwargs: {kwargs}")
 
-            if isinstance(inputData, dict) or isinstance(inputData, list):
+            if isinstance(inputData, (dict, list)):
                 inputData = json.dumps(inputData)
-
+            
             result = await Helper.execute_action(actionSet, actionName, *args, *kwargs.values(), input_data=inputData, game_id=gameId, app_id=appId)
-            # decky_plugin.logger.info(f"execute_action result: {result}")
+            if Helper.verbose:
+                decky_plugin.logger.info(f"execute_action result: {result}")
             return result
         except Exception as e:
             decky_plugin.logger.error(f"Error in execute_action: {e}")
@@ -284,7 +299,7 @@ class Plugin:
                             if not chunk:
                                 break
                             f.write(chunk)
-            print(f"Downloaded {temp_file} from {url}")
+            decky_plugin.logger.debug(f"Downloaded {temp_file} from {url}")
             # Extract the contents of the zip file to the runtime directory
 
             if backup:
@@ -301,11 +316,10 @@ class Plugin:
                 # Move non-backup files to the latest backup folder
                 for item in os.listdir(runtime_dir):
                     item_path = os.path.join(runtime_dir, item)
-                    if os.path.isfile(item_path) or os.path.isdir(item_path):
-                        if not item.startswith("backup"):
-                            shutil.move(item_path, latest_backup_dir)
-                            decky_plugin.logger.info(
-                                "Backup completed successfully")
+                    if (os.path.isfile(item_path) or os.path.isdir(item_path)) and not item.startswith("backup"):
+                        shutil.move(item_path, latest_backup_dir)
+                        decky_plugin.logger.info(
+                            "Backup completed successfully")
 
             with zipfile.ZipFile(temp_file, "r") as zip_ref:
                 zip_ref.extractall(runtime_dir)
@@ -341,44 +355,6 @@ class Plugin:
 
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")
-
-    # async def AntiCheatInstaller(self, GameName):
-    #     try:
-    #         decky_plugin.logger.info("Installing Anti Cheat")
-    #         env = {
-    #             "STEAM_COMPAT_CLIENT_INSTALL_PATH": "/home/eben/Games/FallGuys",
-    #             "STEAM_COMPAT_DATA_PATH": "/home/eben/.local/share/Steam/steamapps/compatdata/3598223863",
-    #             "WAYLAND_DISPLAY": "wayland-0",
-    #             "XDG_CONFIG_DIRS": "/home/eben/.config/kdedefaults:/etc/xdg",
-    #             "XDG_SESSION_PATH": "/org/freedesktop/DisplayManager/Session1",
-    #             "KDE_FULL_SESSION": "true",
-    #             "WAYLAND_DISPLAY": "wayland-0",
-    #             "XDG_SESSION_TYPE": "wayland",
-    #             "XDG_RUNTIME_DIR": "/run/user/1000",
-    #             "XAUTHORITY": "/run/user/1000/xauth_AmZojz",
-    #             "DISPLAY": ":0"  # Add DISPLAY environment variable
-    #         }
-    #         decky_plugin.logger.info("Anti Cheat env")
-    #         for key, value in os.environ.items():
-    #             decky_plugin.logger.info(f"{key}={value}")
-    #         cmd = "/home/eben/.local/share/Steam/compatibilitytools.d/GE-Proton8-25/proton run EasyAntiCheat/EasyAntiCheat_Setup.exe"
-    #         proc = await asyncio.create_subprocess_shell(cmd,
-    #                                                      stdout=asyncio.subprocess.PIPE,
-    #                                                      stderr=asyncio.subprocess.PIPE,
-    #                                                      stdin=asyncio.subprocess.PIPE,
-    #                                                      shell=True,
-    #                                                      env=env,
-    #                                                      cwd="/home/eben/Games/FallGuys",
-    #                                                      start_new_session=False
-    #                                                      )
-
-    #         stdout, stderr = await proc.communicate("".encode())
-    #         decky_plugin.logger.info(
-    #             f"Anti Cheat install result - err: {stderr.decode()}")
-    #         decky_plugin.logger.info(
-    #             f"Anti Cheat install result - out : {stdout.decode()}")
-    #     except Exception as e:
-    #         decky_plugin.logger.error(f"Error in AntiCheatInstaller: {e}")
 
     async def _migration(self):
         plugin_dir = "Junk-Store"

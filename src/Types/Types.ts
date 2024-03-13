@@ -30,7 +30,7 @@ export interface Section {
   Description: string;
   Options: KeyValuePair[];
 }
-export interface ConfData extends Content {
+export interface ConfData extends ContentType {
   Sections: Section[];
   Autoexec: string;
   AutoexecEnabled?: boolean;
@@ -42,7 +42,7 @@ export enum ValueType {
   Enum = "Enum",
   Boolean = "Boolean",
 }
-export interface GameDetails extends Content {
+export interface GameDetails extends ContentType {
   Name: string;
   Description: string;
   ApplicationPath: string;
@@ -64,12 +64,12 @@ export interface EditorAction {
   Description: string;
   ContentId: string;
 }
-export interface ScriptActions extends Content {
+export interface ScriptActions extends ContentType {
   Actions: MenuAction[];
 }
 
 // Define the grid container
-export interface GameDataList extends Content {
+export interface GameDataList extends ContentType {
   NeedsLogin?: string;
   Games: GameData[];
 }
@@ -80,7 +80,7 @@ export interface GameData {
   ShortName: string;
   SteamClientID: string;
 }
-export interface LaunchOptions extends Content {
+export interface LaunchOptions extends ContentType {
   Exe: string;
   Options: string;
   WorkingDir: string;
@@ -88,14 +88,18 @@ export interface LaunchOptions extends Content {
   Compatibility?: boolean;
   CompatToolName?: string;
 }
-export interface LoginStatus extends Content {
+export interface LoginStatus extends ContentType {
   Username: string;
   LoggedIn: boolean;
 }
-export interface FilesData extends Content {
+export interface SaveRefresh extends ContentType {
+  Saved: boolean;
+  Refresh: boolean;
+}
+export interface FilesData extends ContentType {
   Files: FileData[];
 }
-export interface SettingsData extends Content {
+export interface SettingsData extends ContentType {
   name: string;
   value: string;
 }
@@ -107,11 +111,11 @@ export interface FileData {
 }
 
 
-export interface ProgressUpdate extends Content {
+export interface ProgressUpdate extends ContentType {
   Percentage: number;
   Description: string;
 }
-export interface GameImages extends Content {
+export interface GameImages extends ContentType {
   Grid: string;
   GridH: string;
   Hero: string;
@@ -130,24 +134,26 @@ export interface GameData {
 // export interface ActionSetContent extends Content {
 //   ActionSet: ActionSet;
 
-export interface ActionSet extends Content {
+export interface ActionSet extends ContentType {
   SetName: string;
   Actions: MenuAction[];
 }
-export interface MenuAction extends Content {
+export interface MenuAction extends ContentType {
   ActionId: string;
   Title: string;
   Type: string;
   InstalledOnly?: boolean;
 }
 
-export interface ContentResult {
+export interface ContentResult<T> {
   Type: string;
-  Content?: Content;
+  Content: T;
 }
-export interface Content { }
+export interface ContentType { }
 
-export interface StoreTabsContent extends Content {
+export interface EmptyContent extends ContentType { }
+
+export interface StoreTabsContent extends ContentType {
   Tabs: TabContent[];
 }
 export interface TabContent {
@@ -155,14 +161,14 @@ export interface TabContent {
   Type: string;
   ActionId: string;
 }
-export interface ContentError extends Content {
+export interface ContentError extends ContentType {
   Message: string;
   Data: string;
   ActionSet: string;
   ActionName: string;
 }
 
-export interface StoreContent extends Content {
+export interface StoreContent extends ContentType {
   Panels: Panel[];
 }
 export interface Panel {
@@ -171,3 +177,45 @@ export interface Panel {
   Actions: MenuAction[];
 }
 
+export interface ExecuteArgs {
+  inputData?: string|FileData[]|ConfData;
+}
+export interface GetSettingArgs extends ExecuteArgs {
+  name: string;
+}
+export interface SaveSettingsArgs extends GetSettingArgs {
+  value: string;
+}
+
+export interface ExecuteGetGameDetailsArgs extends ExecuteArgs {
+  shortname: string;
+}
+export interface ExecuteInstallArgs extends ExecuteGetGameDetailsArgs {
+  steamClientID: string;
+}
+export interface ExecuteGetActionSetArgs extends ExecuteArgs {
+  content_id: string;
+}
+export interface ExecuteGetContentArgs extends ExecuteArgs {
+  filter?: string;
+  installed?: string;
+  limited?: string;
+}
+
+export interface ExecuteLoginArgs extends ExecuteArgs {
+  gameId: string;
+  appId: string;
+}
+export interface ExecuteGetExeActionSetArgs extends ExecuteLoginArgs {
+   content_id: string;
+}
+
+export interface ExecuteGetFilesDataArgs extends ExecuteLoginArgs {
+  SteamClientId: string;
+  shortName: string;
+}
+export interface ExecuteRunBinaryArgs extends ExecuteGetFilesDataArgs {
+  GameExe: string;
+  AdditionalArguments: boolean;
+  CompatToolName: string;
+}

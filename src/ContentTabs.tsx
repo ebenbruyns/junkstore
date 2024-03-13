@@ -1,367 +1,188 @@
-/**
- * Renders a component that displays a set of tabs, each containing a StorePage component.
- * @param {Object} props - The component properties.
- * @param {ServerAPI} props.serverAPI - The server API object.
- * @param {StoreTabsContent} props.tabs - The content of the tabs.
- * @param {string} props.initActionSet - The initial action set.
- * @param {string} props.initAction - The initial action.
- * @returns {JSX.Element} - The rendered component.
- */
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tabs, TextField, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs, TextField, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
-import { ActionSet, ContentError, ContentResult, GameDataList, MenuAction, ScriptActions, StoreContent, StoreTabsContent } from "./Types/Types";
+import { ActionSet, ContentType, ContentError, ContentResult, ExecuteArgs, ExecuteGetContentArgs, StoreContent, StoreTabsContent, GameDataList } from "./Types/Types";
 import Logger from "./Utils/logger";
 import { executeAction } from "./Utils/executeAction";
 import { Loading } from "./Components/Loading";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
-import GridContainer from "./Components/GridContainer";
+import { GridContent, contentTabsContainerClass } from "./Components/GridContent";
 import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
-import { LoginContent } from "./Components/LoginContent";
-import { ConfEditor } from "./ConfEditor";
-import { FaCog, FaSlidersH } from "react-icons/fa";
+import { useCachedState } from './hooks/useCachedState';
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
-    tabs: StoreTabsContent;
+    content: StoreTabsContent;
     initActionSet: string;
     initAction: string;
-    layout: string;
+    layout: 'horizontal' | 'vertical';
+    subActionSet: string;
+}
+export interface StoreTabsState {
+    currentTab: string;
 }
 
-export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, tabs, initAction, initActionSet, layout }) => {
+export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, content, initAction, initActionSet, layout, subActionSet }) => {
     const logger = new Logger("StoreTabs");
-    const [currentTab, setCurrentTab] = useState("-1");
-    const [content, setContent] = useState<StoreTabsContent>({ Tabs: [] });
-    const [actionSetName, setActionSetName] = useState("");
+    const { cacheState: cacheData, setCacheState: setCacheData } = useCachedState(initActionSet, initAction, 'tabcontent', { currentTab: "-1" });
 
-    useEffect(() => {
-        onInit();
-    }, []);
-
-    const onInit = async () => {
-        try {
-            logger.debug(`Initializing StoreTabs with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            if (!initActionSet || initActionSet === "" || !initAction || initAction === "") {
-                logger.debug("initActionSet or initAction is empty");
-                return;
-            }
-            const data = await executeAction(serverAPI, initActionSet,
-                initAction,
-                {
-                    inputData: "",
-                }
-            );
-            const result = data.Content as ActionSet;
-            setActionSetName(result.SetName);
-            setContent(tabs);
-            setCurrentTab("0");
-            logger.debug(`StoreTabs initialized with actionSetName: ${result.SetName}`);
-        } catch (error) {
-            logger.error(`Error initializing StoreTabs: ${error}`);
-        }
-    };
-    const getContent = () => {
+    const getTabs: () => Tab[] = () => {
         return content.Tabs.map((tab, index) => ({
             title: tab.Title,
-            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} padTop={false} />,
+            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={subActionSet} initAction={tab.ActionId} />,
             id: index.toString()
         }));
-    }
-    const getPages = () => {
+    };
+
+    const getPages: () => SidebarNavigationPage[] = () => {
         return content.Tabs.map((tab) => ({
             title: tab.Title,
-            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={actionSetName} initAction={tab.ActionId} />,
-            identifier: tab.Title
-
-        } as SidebarNavigationPage));
-
-    }
-
+            content: <Content key={tab.ActionId} serverAPI={serverAPI} initActionSet={subActionSet} initAction={tab.ActionId} />,
+            identifier: tab.Title,
+            hideTitle: true
+        }));
+    };
 
     return (
-        <DialogBody key={initActionSet + "_" + initAction}>
-            {layout === "horizontal" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} style={{ height: "calc(100% - 40px)" }}>
-                    <div style={{ marginBottom: "40px" }} />
-                    <Tabs key="0"
-                        activeTab={currentTab}
-                        onShowTab={(tabID: string) => setCurrentTab(tabID)}
-                        tabs={getContent()}
-                    />
-                </DialogControlsSection>}
-            {layout === "vertical" && content.Tabs.length > 0 &&
-                <DialogControlsSection key={initActionSet + "_" + initAction + "vertical"} style={{ height: "calc(100%)" }}>
-                    <SidebarNavigation key="1" pages={getPages()} showTitle
-
+        <DialogBody key={initActionSet + "_" + initAction} className={contentTabsContainerClass}>
+            {content.Tabs.length === 0 ? <Loading /> : (layout === "horizontal" ? (
+                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} className='gamepadlibrary_GamepadLibrary_ZBBhe'>
+                    <Tabs
+                        key="0"
+                        activeTab={cacheData.currentTab}
+                        onShowTab={(tabID: string) => setCacheData({ currentTab: tabID })}
+                        tabs={getTabs()}
+                        autoFocusContents={true}
+                        //@ts-ignore
+                        canBeHeaderBackground={'always'}
                     />
                 </DialogControlsSection>
-            }
-            {content.Tabs.length === 0 && <Loading />}
+            ) : (
+                <DialogControlsSection key={initActionSet + "_" + initAction + "vertical"} style={{ height: "100%" }}>
+                    <SidebarNavigation key="1" pages={getPages()} />
+                </DialogControlsSection>
+            ))}
         </DialogBody>
     );
 };
 
+export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
+    const logger = new Logger("Content");
+    const [content, setContent] = useState<ContentResult<ContentType>>({ Type: "Empty", Content: {} });
+    const [actionSetName, setActionSetName] = useState("");
 
-
-export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; padTop?: boolean; }> = ({
-    serverAPI, initActionSet, initAction, padTop = true }) => {
-    const logger = new Logger("index");
-    const [content, setContent] = useState<ContentResult>({ Type: "Empty", Content: {} });
-    const [actionSetName, setActionSetName] = useState<string>("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterInstalled, setFilterInstalled] = useState(false);
-    const [limited, setLimited] = useState(true);
-    const [scriptActions, setScriptActions] = useState<MenuAction[]>([]);
-
-
-    const fetchData = async (setName: string, filter: string, installed: boolean, limited: boolean) => {
-        if (!setName) return;
-        try {
-            const data = await executeAction(serverAPI, setName,
-                "GetContent",
-                {
-                    filter,
-                    installed: String(installed),
-                    limited: String(limited)
-                });
-            setContent(data as ContentResult);
-        } catch (error) {
-            logger.error("GetContent: ", error);
+    const { cacheState: gridContentCache, setCacheState: setGridContentCache, hadCache: hadGridCache } = useCachedState(
+        initActionSet,
+        initAction,
+        'gridcontentparams',
+        {
+            filter: "",
+            installed: false,
         }
-    };
-    useEffect(() => {
-        logger.log("Content: ", content);
-    }, [content]);
+    );
 
     useEffect(() => {
-        logger.log(`Search query: ${searchQuery}, Filter installed: ${filterInstalled}, Limited: ${limited}, Action set name: ${actionSetName}`);
-        fetchData(actionSetName, searchQuery, filterInstalled, limited);
-    }, [searchQuery, filterInstalled, limited, actionSetName]);
+        (async () => {
+            try {
+                logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
+                const actionSetRes = await executeAction<ExecuteArgs,ActionSet>(serverAPI, initActionSet, initAction, {});
+                logger.debug("init result: ", actionSetRes);
+                if (actionSetRes === null) return;
 
-    useEffect(() => {
-        onInit();
+                const actionSet = actionSetRes.Content;
+                logger.debug(`Getting Content ${hadGridCache ? 'with args cache' : ''}`, hadGridCache ? gridContentCache : '');
+                const contentRes = await getContent(actionSet.SetName, hadGridCache ? stringifyArgs(gridContentCache) : {});
+                logger.debug("GetContent result: ", contentRes);
+                if (contentRes === null) return;
+
+                setActionSetName(actionSet.SetName);
+                setContent(contentRes);
+            } catch (error) {
+                logger.error("OnInit: ", error);
+            }
+        })();
     }, []);
 
-    const onInit = async () => {
-        try {
-            logger.debug(`Initializing Content with initActionSet: ${initActionSet} and initAction: ${initAction}`);
-            const data = await executeAction(serverAPI, initActionSet,
-                initAction,
-                {
-                    inputData: ""
-                });
-            logger.debug("init result: ", data);
-            const result = data.Content as ActionSet;
-            setActionSetName(result.SetName);
-            const menu = await executeAction(serverAPI, result.SetName,
-                "GetContent",
-                {
-                    inputData: ""
-                });
-            setContent(menu);
-            logger.debug("GetContent result: ", menu);
-            const actionRes = await executeAction(serverAPI, result.SetName,
-                "GetScriptActions",
-                {
-                    inputData: ""
-                }) as ContentResult;
-            logger.debug("onInit actionRes", actionRes);
-            if (actionRes.Type === "ScriptSet") {
-                const scriptActions = actionRes.Content as ScriptActions;
-                logger.debug("onInit scriptActions", scriptActions);
-                setScriptActions(scriptActions.Actions);
+    const getContent = async (actionSet: string, actionArgs: { [param: string]: string; }) => executeAction<ExecuteGetContentArgs, ContentResult<ContentType>>(serverAPI, actionSet, "GetContent", actionArgs);
+
+    const refreshContent = (args: { [param: string]: any; }, onFinish?: () => void) => {
+        (async () => {
+            logger.debug("Refreshing Content with args: ", args);
+            const contentRes = await getContent(actionSetName, stringifyArgs(args));
+            if (contentRes === null) {
+                return;
             }
-        } catch (error) {
-            logger.error("OnInit: ", error);
-        }
+            setContent(contentRes);
+            onFinish?.();
+        })();
     };
-    const configEditor = () => {
-        showModal(<ConfEditor serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetTabConfigActions" contentId="0" />);
+
+    switch (content.Type) {
+        case "GameGrid":
+            return <GridContent
+                serverAPI={serverAPI}
+                content={content.Content as GameDataList}
+                initActionSet={actionSetName}
+                refreshContent={refreshContent}
+                argsCache={gridContentCache}
+                setArgsCache={setGridContentCache}
+            />;
+
+        case "StoreTabs":
+            return <ContentTabs
+                serverAPI={serverAPI}
+                content={content.Content as StoreTabsContent}
+                layout="horizontal"
+                initAction={initAction}
+                initActionSet={initActionSet}
+                subActionSet={actionSetName}
+            />;
+
+        case "SideBarPage":
+            return <ContentTabs
+                serverAPI={serverAPI}
+                content={content.Content as StoreTabsContent}
+                layout="vertical"
+                initAction={initAction}
+                initActionSet={initActionSet}
+                subActionSet={actionSetName}
+            />;
+
+        case "MainMenu":
+            return <MainMenu //key={initActionSet + "_" + initAction} 
+                serverApi={serverAPI}
+                content={content.Content as StoreContent}
+                initActionSet={actionSetName}
+                initAction=""
+            />;
+
+        case "Text":
+            return <TextContent //key={initActionSet + "_" + initAction} 
+                content={content.Content as string}
+            />;
+
+        case "Html":
+            return <HtmlContent //key={initActionSet + "_" + initAction}
+                content={content.Content as string}
+            />;
+
+        case "Error":
+            return <ErrorDisplay //key={initActionSet + "_" + initAction}
+                error={content.Content as ContentError}
+            />;
+
+        case "Empty":
+            return <Loading />;
+
+        default:
+            return null;
     }
-    const runScript = async (actionSet: string, actionId: string, args: any) => {
-        const result = await executeAction(serverAPI, actionSet, actionId, args)
-        logger.debug("runScript result", result);
-
-    }
-    const actionsMenu = (e: any) => {
-        showContextMenu(
-            <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-                {scriptActions && scriptActions.length > 0 && scriptActions.map((action) => {
-
-
-                    return (<MenuItem onSelected={
-                        async () => {
-                            const args = {
-                                shortname: "",
-                                steamClientID: "",
-                                startDir: "",
-                                compatToolName: "",
-                                inputData: "",
-                                gameId: "",
-                                appId: ""
-                            }
-
-                            runScript(initActionSet, action.ActionId, args)
-
-                        }}
-                    >{action.Title}</MenuItem>)
-
-                })}
-
-
-            </Menu>,
-            e.currentTarget ?? window
-        )
-    }
-
-    return (
-        <>
-
-            {content.Type === "GameGrid" && (
-                <>
-
-
-                    {padTop && <div style={{ marginBottom: "50px", width: "100%", height: "100%" }} />}
-                    <Focusable //key={initActionSet + "_" + initAction}
-
-                        // @ts-ignore
-                        focusableIfNoChildren={true}
-
-                        style={{
-                            display: "flex",
-                            marginLeft: "0px",
-                            marginBottom: "1em",
-                            color: "white",
-
-                            //justifyContent: "space-between",
-                            //flexFlow: "row ",
-                            flex: "1",
-                            alignItems: "flex-end",
-                        }}
-
-                        onSecondaryActionDescription="Toggle Installed Filter"
-                        onSecondaryButton={() => setFilterInstalled(!filterInstalled)}
-                        onOptionsActionDescription={limited ? "Show All" : "Limit Results"}
-                        onOptionsButton={() => setLimited(!limited)}
-                    >
-                        <TextField
-                            placeholder="Search"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{
-                                minWidth: "685px",
-                                flexGrow: "10",
-                            }}
-                        />
-                        <DialogButton
-                            onClick={actionsMenu}
-                            onOKButton={actionsMenu}
-                            style={{
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-                                flexDirection: "column",
-                            }}
-                        >
-                            <FaSlidersH
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
-                        </DialogButton>
-                        <DialogButton
-                            onClick={configEditor}
-                            onOKButton={configEditor}
-                            style={{
-
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "40px",
-                                maxHeight: "40px",
-                                minHeight: "40px",
-                                margin: "0",
-                                position: "relative",
-
-
-                            }}
-                        >
-                            <FaCog
-                                style={{
-                                    position: "absolute",
-                                    left: "50%",
-                                    top: "50%",
-                                    transform: "translate(-50%,-50%)",
-                                }}
-                            />
-                        </DialogButton>
-                    </Focusable>
-                    {(content.Content as GameDataList).NeedsLogin === "true" && (
-                        <LoginContent serverAPI={serverAPI} initActionSet={actionSetName} initAction="GetLoginActions" />
-                    )}
-                    <GridContainer
-                        serverAPI={serverAPI}
-                        games={(content.Content as GameDataList).Games}
-                        limited={limited}
-                        limitFn={() => setLimited(!limited)}
-                        filterFn={() => setFilterInstalled(!filterInstalled)}
-                        initActionSet={actionSetName}
-                        initAction="" />
-                </>
-            )
-            }
-            {
-                content.Type === "StoreTabs" &&
-                <ContentTabs serverAPI={serverAPI}
-                    tabs={content.Content as StoreTabsContent}
-                    layout="horizontal"
-                    initAction={initAction}
-                    initActionSet={initActionSet} />
-            }
-            {
-                content.Type === "SideBarPage" &&
-                <ContentTabs serverAPI={serverAPI}
-                    tabs={content.Content as StoreTabsContent}
-                    layout="vertical"
-                    initAction={initAction}
-                    initActionSet={initActionSet} />
-            }
-            {
-                content.Type === "MainMenu" &&
-                <MainMenu //key={initActionSet + "_" + initAction} 
-                    serverApi={serverAPI}
-                    content={content.Content as StoreContent}
-                    initActionSet={actionSetName} initAction="" />
-            }
-            {
-                content.Type === "Text" &&
-                <TextContent //key={initActionSet + "_" + initAction} 
-                    content={content.Content as string} />
-            }
-            {
-                content.Type === "Html" &&
-                <HtmlContent //key={initActionSet + "_" + initAction}
-                    content={content.Content as string} />
-            }
-
-            {
-                content.Type === "Error" &&
-                <ErrorDisplay //key={initActionSet + "_" + initAction}
-                    error={content.Content as ContentError} />
-            }
-            {
-                content.Type === "Empty" &&
-                <Loading />
-            }
-        </>
-    );
 };
 
-
+function stringifyArgs(args: { [param: string]: any; }) {
+    let out: { [param: string]: string; } = {};
+    for (let key in args) {
+        out[key] = String(args[key]);
+    }
+    return out;
+}
