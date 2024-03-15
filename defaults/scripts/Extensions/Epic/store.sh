@@ -80,6 +80,13 @@ function Epic_update(){
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
+function Epic_download-saves(){
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
+    $LEGENDARY download-saves  $1 -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
+    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading Saves\"}}"
+
+}
 function Epic_verify(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     $LEGENDARY verify  $1 >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
@@ -89,12 +96,18 @@ function Epic_verify(){
 }
 function Epic_repair(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
+    $LEGENDARY repair $1  --repair -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
+    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
+
+}
+function Epic_repair_and_update(){
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     $LEGENDARY repair $1  --repair-and-update -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
-
 function Epic_protontricks(){
     get_steam_env
     unset STEAM_RUNTIME_LIBRARY_PATH

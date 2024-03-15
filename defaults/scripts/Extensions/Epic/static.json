@@ -146,6 +146,12 @@
           "InstalledOnly": "True"
         },
         {
+          "ActionId": "DownloadSaves",
+          "Title": "Download saves",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
           "ActionId": "Verify",
           "Title": "Verify Game",
           "Type": "ScriptAction",
@@ -154,6 +160,12 @@
         {
           "ActionId": "Repair",
           "Title": "Repair Game",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "RepairUpdate",
+          "Title": "Repair and Update Game",
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         },
@@ -288,6 +300,12 @@
           "Command": "./scripts/junk-store.sh Epic download"
         },
         {
+          "Id": "DownloadSaves",
+          "Title": "Download saves",
+          "Type": "DownloadSaves",
+          "Command": "./scripts/junk-store.sh Epic download-saves"
+        },
+        {
           "Id": "Update",
           "Title": "Update game",
           "Type": "Update",
@@ -298,6 +316,12 @@
           "Title": "Repair game",
           "Type": "Update",
           "Command": "./scripts/junk-store.sh Epic repair"
+        },
+        {
+          "Id": "RepairUpdate",
+          "Title": "Repair and Update game",
+          "Type": "Update",
+          "Command": "./scripts/junk-store.sh Epic repair_and_update"
         },
         {
           "Id": "Verify",
