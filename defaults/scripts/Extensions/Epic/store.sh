@@ -67,7 +67,7 @@ function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
-    $LEGENDARY install $1 --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
 
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
