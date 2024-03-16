@@ -22,6 +22,7 @@ import Logger from "../Utils/logger";
 import { ExeRunner } from "../ExeRunner";
 import { getAppDetails } from "../Utils/executeAction";
 import { ScrollableWindow } from '../ScrollableWindow';
+import { appActionButtonClasses, basicAppDetailsClasses } from '../staticClasses';
 
 
 interface GameDisplayProperties {
@@ -197,12 +198,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                         <Focusable
                             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
                             <div
-                                className={joinClassNames('basicappdetailssectionstyler_AppActionButton_QsZdW', 'appactionbutton_PlayButtonContainer_1FnJ6', installing || steamClientID == "" ? '' : 'appactionbutton_Green_3cI5T')}
+                                className={joinClassNames(basicAppDetailsClasses.AppActionButton, appActionButtonClasses.PlayButtonContainer, installing || steamClientID == "" ? '' : appActionButtonClasses.Green)}
                                 style={{ height: '100%', width: '100%' }}
                             >
                                 <Button
                                     style={{ display: 'flex', justifyContent: 'left', fontSize: '14px' }}
-                                    className={installing ? 'DialogButton' : 'appactionbutton_PlayButton_3ydig appactionbutton_ButtonChild_2AzIX'}
+                                    className={installing ? 'DialogButton' : joinClassNames(appActionButtonClasses.PlayButton, appActionButtonClasses.ButtonChild)}
                                     onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}>
                                     {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
                                 </Button>

@@ -1,4 +1,4 @@
-import { Focusable, ServerAPI, ModalRoot, sleep } from "decky-frontend-lib";
+import { Focusable, ServerAPI, ModalRoot, sleep, gamepadDialogClasses } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
 import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
@@ -6,6 +6,7 @@ import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
 import { GameStateUpdate, executeAction } from "../Utils/executeAction";
+import { footerClasses } from '../staticClasses';
 
 const gameDetailsRootClass = 'game-details-modal-root';
 
@@ -399,10 +400,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                     background: #0e172175;
                     backdrop-filter: blur(8px);
                 }
-                .${gameDetailsRootClass} .gamepaddialog_ModalPosition_30VHl {
+                .${gameDetailsRootClass} .${gamepadDialogClasses.ModalPosition} {
                     padding: 0;
                 }
-                .footer_BasicFooter_3T1iF {
+                .${footerClasses.BasicFooter} {
                     border-top: unset;
                 }
             `}

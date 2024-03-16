@@ -1,7 +1,8 @@
 import {
     Focusable,
     PanelSection, Dropdown, ModalRoot, ModalRootProps, 
-    quickAccessControlsClasses
+    quickAccessControlsClasses,
+    gamepadDialogClasses
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh, ExecuteGetActionSetArgs } from "./Types/Types";
@@ -103,7 +104,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
             .${confEditorRootClass} .${quickAccessControlsClasses.PanelSection} {
                 padding: 0 2.8vw;
             }
-            .${confEditorRootClass} .${sectionEditorFieldContainer} .gamepaddialog_Field_S-_La {
+            .${confEditorRootClass} .${sectionEditorFieldContainer} .${gamepadDialogClasses.Field} {
                 margin: 0;
             }
         `} </style>
