@@ -275,7 +275,7 @@ class GameSet:
         c.execute(query, params)
         conn.commit()
         conn.close()
-        return json.dumps({'Type': 'Success', 'Content': {'success': True}})
+        return json.dumps({'Type': 'Success', 'Content': {'Message': "Config saved"}})
         # except Exception as e:
         #     return json.dumps({'Type': 'Error', 'Content': {'success': False, 'error': f'somethign went sideways {e}'}})
 
@@ -556,7 +556,7 @@ class GameSet:
                       (value, name))
         conn.commit()
         conn.close()
-        return json.dumps({'Type': 'Success', 'Content': {'success': True}})
+        return json.dumps({'Type': 'Success', 'Content': {'Message': "Setting Saved: " + name }})
 
     def add_steam_client_id(self, shortname, steam_client_id):
         conn = self.get_connection()
@@ -651,12 +651,12 @@ class GenericArgs:
             self.gameSet.add_steam_client_id(
                 self.args.addsteamclientid[0], self.args.addsteamclientid[1])
             print(json.dumps(
-                {'Type': 'Success', 'Content': {'success': True}}))
+                {'Type': 'Success', 'Content': {'Message': 'Steam Client ID added'}}))
 
         if self.args.clearsteamclientid:
             self.gameSet.clear_steam_client_id(self.args.clearsteamclientid[0])
             print(json.dumps(
-                {'Type': 'Success', 'Content': {'success': True}}))
+                {'Type': 'Success', 'Content': {"Message": "Steam Client ID Cleared"}}))
 
         if self.args.getgamedata:
             urlencode = False

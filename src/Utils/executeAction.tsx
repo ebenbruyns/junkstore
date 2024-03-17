@@ -1,5 +1,5 @@
-import { AppDetails, LifetimeNotification, ServerAPI, showModal } from "decky-frontend-lib";
-import { ContentError, ContentResult, ContentType, ExecuteArgs, LaunchOptions } from "../Types/Types";
+import { AppDetails, LifetimeNotification, ServerAPI, ToastData, showModal } from "decky-frontend-lib";
+import { ContentError, ContentResult, ContentType, ExecuteArgs, LaunchOptions, SuccessContent } from "../Types/Types";
 import Logger from "./logger";
 import { ErrorModal } from "../ErrorModal";
 import { gameIDFromAppID } from "./gameIDFromAppID";
@@ -92,6 +92,17 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
         }
 
         return null; //* does caller need to be able to distinguish this case or not
+    }
+
+    if (res.result.Type === 'Success') {
+        const success = res.result.Content as SuccessContent
+        const data: ToastData = {
+            title: "Success",   
+            body: success.Message,
+            
+
+        }
+        serverAPI.toaster.toast(data);
     }
 
     if (res.result.Type === 'Error') {

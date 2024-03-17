@@ -200,6 +200,24 @@
           "Title": "Refresh Games List",
           "Type": "ScriptAction",
           "InstalledOnly": "False"
+        },
+        {
+          "ActionId": "InstallOverlay",
+          "Title": "Install EOS Overlay",
+          "Type": "ScriptAction",
+          "InstalledOnly": "False"
+        },
+        {
+          "ActionId": "UpdateOverlay",
+          "Title": "Update EOS Overlay",
+          "Type": "ScriptAction",
+          "InstalledOnly": "False"
+        },
+        {
+          "ActionId": "RemoveOverlay",
+          "Title": "Remove EOS Overlay",
+          "Type": "ScriptAction",
+          "InstalledOnly": "False"
         }
       ]
     }
@@ -352,6 +370,24 @@
           "Title": "Disable EOS overlay",
           "Type": "Executable",
           "Command": "./scripts/junk-store.sh Epic disable-eos-overlay"
+        },
+        {
+          "Id": "InstallOverlay",
+          "Title": "Install EOS overlay",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic install-overlay"
+        },
+        {
+          "Id": "UpdateOverlay",
+          "Title": "Install EOS overlay",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic update-overlay"
+        },
+        {
+          "Id": "RemoveOverlay",
+          "Title": "Install EOS overlay",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic remove-overlay"
         },
         {
           "Id": "ProtonTricks",

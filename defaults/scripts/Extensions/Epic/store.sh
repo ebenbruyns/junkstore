@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-#ACTIONS+=(refresh)
+ACTIONS+=("install-overlay" "update-overlay" "remove-overlay")
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
@@ -60,7 +60,7 @@ function Epic_cancelinstall(){
     killall -w legendary
     rm "${DECKY_PLUGIN_LOG_DIR}/tmp.pid"
     rm "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
-    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Cancelled\"}}"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} installation Cancelled\"}}"
 }
 
 function Epic_download(){
@@ -80,6 +80,22 @@ function Epic_update(){
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
+function Epic_install-overlay(){
+    $LEGENDARY eos-overlay install -y >> "${DECKY_PLUGIN_LOG_DIR}/eos_overlay.log" 
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"EOS Overlay installed\"}}"
+}
+
+function Epic_update-overlay(){
+    $LEGENDARY eos-overlay udpate -y >> "${DECKY_PLUGIN_LOG_DIR}/eos_overlay.log" 
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"EOS Overlay updated\"}}"
+}
+function Epic_remove-overlay(){
+    $LEGENDARY eos-overlay remove -y >> "${DECKY_PLUGIN_LOG_DIR}/eos_overlay.log" 
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"EOS Overlay installed\"}}"
+}
+
+
+
 function Epic_download-saves(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     $LEGENDARY download-saves  $1 -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
@@ -318,6 +334,6 @@ function Epic_gettabconfig(){
 function Epic_savetabconfig(){
     
     cat > "${DECKY_PLUGIN_RUNTIME_DIR}/conf_schemas/epictabconfig.json"
-    echo "{\"Type\": \"Success\", \"Content\": {\"success\": \"True\"}}"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Epic tab config saved\"}}"
     
 }
