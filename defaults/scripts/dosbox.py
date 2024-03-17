@@ -103,7 +103,7 @@ class Dosbox (sharedgameset.GameSet):
                               (batfile['Content'], row[0]))
         conn.commit()
         conn.close()
-        return json.dumps({'Type': 'Success', 'Content': {'success': True}})
+        return json.dumps({'Type': 'Success', 'Content': {'Message': "bat files saved"}})
 
     def lookup_title(self, shortname):
         conn = self.get_connection()

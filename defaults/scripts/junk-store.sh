@@ -8,6 +8,14 @@ source "${DECKY_PLUGIN_DIR}/scripts/shared.sh"
 PLATFORMS=()
 PLATFORM="${1}"
 
+# List of actions that can be performed by the junk-store.sh script
+ACTIONS=("init" "getgames" "getactions" "saveconfig" "getconfig" "download" \
+"install" "update" "verify" "repair" "import" "getjsonimages" "cancelinstall" \
+"uninstall" "protontricks" "enable-eos-overlay" "disable-eos-overlay" \
+"getgamedetails" "getbats" "savebats" "getprogress" "login" \
+"login-launch-options" "logout" "loginstatus" "getsetting" "savesetting" \
+"getlaunchoptions" "run-exe" "get-exe-list" "gettabconfig" "savetabconfig" \
+"saveplatformconfig" "getplatformconfig" "refresh" )
 
 
 # Function to source scripts recursively from a directory
@@ -45,14 +53,6 @@ else
     export PLATFORM=""
 fi
 
-# List of actions that can be performed by the junk-store.sh script
-ACTIONS=("init" "getgames" "getactions" "saveconfig" "getconfig" "download" \
-"install" "update" "verify" "repair" "import" "getjsonimages" "cancelinstall" \
-"uninstall" "protontricks" "enable-eos-overlay" "disable-eos-overlay" \
-"getgamedetails" "getbats" "savebats" "getprogress" "login" \
-"login-launch-options" "logout" "loginstatus" "getsetting" "savesetting" \
-"getlaunchoptions" "run-exe" "get-exe-list" "gettabconfig" "savetabconfig" \
-"saveplatformconfig" "getplatformconfig" "refresh" )
 
 
 # Check if ACTION is one of the actions in the case statement

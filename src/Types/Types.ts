@@ -171,6 +171,9 @@ export interface ContentError extends ContentType {
 export interface StoreContent extends ContentType {
   Panels: Panel[];
 }
+export interface SuccessContent extends ContentType {
+  Message: string;
+}
 export interface Panel {
   Title: string;
   Type: string;
