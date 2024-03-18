@@ -95,19 +95,18 @@ export const ConfEditor: VFC<EditorProperties> = ({
     };
     return (
         <>
-            <style>
-                {`
-            .${confEditorRootClass} {
-                padding: 0 !important;
-                width: 100% !important;
-            }
-            .${confEditorRootClass} .${quickAccessControlsClasses.PanelSection} {
-                padding: 0 2.8vw;
-            }
-            .${confEditorRootClass} .${sectionEditorFieldContainer} .${gamepadDialogClasses.Field} {
-                margin: 0;
-            }
-        `} </style>
+            <style>{`
+                .${confEditorRootClass} {
+                    padding: 0 !important;
+                    width: 100% !important;
+                }
+                .${confEditorRootClass} .${quickAccessControlsClasses.PanelSection} {
+                    padding: 0 2.8vw;
+                }
+                .${confEditorRootClass} .${sectionEditorFieldContainer} .${gamepadDialogClasses.Field} {
+                    margin: 0;
+                }
+            `}</style>
             <ModalRoot className={confEditorRootClass} closeModal={closeModal}>
                 <Focusable
                     style={{ display: "flex", minHeight: '400px' }}
@@ -173,10 +172,9 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         {confData?.AutoexecEnabled && confData?.Autoexec && (
                             <PanelSection title="[Autoexec]">
                                 <Focusable
-                                    focusableIfNoChildren={true}
                                     noFocusRing={true}
                                     onFocusCapture={() => (focusRef && focusRef.current != null) && focusRef.current.focus()}
-                                    onOKButton={() => { }}
+                                    onActivate={() => { }}
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async () => {
                                         logger.log("Saving config: ", confData)
@@ -188,7 +186,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                                 content_id: contentId,
                                                 inputData: confData
                                             });
-                                            
                                         logger.log("Save result: ", result)
                                         if (!result) {
                                             closeModal(); 
@@ -206,13 +203,13 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     onCancel={() => closeModal()}
                                     onCancelActionDescription="Go back to Game Details"
                                 >
-
                                     <textarea
                                         className=""
                                         ref={focusRef}
                                         style={{ width: "100%", height: "200px" }}
                                         value={confData.Autoexec}
-                                        onChange={(e) => setConfData({ ...confData, Autoexec: e.target.value })} />
+                                        onChange={(e) => setConfData({ ...confData, Autoexec: e.target.value })}
+                                    />
                                 </Focusable>
                             </PanelSection>
                         )}
