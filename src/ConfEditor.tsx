@@ -7,7 +7,6 @@ import {
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh, ExecuteGetActionSetArgs } from "./Types/Types";
 import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
-// import { Panel, ScrollPanelGroup } from "./Components/Scrollable";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
@@ -217,7 +216,8 @@ export const ConfEditor: VFC<EditorProperties> = ({
                     <div
                         style={{
                             flex: '4',
-                            background: '#02000b8a'
+                            background: '#02000b8a',
+                            borderRadius: 'var(--round-radius-size)'
                         }}
                     >
                         <Focusable
@@ -229,7 +229,6 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                 top: "40px",
                                 margin: '0 20px'
                             }}
-                            focusable={true}
                             noFocusRing={false}
                         >
                             <h3 style={{ margin: 0, marginBottom: '5px' }}>{sectionHelpText}</h3>

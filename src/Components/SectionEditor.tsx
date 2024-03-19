@@ -8,31 +8,31 @@ export const sectionEditorRootClass = 'section-editor-root';
 export const sectionEditorFieldContainer = 'section-editor-field-editors';
 
 export const SectionEditor: VFC<{
-  section: Section;
-  updateHelpText: (helpText: KeyValuePair) => void;
-  modeLevel: number;
-  onChange: (section: Section) => void;
+    section: Section;
+    updateHelpText: (helpText: KeyValuePair) => void;
+    modeLevel: number;
+    onChange: (section: Section) => void;
 }> = ({ section, updateHelpText, modeLevel, onChange }) => {
-  // const [name, setName] = useState(section.Name);
-  // const [description, setDescription] = useState(section.Description);
-  const [options, setOptions] = useState(section.Options);
-  const [collapsed, setCollapsed] = useState<boolean>(true);
+    // const [name, setName] = useState(section.Name);
+    // const [description, setDescription] = useState(section.Description);
+    const [options, setOptions] = useState(section.Options);
+    const [collapsed, setCollapsed] = useState<boolean>(true);
 
-  const handleOptionChange = (index: number, option: KeyValuePair) => {
-    const newOptions = [...options];
-    newOptions[index] = option;
-    setOptions(newOptions);
-    onChange({ ...section, Options: newOptions });
-  };
-  const OnInit = () => {
-    if (section.Visible) {
-      setCollapsed(!section.Visible)
-    }
-  }
-  useEffect(() => {
-    OnInit();
+    const handleOptionChange = (index: number, option: KeyValuePair) => {
+        const newOptions = [...options];
+        newOptions[index] = option;
+        setOptions(newOptions);
+        onChange({ ...section, Options: newOptions });
+    };
+    const OnInit = () => {
+        if (section.Visible) {
+            setCollapsed(!section.Visible);
+        }
+    };
+    useEffect(() => {
+        OnInit();
 
-  }, []);
+    }, []);
     return (
         <div className={sectionEditorRootClass}>
             <PanelSectionRow
@@ -41,10 +41,13 @@ export const SectionEditor: VFC<{
             >
                 <style>
                     {`
-                    .${sectionEditorRootClass} .DialogInputLabelGroup {
-                margin-bottom: 0;
-            }
-        `}
+                    .${sectionEditorRootClass} input[type=number]{
+                        width: 80px;
+                    }
+                    .${sectionEditorRootClass} input[type=text]{
+                        min-width: 140px;
+                    }
+                    `}
                 </style>
                 <Focusable>
                     <ButtonItem
@@ -55,18 +58,14 @@ export const SectionEditor: VFC<{
                     </ButtonItem>
                 </Focusable>
                 {!collapsed && (
-                    <div className={sectionEditorFieldContainer} style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+                    <div className={sectionEditorFieldContainer} style={{ display: "flex", flexDirection: "column" }}>
                         {options.map((option, index) => {
                             if (modeLevel >= option.ModeLevel)
                                 return (
                                     <FieldEditor
                                         field={option}
-                                        onChange={(updatedOption) =>
-                                            handleOptionChange(index, updatedOption)
-                                        }
-                                        updateHelpText={(field: KeyValuePair) => {
-                                            updateHelpText(field);
-                                        }}
+                                        onChange={updatedOption => handleOptionChange(index, updatedOption)}
+                                        updateHelpText={field => updateHelpText(field)}
                                     />
                                 );
                             else
