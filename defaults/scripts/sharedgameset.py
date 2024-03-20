@@ -476,7 +476,8 @@ class GameSet:
         html += f"<p style='width:100%; white-space: pre-wrap;'>{game_data['Description']}</p>"
         html += f"</div>"
         html += f"<div>"
-        html += f"<p>Size: {game_data['Size']}</p>"
+        if game_data['Size'] != None:
+            html += f"<p>Size: {game_data['Size']}</p>"
         html += f"<p>Publisher: {game_data['Publisher']}</p>"
         html += f"<p>Developer: {game_data['Developer']}</p>"
         html += f"<p>Genre: {game_data['Genre']}</p>"
