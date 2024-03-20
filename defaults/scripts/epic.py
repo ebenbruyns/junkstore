@@ -128,7 +128,7 @@ class Epic(sharedgameset.GameSet):
         for game in games_list:
 
             try:
-                title = game['app_title']
+                title = game['app_title'].replace("''", "'")
                 shortname = game['asset_infos']['Windows']['asset_id']
 
                 c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
@@ -159,7 +159,9 @@ class Epic(sharedgameset.GameSet):
                         developer,
                         release_date,
                         "",
+                        "",
                         shortname,
+                        
                     ]
 
                     # print(f"Inserting game {title} into database: {vals}")
@@ -188,6 +190,8 @@ class Epic(sharedgameset.GameSet):
         offline_switch = "--offline" if offline else ""
         result = self.execute_shell(
             f"{self.legendary_cmd} info {game_id} --json {offline_switch}")
+        game = result['game']
+        title = game['title']
         manifest = result['manifest']
         print(f"manifest: {manifest}", file=sys.stderr)
         download_size = manifest['download_size']
@@ -200,8 +204,8 @@ class Epic(sharedgameset.GameSet):
         c = conn.cursor()
        
         c.execute(
-            "UPDATE Game SET Size=? WHERE ShortName=?", 
-            (size, game_id))
+            "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 
+            (title, size, game_id))
         conn.commit()
         conn.close()
 
