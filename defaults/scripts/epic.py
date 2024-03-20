@@ -184,10 +184,41 @@ class Epic(sharedgameset.GameSet):
                 print(f"Error parsing metadata for game: {title} {e}")
 
         conn.close()
+    def update_game_details(self, game_id, offline):
+        offline_switch = "--offline" if offline else ""
+        result = self.execute_shell(
+            f"{self.legendary_cmd} info {game_id} --json {offline_switch}")
+        manifest = result['manifest']
+        print(f"manifest: {manifest}", file=sys.stderr)
+        download_size = manifest['download_size']
+        disk_size = manifest['disk_size']
+        print(f"download_size: {download_size}, disk_size: {disk_size}", file=sys.stderr)
+
+        size = f"{self.convert_bytes(download_size)} ({self.convert_bytes(disk_size)})"
+        print(f"size: {size}", file=sys.stderr)
+        conn = self.get_connection()
+        c = conn.cursor()
+       
+        c.execute(
+            "UPDATE Game SET Size=? WHERE ShortName=?", 
+            (size, game_id))
+        conn.commit()
+        conn.close()
 
     def insert_game(self, game):
         conn = self.get_connection()
         c = conn.cursor()
+
+    def convert_bytes(self , size):
+        if size >= 1024**3:
+            size = f"{size / 1024**3:.2f} GB"
+        elif size >= 1024**2:
+            size = f"{size / 1024**2:.2f} MB"
+        elif size >= 1024:
+            size = f"{size / 1024:.2f} KB"
+        else:
+            size = f"{size} bytes"
+        return size
 
     # [DLManager] INFO: = Progress: 0.51% (368/72002), Running for 00:01:58, ETA: 06:23:02
     # [DLManager] INFO:  - Downloaded: 316.12 MiB, Written: 361.03 MiB
