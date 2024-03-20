@@ -308,6 +308,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                             <ul>
                                                 <li>Eben Bruyns - Main Developer</li>
                                                 <li>Logan (Beebles) - UI Developer</li>
+                                                <li>Jesse Bofill - UI Developer</li>
                                             </ul>
                                         </div>
                                     </div>

@@ -77,9 +77,9 @@
           "ModeLevel": 0,
           "Parents": [],
           "EnumValues": [
-            "gpl",
-            "aco",
-            "amdvlk"
+            { "Key": "gpl", "Description": "" },
+            { "Key": "aco", "Description": "" },
+            { "Key": "amdvlk", "Description": "" }
           ]
         },
         {
