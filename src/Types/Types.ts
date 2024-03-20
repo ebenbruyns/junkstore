@@ -173,6 +173,9 @@ export interface StoreContent extends ContentType {
 }
 export interface SuccessContent extends ContentType {
   Message: string;
+  Title?: string;
+  Success?: boolean;
+  Toast?: boolean;
 }
 export interface Panel {
   Title: string;

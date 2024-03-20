@@ -12,6 +12,8 @@ import {
     afterPatch,
     Button,
     joinClassNames,
+    SimpleModal,
+    ConfirmModal,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
@@ -109,7 +111,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                 {steamClientID !== "" &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
-                        <MenuItem onSelected={uninstaller}>Uninstall Game</MenuItem>
+                    <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => uninstaller()} closeModal={() => { }}/>)
+
+                        }>Uninstall Game</MenuItem>
                     </>
                 }
 
@@ -150,7 +154,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                         args.appId = String(id);
                                     }
                                 }
-                                scriptRunner(initActionSet, action.ActionId, args);
+                                if (action.Type == "ScriptActionConfirm") {
+                                    showModal(<ConfirmModal strTitle="Confirm" strDescription={action.Title} onOK={() => scriptRunner(initActionSet, action.ActionId, args)} closeModal={() => { }}/>);
+                                }
+                                else {
+                                    scriptRunner(initActionSet, action.ActionId, args);
+                                }
                             }
                         }>{action.Title}</MenuItem>;
                     else
