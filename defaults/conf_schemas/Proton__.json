@@ -55,6 +55,34 @@
           "EnumValues": []
         },
         {
+          "Key": "PULSE_LATENCY_MSEC",
+          "Description": "Enable PulseAudio latency fix. This can help with audio latency in some games, but can also cause issues in others.",
+          "DefaultValue": "0",
+          "Value": "0",
+          "Type": "Range",
+          "Min": 0,
+          "Max": 500,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "RADV_PERFTEST",
+          "Description": "Enable RADV performance test. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "",
+          "Value": "",
+          "Type": "Enum",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": [
+            "gpl",
+            "aco",
+            "amdvlk"
+          ]
+        },
+        {
           "Key": "VKD3D",
           "Description": "Enable VKD3D. This can help with performance in some games, but can also cause issues in others.",
           "DefaultValue": "false",

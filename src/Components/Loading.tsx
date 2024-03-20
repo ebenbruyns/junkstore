@@ -1,5 +1,6 @@
 import { SteamSpinner, quickAccessMenuClasses } from "decky-frontend-lib";
 import { VFC } from "react";
+import { steamSpinnerClasses } from '../staticClasses';
 
 const spinnerContainer = 'spinner-container';
 
@@ -7,7 +8,7 @@ export const Loading: VFC = () => {
     return (
         <>
             <style>{`
-                .${spinnerContainer} .loadingthrobber_ContainerBackground_2ngG3 {
+                .${spinnerContainer} .${steamSpinnerClasses.ContainerBackground} {
                     background: unset;
                 }
                 .${quickAccessMenuClasses.TabGroupPanel} .spinner-container {
@@ -16,7 +17,7 @@ export const Loading: VFC = () => {
                     height: -webkit-fill-available;
                     padding-bottom: 16px;
                 }
-                .${quickAccessMenuClasses.TabGroupPanel} .spinner-container .loadingthrobber_Medium_39-WT{
+                .${quickAccessMenuClasses.TabGroupPanel} .spinner-container .${steamSpinnerClasses.Medium}{
                     width: 110px;
                     height: 110px;
                 }
@@ -24,7 +25,7 @@ export const Loading: VFC = () => {
                     width: 100%;
                     height: 100%;
                 }
-                .${spinnerContainer} .loadingthrobber_LoadingStatus_3rAIy {
+                .${spinnerContainer} .${steamSpinnerClasses.LoadingStatus} {
                     display: none;
                 }
             `}</style>

@@ -1,4 +1,4 @@
-import { DialogBody, DialogButton, DialogControlsSection, Focusable, Menu, MenuItem, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs, TextField, joinClassNames, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogBody, DialogControlsSection, ServerAPI, SidebarNavigation, SidebarNavigationPage, Tab, Tabs } from "decky-frontend-lib";
 import { VFC, useEffect, useState } from "react";
 import { ActionSet, ContentType, ContentError, ContentResult, ExecuteArgs, ExecuteGetContentArgs, StoreContent, StoreTabsContent, GameDataList } from "./Types/Types";
 import Logger from "./Utils/logger";
@@ -10,6 +10,7 @@ import { HtmlContent } from "./HtmlContent";
 import { TextContent } from "./TextContent";
 import { MainMenu } from "./MainMenu";
 import { useCachedState } from './hooks/useCachedState';
+import { gamepadLibraryClasses } from './staticClasses';
 interface ContentTabsProperties {
     serverAPI: ServerAPI;
     content: StoreTabsContent;
@@ -46,7 +47,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, content, in
     return (
         <DialogBody key={initActionSet + "_" + initAction} className={contentTabsContainerClass}>
             {content.Tabs.length === 0 ? <Loading /> : (layout === "horizontal" ? (
-                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} className='gamepadlibrary_GamepadLibrary_ZBBhe'>
+                <DialogControlsSection key={initActionSet + "_" + initAction + "horizontal"} className={gamepadLibraryClasses.GamepadLibrary}>
                     <Tabs
                         key="0"
                         activeTab={cacheData.currentTab}

@@ -4,6 +4,7 @@ import { Focusable, Spinner } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from 'react';
 import { GameData } from '../Types/Types';
 import { FaGears } from "react-icons/fa6";
+import { focusRingClasses, libraryAssetImageClasses } from '../staticClasses';
 
 interface GameGridItemProps {
     gameData: GameData;
@@ -46,7 +47,7 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                                     {!isImgLoaded && <Spinner style={{ alignSelf: 'center', flex: 'auto', height: '25%', color: '#7f7f7f4d' }} />}
                                     <img
                                         key={`img-${gameData.ID}`}
-                                        className={'libraryassetimage_Image_24_Au'}
+                                        className={libraryAssetImageClasses.Image}
                                         style={{
                                             width: 'auto',
                                             height: 'auto',
@@ -84,7 +85,7 @@ const GameGridItem: VFC<GameGridItemProps> = ({ gameData, imgAreaWidth, imgAreaH
                                             top: '0px',
                                             left: '0px',
                                         }}
-                                        className='focusring_FocusRing_1IZrQ'
+                                        className={focusRingClasses.FocusRing}
                                     />
                                 </>
                             )}

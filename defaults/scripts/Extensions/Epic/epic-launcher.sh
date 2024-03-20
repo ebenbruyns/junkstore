@@ -60,7 +60,16 @@ fi
 if [[ "${RUNTIMES_BATTLEYE}" == "true"  ]]; then
     export PROTON_BATTLEYE_RUNTIME="${HOME}/.steam/root/steamapps/common/Proton BattlEye Runtime/"
 fi
-#export PROTON_EAC_RUNTIME="${HOME}/.steam/root/steamapps/common/Proton EasyAntiCheat Runtime/"
+
+if [ -z "${RUNTIMES_PULSE_LATENCY_MSEC}" ]; then
+    export PULSE_LATENCY_MSEC=$RUNTIMES_PULSE_LATENCY_MSEC
+
+fi
+if [[ "${RUNTIMES_RADV_PERFTEST}" == "" ]]; then
+    unset RADV_PERFTEST
+else
+    export RADV_PERFTEST=$RUNTIMES_RADV_PERFTEST
+fi
 
 CMD=$@
 ARGS=$("${ARGS_SCRIPT}" $ID)
