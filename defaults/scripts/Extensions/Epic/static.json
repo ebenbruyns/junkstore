@@ -178,7 +178,7 @@
         {
           "ActionId": "DisableEOSoverlay",
           "Title": "Disable EOS overlay",
-          "Type": "ScriptAction",
+          "Type": "ScriptActionConfirm",
           "InstalledOnly": "True"
         },
 

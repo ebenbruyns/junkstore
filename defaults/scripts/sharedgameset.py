@@ -35,7 +35,8 @@ class GameSet:
             "Genre",
             "ConfigurationPath",
             "Developer",
-            "ReleaseDate"]
+            "ReleaseDate",
+            "Size"]
 
     def read_json_from_stdin(self):
         json_str = sys.stdin.read()
@@ -66,6 +67,12 @@ class GameSet:
         c.execute(
             'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, name TEXT UNIQUE, value TEXT)')
         c.execute(f"CREATE TABLE IF NOT EXISTS Cache (id INTEGER PRIMARY KEY, Key TEXT UNIQUE, Value TEXT, ExpiryDate DateTime)")
+        
+        
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "Size" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN Size TEXT")
         conn.commit()
         conn.close()
     
@@ -421,10 +428,11 @@ class GameSet:
                 'ConfigurationPath': result[9],
                 'Developer': result[10],
                 'ReleaseDate': releseDate,
-                'SteamClientID': result[12],
+                'Size': result[12],
+                'SteamClientID': result[13],
                 'ShortName': shortname,
                 'HasDosConfig': False,
-                'HasBatFiles': False,
+                'HasBatFiles': False
             }
 
             c.execute("SELECT ID FROM Game WHERE ShortName=?", (shortname,))
@@ -468,6 +476,8 @@ class GameSet:
         html += f"<p style='width:100%; white-space: pre-wrap;'>{game_data['Description']}</p>"
         html += f"</div>"
         html += f"<div>"
+        if game_data['Size'] != None:
+            html += f"<p>Size: {game_data['Size']}</p>"
         html += f"<p>Publisher: {game_data['Publisher']}</p>"
         html += f"<p>Developer: {game_data['Developer']}</p>"
         html += f"<p>Genre: {game_data['Genre']}</p>"

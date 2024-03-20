@@ -37,6 +37,8 @@ class EpicArgs(sharedgameset.GenericArgs):
         )
         self.parser.add_argument(
             '--offline', help='Offline mode', action='store_true')
+        self.parser.add_argument(
+            '--update-game-details', help='Update game details')
 
     def parseArgs(self):
         super().parseArgs()
@@ -77,6 +79,9 @@ class EpicArgs(sharedgameset.GenericArgs):
             if self.args.get_base64_images:
                 print(self.gameSet.get_base64_images(
                     self.args.get_base64_images))
+            if self.args.update_game_details:
+                self.gameSet.update_game_details(
+                    self.args.update_game_details, self.args.offline)
             if not any(vars(self.args).values()):
                 self.parser.print_help()
         except epic.CmdException as e:

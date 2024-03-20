@@ -96,13 +96,19 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
 
     if (res.result.Type === 'Success') {
         const success = res.result.Content as SuccessContent
+        logger.debug("result: ", res);
         const data: ToastData = {
-            title: "Success",   
+            title: "Junk-Store",   
             body: success.Message,
-            
-
         }
-        serverAPI.toaster.toast(data);
+        if (success.Title) {
+            data.title = success.Title;
+        }
+       
+        if (success.Toast !== false) {
+            logger.debug("toasting: ", data);
+            serverAPI.toaster.toast(data);
+        }
     }
 
     if (res.result.Type === 'Error') {
