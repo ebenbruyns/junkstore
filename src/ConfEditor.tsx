@@ -221,7 +221,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             }}
                             noFocusRing={false}
                         >
-                            <h3 style={{ margin: 0, marginBottom: '5px' }}>{sectionHelpText}</h3>
+                            <h4 style={{ margin: 0, marginBottom: '5px', textTransform: 'uppercase' }}>{sectionHelpText}</h4>
                             <div>{helpText.Description}</div>
                             {helpText.EnumValues &&
                                 helpText.EnumValues.map((enumValue) => (

@@ -1,5 +1,5 @@
 import { Section, KeyValuePair } from "../Types/Types";
-import { ButtonItem, Focusable, PanelSectionRow } from "decky-frontend-lib";
+import { ButtonItem, PanelSectionRow, quickAccessMenuClasses } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { FieldEditor } from "./FieldEditor";
 import { VFC, useEffect, useState } from "react";
@@ -39,14 +39,14 @@ export const SectionEditor: VFC<SectionEditorProps> = ({ section, updateHelpText
             //@ts-ignore
             style={{ display: "flex", flexDirection: "column", gap: "1em" }}
         >
-            <Focusable style={{ padding: 0 }}>
+            <div style={{ display: 'contents' }}>
                 <ButtonItem
-                    label={`[${section.Name}]`}
+                    label={<div className={quickAccessMenuClasses.PanelSectionTitle} style={{ padding: 0 }}>{`[${section.Name}]`}</div>}
                     onClick={() => setCollapsed(!collapsed)}
                 >
                     {collapsed ? <RiArrowDownSFill /> : <RiArrowUpSFill />}
                 </ButtonItem>
-            </Focusable>
+            </div>
             {!collapsed && (
                 <div className={sectionEditorFieldRoot} style={{ display: "flex", flexDirection: "column" }}>
                     {options.map((option, index) => {
