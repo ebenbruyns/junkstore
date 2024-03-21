@@ -16,6 +16,9 @@ import { ValueType } from "../Types/Types";
 import { KeyValuePair } from "../Types/Types";
 import { FaCog } from "react-icons/fa";
 
+export const sectionEditorFieldFlexShrink = 'editor-field-flex-shrink';
+export const sectionEditorFieldContainerNumber = 'editor-field-number';
+
 interface FieldProps {
     field: KeyValuePair;
     value: any;
@@ -44,11 +47,12 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
                     label={field.Key + " " + parentValue}
                     checked={value === "true"}
                     onChange={(newValue) => onChange(newValue.toString())}
+
                 />
             );
         case ValueType.Number:
             return (
-                <Field label={field.Key + " " + parentValue}>
+                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldContainerNumber}>
                     <TextField
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
@@ -71,13 +75,13 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
             );
         case ValueType.String:
             return (
-                <Field label={field.Key + " " + parentValue}>
+                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
                     <TextField value={value} onChange={(e) => onChange(e.target.value)} />
                 </Field>
             );
         case ValueType.Enum:
             return (
-                <Field label={field.Key + " " + parentValue}>
+                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
                     <Dropdown
                         menuLabel={field.Key}
                         selectedOption={value}
@@ -144,7 +148,6 @@ export const FieldEditor: VFC<FieldEditorProps> = ({ field, onChange, updateHelp
         <PanelSectionRow>
             <Focusable
                 style={{
-                    flex: "1",
                     display: "flex",
                     gap: "15px",
                     alignItems: "center",
@@ -164,12 +167,12 @@ export const FieldEditor: VFC<FieldEditorProps> = ({ field, onChange, updateHelp
                 <DialogButton
                     style={{
                         width: '48px',
-                        minWidth: 'initial',
+                        minWidth: '48px',
                         padding: 'initial',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height: '32px'
+                        height: '36px'
                     }}
                     onClick={changeType}
                 >
