@@ -31,6 +31,7 @@
         },
         {
           "Key": "fullresolution",
+          "Label": "Full Resolution",
           "Description": "What resolution to use for fullscreen: 'original', 'desktop' or a fixed size, e.g. 1024x768 ('desktop' by default).",
           "DefaultValue": "desktop",
           "Value": "desktop",
@@ -60,6 +61,7 @@
         },
         {
           "Key": "windowresolution",
+          "Label": "Window Resolution",
           "Description": "Set window size when running in windowed mode: default: Select the best option based on your environment and other settings. small, medium, large (s, m, l): Size the window relative to the desktop. <custom>: Scale the window to the given dimensions in WxH format. For example: 1024x768.",
           "DefaultValue": "default",
           "Value": "default",
@@ -279,6 +281,7 @@
         },
         {
           "Key": "waitonerror",
+          "Label": "Wait On Error",
           "Description": "Keep the console open if an error has occurred (enabled by default).",
           "DefaultValue": "true",
           "Value": "true",
@@ -334,6 +337,7 @@
         },
         {
           "Key": "mapperfile",
+          "Label": "Mapper File",
           "Description": "File used to load/save the key/event mappings. Pre-configured maps are bundled in the 'resources/mapperfiles' directory. They can be loaded by name, for example: mapperfile = xbox/xenon2.map Note: The --resetmapper command line flag only deletes the default mapperfile.",
           "DefaultValue": "mapper-sdl2-0.81.0-alpha.map",
           "Value": "mapper-sdl2-0.81.0-alpha.map",
@@ -464,6 +468,7 @@
         },
         {
           "Key": "mcb_fault_strategy",
+          "Label": "MCB Fault Strategy",
           "Description": "How software-corrupted memory chain blocks should be handled: repair: Repair (and report) faults using adjacent blocks (default). report: Report faults but otherwise proceed as-is. allow: Allow faults to go unreported (hardware behavior). deny: Quit (and report) when faults are detected. Possible values: repair, report, allow, deny.",
           "DefaultValue": "repair",
           "Value": "repair",
@@ -505,6 +510,7 @@
         },
         {
           "Key": "Dos_rate",
+          "Label": "DOS Rate",
           "Description": "Customize the emulated video mode's frame rate, in Hz: default: The DOS video mode determines the rate (recommended; default). host: Match the DOS rate to the host rate (see 'host_rate' setting). <value>: Sets the rate to an exact value, between 24.000 and 1000.000 (Hz). We recommend the 'default' rate; otherwise test and set on a per-game basis.",
           "DefaultValue": "default",
           "Value": "default",
@@ -566,6 +572,7 @@
         },
         {
           "Key": "vga_8dot_font",
+          "Label": "VGA 8dot Font",
           "Description": "Use the 8-dot VGA font instead of the 9-dot MCGA font (disabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -751,6 +758,7 @@
         },
         {
           "Key": "cga_colors",
+          "Label": "CGA Colors",
           "Description": "Set the interpretation of CGA RGBI colours. Affects all machine types capable of displaying CGA or better graphics. Built-in presets:",
           "DefaultValue": "default",
           "Value": "default",
@@ -812,6 +820,7 @@
         },
         {
           "Key": "glshader",
+          "Label": "GL Shader",
           "Description": "Set an adaptive CRT monitor emulation shader or a regular GLSL shader in OpenGL output modes. Adaptive CRT shader 'Options':",
           "DefaultValue": "crt-auto",
           "Value": "crt-auto",
@@ -990,6 +999,7 @@
         },
         {
           "Key": "cputype",
+          "Label": "CPU Type",
           "Description": "CPU type used in emulation ('auto' by default). 'auto' is the fastest choice. Possible values: auto, 386, 386_slow, 486_slow, pentium_slow, 386_prefetch.",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -1037,6 +1047,7 @@
         },
         {
           "Key": "cycleup",
+          "Label": "Cycle Up",
           "Description": "Number of cycles added or subtracted with speed control hotkeys (10 by default).",
           "DefaultValue": "10",
           "Value": "10",
@@ -1049,6 +1060,7 @@
         },
         {
           "Key": "cycledown",
+          "Label": "Cycle Down",
           "Description": "Setting it lower than 100 will be a percentage (20 by default).",
           "DefaultValue": "20",
           "Value": "20",
@@ -1217,6 +1229,7 @@
         },
         {
           "Key": "dos_mouse_driver",
+          "Label": "DOS Mouse Driver",
           "Description": "Enable built-in DOS mouse driver (enabled by default). Notes: Disable if you intend to use original MOUSE.COM driver in emulated DOS. When guest OS is booted, built-in driver gets disabled automatically.",
           "DefaultValue": "true",
           "Value": "true",
@@ -1229,6 +1242,7 @@
         },
         {
           "Key": "dos_mouse_immediate",
+          "Label": "DOS Mouse Immediate",
           "Description": "Update mouse movement counters immediately, without waiting for interrupt (disabled by default). May improve gameplay, especially in fast-paced games (arcade, FPS, etc.), as for some games it effectively boosts the mouse sampling rate to 1000 Hz, without increasing interrupt overhead. Might cause compatibility issues. List of known incompatible games: Ultima Underworld: The Stygian Abyss Ultima Underworld II: Labyrinth of Worlds Please report it if you find another incompatible game so we can update this list.",
           "DefaultValue": "false",
           "Value": "false",
@@ -1241,6 +1255,7 @@
         },
         {
           "Key": "ps2_mouse_model",
+          "Label": "PS/2 Mouse Model",
           "Description": "PS/2 AUX port mouse model: standard: 3 buttons, standard PS/2 mouse. intellimouse: 3 buttons + wheel, Microsoft IntelliMouse. explorer: 5 buttons + wheel, Microsoft IntelliMouse Explorer. none: no PS/2 mouse emulated. Default: explorer Possible values: standard, intellimouse, explorer, none.",
           "DefaultValue": "explorer",
           "Value": "explorer",
@@ -1267,6 +1282,7 @@
         },
         {
           "Key": "com_mouse_model",
+          "Label": "COM Mouse Model",
           "Description": "COM (serial) port default mouse model: 2button: 2 buttons, Microsoft mouse. 3button: 3 buttons, Logitech mouse; mostly compatible with Microsoft mouse. wheel: 3 buttons + wheel; mostly compatible with Microsoft mouse. msm: 3 buttons, Mouse Systems mouse; NOT compatible with Microsoft mouse. 2button+msm: Automatic choice between '2button' and 'msm'. 3button+msm: Automatic choice between '3button' and 'msm'. wheel+msm: Automatic choice between 'wheel' and 'msm' (default). Note: Enable COM port mice in the [serial] section. Possible values: 2button, 3button, wheel, msm, 2button+msm, 3button+msm, wheel+msm.",
           "DefaultValue": "wheel+msm",
           "Value": "wheel+msm",
@@ -1312,6 +1328,7 @@
       "Options": [
         {
           "Key": "nosound",
+          "Label": "No Sound",
           "Description": "Enable silent mode (disabled by default). Sound is still fully emulated in silent mode, but DOSBox outputs silence.",
           "DefaultValue": "false",
           "Value": "false",
@@ -1344,6 +1361,7 @@
         },
         {
           "Key": "blocksize",
+          "Label": "Block Size",
           "Description": "Mixer block size; larger values might help with sound stuttering but sound will also be more lagged. Possible values: 128, 256, 512, 1024, 2048, 4096, 8192.",
           "DefaultValue": "512",
           "Value": "512",
@@ -1494,6 +1512,7 @@
       "Options": [
         {
           "Key": "mididevice",
+          "Label": "MIDI Device",
           "Description": "Set where MIDI data from the emulated MPU-401 MIDI interface is sent ('auto' by default): oss: Use the Linux OSS MIDI playback interface. alsa: Use the Linux ALSA MIDI playback interface. fluidsynth: The built-in FluidSynth MIDI synthesizer (SoundFont player). See the [fluidsynth] section for detailed configuration. mt32: The built-in Roland MT-32 synthesizer. See the [mt32] section for detailed configuration. auto: Either one of the built-in MIDI synthesisers (if `midiconfig` is set to 'fluidsynth' or 'mt32'), or a MIDI device external to DOSBox (any other 'midiconfig' value). This might be a software synthesizer or physical device. This is the default behaviour. none: Disable MIDI output. Possible values: auto, oss, alsa, fluidsynth, mt32, none.",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -1513,6 +1532,7 @@
         },
         {
           "Key": "midiconfig",
+          "Label": "MIDI Config",
           "Description": "Configuration options for the selected MIDI interface (unset by default). This is usually the ID or name of the MIDI synthesizer you want to use (find the ID/name with the DOS command 'MIXER /LISTMIDI'). Notes: - This option has no effect when using the built-in synthesizers ('mididevice = fluidsynth' or 'mididevice = mt32'). - When using ALSA, use the Linux command 'aconnect -l' to list all open MIDI ports and select one (e.g. 'midiconfig = 14:0' for sequencer client 14, port 0). - If you're using a physical Roland MT-32 with revision 0 PCB, the hardware may require a delay in order to prevent its buffer from overflowing. In that case, add 'delaysysex' (e.g. 'midiconfig = 2 delaysysex').",
           "DefaultValue": "",
           "Value": "",
@@ -1525,6 +1545,7 @@
         },
         {
           "Key": "mpu401",
+          "Label": "MPU-401",
           "Description": "MPU-401 mode to emulate ('intelligent' by default). Possible values: intelligent, uart, none.",
           "DefaultValue": "intelligent",
           "Value": "intelligent",
@@ -1541,6 +1562,7 @@
         },
         {
           "Key": "raw_midi_output",
+          "Label": "Raw MIDI Output",
           "Description": "Enable raw, unaltered MIDI output (disabled by default). The MIDI drivers of many games don't fully conform to the MIDI standard, which makes editing the MIDI recordings of these games very error-prone and cumbersome in MIDI sequencers, often resulting in hanging or missing notes. DOSBox corrects the MIDI output of such games by default. This results in no audible difference whatsoever; it only affects the representation of the MIDI data. You should only enable 'raw_midi_output' if you really need to capture the raw, unaltered MIDI output of a program, e.g. when working with music applications, or when debugging MIDI issues.",
           "DefaultValue": "false",
           "Value": "false",
@@ -1679,6 +1701,7 @@
         },
         {
           "Key": "romdir",
+          "Label": "ROM Directory",
           "Description": "The directory containing ROMs for one or more models. The directory can be absolute or relative, or leave it blank to use the 'mt32-roms' directory in your DOSBox configuration directory. Other common system locations will be checked as well. ROM files inside this directory may include any of the following: - MT32_CONTROL.ROM and MT32_PCM.ROM, for the 'mt32' model. - CM32L_CONTROL.ROM and CM32L_PCM.ROM, for the 'cm32l' model. - Unzipped MAME MT-32 and CM-32L ROMs, for the versioned models.",
           "DefaultValue": "",
           "Value": "",
@@ -1691,6 +1714,7 @@
         },
         {
           "Key": "mt32_filter",
+          "Label": "MT-32 Filter",
           "Description": "Filter for the Roland MT-32/CM-32L audio output: off: Don't filter the output (default). <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "off",
           "Value": "off",
@@ -1719,6 +1743,7 @@
       "Options": [
         {
           "Key": "sbtype",
+          "Label": "SB Type",
           "Description": "Type of Sound Blaster to emulate ('sb16' by default). gb is Game Blaster. Possible values: sb1, sb2, sbpro1, sbpro2, sb16, gb, none.",
           "DefaultValue": "sb16",
           "Value": "sb16",
@@ -1739,6 +1764,7 @@
         },
         {
           "Key": "sbbase",
+          "Label": "SB Base",
           "Description": "The IO address of the Sound Blaster (220 by default). Possible values: 220, 240, 260, 280, 2a0, 2c0, 2e0, 300.",
           "DefaultValue": "220",
           "Value": "220",
@@ -1760,6 +1786,7 @@
         },
         {
           "Key": "irq",
+          "Label": "IRQ",
           "Description": "The IRQ number of the Sound Blaster (7 by default). Possible values: 3, 5, 7, 9, 10, 11, 12.",
           "DefaultValue": "7",
           "Value": "7",
@@ -1780,6 +1807,7 @@
         },
         {
           "Key": "dma",
+          "Label": "DMA",
           "Description": "The DMA channel of the Sound Blaster (1 by default). Possible values: 0, 1, 3, 5, 6, 7.",
           "DefaultValue": "1",
           "Value": "1",
@@ -1799,6 +1827,7 @@
         },
         {
           "Key": "hdma",
+          "Label": "High DMA",
           "Description": "The High DMA channel of the Sound Blaster 16 (5 by default). Possible values: 0, 1, 3, 5, 6, 7.",
           "DefaultValue": "5",
           "Value": "5",
@@ -1818,6 +1847,7 @@
         },
         {
           "Key": "sbmixer",
+          "Label": "SB Mixer",
           "Description": "Allow the Sound Blaster mixer to modify the DOSBox mixer (enabled by default).",
           "DefaultValue": "true",
           "Value": "true",
@@ -1830,6 +1860,7 @@
         },
         {
           "Key": "sbwarmup",
+          "Label": "SB Warmup",
           "Description": "Silence initial DMA audio after card power-on, in milliseconds (100 by default). This mitigates pops heard when starting many SB-based games. Reduce this if you notice intial playback is missing audio.",
           "DefaultValue": "100",
           "Value": "100",
@@ -1842,6 +1873,7 @@
         },
         {
           "Key": "oplmode",
+          "Label": "OPL Mode",
           "Description": "Type of OPL emulation ('auto' by default). On 'auto' the mode is determined by 'sbtype'. All OPL modes are AdLib-compatible, except for 'cms'. Possible values: auto, cms, opl2, dualopl2, opl3, opl3gold, none.",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -1862,6 +1894,7 @@
         },
         {
           "Key": "sb_filter",
+          "Label": "SB Filter",
           "Description": "Type of filter to emulate for the Sound Blaster digital sound output: auto: Use the appropriate filter determined by 'sbtype'. sb1, sb2, sbpro1, sbpro2, sb16: Use the filter of this Sound Blaster model. modern: Use linear interpolation upsampling that acts as a low-pass filter; this is the legacy DOSBox behaviour (default). off: Don't filter the output. <custom>: One or two custom filters in the following format: TYPE ORDER FREQ Where TYPE can be 'hpf' (high-pass) or 'lpf' (low-pass), ORDER is the order of the filter from 1 to 16 (1st order = 6dB/oct slope, 2nd order = 12dB/oct, etc.), and FREQ is the cutoff frequency in Hz. Examples: lpf 2 12000 hpf 3 120 lfp 1 6500",
           "DefaultValue": "modern",
           "Value": "modern",
@@ -1908,6 +1941,7 @@
         },
         {
           "Key": "sb_filter_always_on",
+          "Label": "SB Filter Always On",
           "Description": "Force the Sound Blaster filter to be always on (disallow programs from turning the filter off; disabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -1920,6 +1954,7 @@
         },
         {
           "Key": "opl_filter",
+          "Label": "OPL Filter",
           "Description": "Type of filter to emulate for the Sound Blaster OPL output: auto: Use the appropriate filter determined by 'sbtype' (default). sb1, sb2, sbpro1, sbpro2, sb16: Use the filter of this Sound Blaster model. off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -1962,6 +1997,7 @@
         },
         {
           "Key": "cms_filter",
+          "Label": "CMS Filter",
           "Description": "Filter for the Sound Blaster CMS output: on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -1988,6 +2024,7 @@
       "Options": [
         {
           "Key": "gus",
+          "Label": "GUS",
           "Description": "Enable Gravis UltraSound emulation (disabled by default). The default settings of base address 240, IRQ 5, and DMA 3 have been chosen so the GUS can coexist with a Sound Blaster card. This works fine for the majority of programs, but some games and demos expect the GUS factory defaults of base address 220, IRQ 11, DMA 1.",
           "DefaultValue": "false",
           "Value": "false",
@@ -2000,6 +2037,7 @@
         },
         {
           "Key": "gusbase",
+          "Label": "GUS Base",
           "Description": "The IO base address of the Gravis UltraSound (240 by default). Possible values: 240, 220, 260, 280, 2a0, 2c0, 2e0, 300.",
           "DefaultValue": "240",
           "Value": "240",
@@ -2021,6 +2059,7 @@
         },
         {
           "Key": "gusirq",
+          "Label": "GUS IRQ",
           "Description": "The IRQ number of the Gravis UltraSound (5 by default). Possible values: 3, 5, 7, 9, 10, 11, 12.",
           "DefaultValue": "5",
           "Value": "5",
@@ -2041,6 +2080,7 @@
         },
         {
           "Key": "gusdma",
+          "Label": "GUS DMA",
           "Description": "The DMA channel of the Gravis UltraSound (3 by default). Possible values: 0, 1, 3, 5, 6, 7.",
           "DefaultValue": "3",
           "Value": "3",
@@ -2060,6 +2100,7 @@
         },
         {
           "Key": "ultradir",
+          "Label": "UltraSound Directory",
           "Description": "Path to UltraSound directory ('C:\\ULTRASND' by default). In this directory there should be a 'MIDI' directory that contains the patch files for GUS playback.",
           "DefaultValue": "C:\\ULTRASND",
           "Value": "C:\\ULTRASND",
@@ -2072,6 +2113,7 @@
         },
         {
           "Key": "gus_filter",
+          "Label": "GUS Filter",
           "Description": "Filter for the Gravis UltraSound audio output: off: Don't filter the output (default). <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "off",
           "Value": "off",
@@ -2100,6 +2142,7 @@
       "Options": [
         {
           "Key": "imfc",
+          "Label": "IMFC",
           "Description": "Enable the IBM Music Feature Card (disabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -2112,6 +2155,7 @@
         },
         {
           "Key": "imfc_base",
+          "Label": "IMFC Base",
           "Description": "The IO base address of the IBM Music Feature Card (2A20 by default). Possible values: 2a20, 2a30.",
           "DefaultValue": "2a20",
           "Value": "2a20",
@@ -2127,6 +2171,7 @@
         },
         {
           "Key": "imfc_irq",
+          "Label": "IMFC IRQ",
           "Description": "The IRQ number of the IBM Music Feature Card (3 by default). Possible values: 2, 3, 4, 5, 6, 7.",
           "DefaultValue": "3",
           "Value": "3",
@@ -2146,6 +2191,7 @@
         },
         {
           "Key": "imfc_filter",
+          "Label": "IMFC Filter",
           "Description": "Filter for the IBM Music Feature Card output: on: Filter the output. off: Don't filter the output (default). <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "off",
           "Value": "off",
@@ -2175,6 +2221,7 @@
       "Options": [
         {
           "Key": "sidmodel",
+          "Label": "SID Model",
           "Description": "Model of chip to emulate in the Innovation SSI-2001 card: auto: Use the 6581 chip. 6581: The original chip, known for its bassy and rich character. 8580: A later revision that more closely matched the SID specification. It fixed the 6581's DC bias and is less prone to distortion. The 8580 is an option on reproduction cards, like the DuoSID. none: Disable the card (default). Possible values: auto, 6581, 8580, none.",
           "DefaultValue": "none",
           "Value": "none",
@@ -2198,6 +2245,7 @@
         },
         {
           "Key": "sidclock",
+          "Label": "SID Clock",
           "Description": "The SID chip's clock frequency, which is jumperable on reproduction cards. default: 0.895 MHz, per the original SSI-2001 card (default). c64ntsc: 1.023 MHz, per NTSC Commodore PCs and the DuoSID. c64pal: 0.985 MHz, per PAL Commodore PCs and the DuoSID. hardsid: 1.000 MHz, available on the DuoSID. Possible values: default, c64ntsc, c64pal, hardsid.",
           "DefaultValue": "default",
           "Value": "default",
@@ -2227,6 +2275,7 @@
         },
         {
           "Key": "sidport",
+          "Label": "SID Port",
           "Description": "The IO port address of the Innovation SSI-2001 (280 by default). Possible values: 240, 260, 280, 2a0, 2c0.",
           "DefaultValue": "280",
           "Value": "280",
@@ -2245,6 +2294,7 @@
         },
         {
           "Key": "6581filter",
+          "Label": "6581 Filter",
           "Description": "Adjusts the 6581's filtering strength as a percent from 0 to 100 (50 by default). The SID's analog filtering meant that each chip was physically unique.",
           "DefaultValue": "50",
           "Value": "50",
@@ -2257,6 +2307,7 @@
         },
         {
           "Key": "8580filter",
+          "Label": "8580 Filter",
           "Description": "Adjusts the 8580's filtering strength as a percent from 0 to 100 (50 by default).",
           "DefaultValue": "50",
           "Value": "50",
@@ -2297,6 +2348,7 @@
       "Options": [
         {
           "Key": "pcspeaker",
+          "Label": "PC Speaker",
           "Description": "PC speaker emulation model: discrete: Waveform is created using discrete steps (default). Works well for games that use RealSound-type effects. impulse: Waveform is created using sinc impulses. Recommended for square-wave games, like Commander Keen. While improving accuracy, it is more CPU intensive. none/off: Don't use the PC Speaker. Possible values: discrete, impulse, none, off.",
           "DefaultValue": "discrete",
           "Value": "discrete",
@@ -2320,6 +2372,7 @@
         },
         {
           "Key": "pcspeaker_filter",
+          "Label": "PC Speaker Filter",
           "Description": "Filter for the PC Speaker output: on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -2384,6 +2437,7 @@
         },
         {
           "Key": "tandy_dac_filter",
+          "Label": "Tandy DAC Filter",
           "Description": "Filter for the Tandy DAC output: on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -2403,6 +2457,7 @@
         },
         {
           "Key": "lpt_dac",
+          "Label": "LPT DAC",
           "Description": "Type of DAC plugged into the parallel port: disney: Disney Sound Source. covox: Covox Speech Thing. ston1: Stereo-on-1 DAC, in stereo up to 30 kHz. none/off: Don't use a parallel port DAC (default). Possible values: none, disney, covox, ston1, off.",
           "DefaultValue": "none",
           "Value": "none",
@@ -2430,6 +2485,7 @@
         },
         {
           "Key": "lpt_dac_filter",
+          "Label": "LPT DAC Filter",
           "Description": "Filter for the LPT DAC audio device(s): on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -2449,6 +2505,7 @@
         },
         {
           "Key": "ps1audio",
+          "Label": "PS/1 Audio",
           "Description": "Enable IBM PS/1 Audio emulation (disabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -2461,6 +2518,7 @@
         },
         {
           "Key": "ps1audio_filter",
+          "Label": "PS/1 Audio Filter",
           "Description": "Filter for the PS/1 Audio synth output: on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -2480,6 +2538,7 @@
         },
         {
           "Key": "ps1audio_dac_filter",
+          "Label": "PS/1 Audio DAC Filter",
           "Description": "Filter for the PS/1 Audio DAC output: on: Filter the output (default). off: Don't filter the output. <custom>: Custom filter definition; see 'sb_filter' for details.",
           "DefaultValue": "on",
           "Value": "on",
@@ -2506,6 +2565,7 @@
       "Options": [
         {
           "Key": "reelmagic",
+          "Label": "ReelMagic",
           "Description": "ReelMagic (aka REALmagic) MPEG playback support: off: Disable support (default). cardonly: Initialize the card without loading the FMPDRV.EXE driver. on: Initialize the card and load the FMPDRV.EXE on start-up.",
           "DefaultValue": "off",
           "Value": "off",
@@ -2528,6 +2588,7 @@
         },
         {
           "Key": "reelmagic_key",
+          "Label": "ReelMagic Key",
           "Description": "Set the 32-bit magic key used to decode the game's videos: auto: Use the built-in routines to determine the key (default). common: Use the most commonly found key, which is 0x40044041. thehorde: Use The Horde's key, which is 0xC39D7088. <custom>: Set a custom key in hex format (e.g., 0x12345678).",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -2557,6 +2618,7 @@
         },
         {
           "Key": "reelmagic_fcode",
+          "Label": "ReelMagic FR Code",
           "Description": "Override the frame rate code used during video playback: 0: No override: attempt automatic rate discovery (default). 1 to 7: Override the frame rate to one the following (use 1 through 7): 1=23.976, 2=24, 3=25, 4=29.97, 5=30, 6=50, or 7=59.94 FPS.",
           "DefaultValue": "0",
           "Value": "0",
@@ -2576,6 +2638,7 @@
       "Options": [
         {
           "Key": "joysticktype",
+          "Label": "Joystick Type",
           "Description": "Type of joystick to emulate: auto: Detect and use any joystick(s), if possible (default). 2axis: Support up to two joysticks, each with 2 axis 4axis: Support the first joystick only, as a 4-axis type. 4axis_2: Support the second joystick only, as a 4-axis type. fcs: Emulate joystick as an original Thrustmaster FCS. ch: Emulate joystick as an original CH Flightstick. hidden: Prevent DOS from seeing the joystick(s), but enable them for mapping. disabled: Fully disable joysticks: won't be polled, mapped, or visible in DOS. Remember to reset DOSBox's mapperfile if you saved it earlier. Possible values: auto, 2axis, 4axis, 4axis_2, fcs, ch, hidden, disabled.",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -2645,6 +2708,7 @@
         },
         {
           "Key": "swap34",
+          "Label": "Swap 3-4 Axes",
           "Description": "Swap the 3rd and the 4th axis (disabled by default). Can be useful for certain joysticks.",
           "DefaultValue": "false",
           "Value": "false",
@@ -2657,6 +2721,7 @@
         },
         {
           "Key": "buttonwrap",
+          "Label": "Button Wrap",
           "Description": "Enable button wrapping at the number of emulated buttons (disabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -2669,6 +2734,7 @@
         },
         {
           "Key": "circularinput",
+          "Label": "Circular Input",
           "Description": "Enable translation of circular input to square output (disabled by default). Try enabling this if your left analog stick can only move in a circle.",
           "DefaultValue": "false",
           "Value": "false",
@@ -2859,6 +2925,7 @@
         },
         {
           "Key": "phonebookfile",
+          "Label": "Phonebook File",
           "Description": "File used to map fake phone numbers to addresses ('phonebook.txt' by default).",
           "DefaultValue": "phonebook.txt",
           "Value": "phonebook.txt",
@@ -2878,6 +2945,7 @@
       "Options": [
         {
           "Key": "xms",
+          "Label": "XMS",
           "Description": "Enable XMS support (enabled by default).",
           "DefaultValue": "true",
           "Value": "true",
@@ -2890,6 +2958,7 @@
         },
         {
           "Key": "ems",
+          "Label": "EMS",
           "Description": "Enable EMS support (enabled by default). Enabled provides the best compatibility but certain applications may run better with other choices, or require EMS support to be disabled to work at all. Possible values: true, emsboard, emm386, false.",
           "DefaultValue": "true",
           "Value": "true",
@@ -2907,6 +2976,7 @@
         },
         {
           "Key": "umb",
+          "Label": "UMB",
           "Description": "Enable UMB support (enabled by default).",
           "DefaultValue": "true",
           "Value": "true",
@@ -2919,6 +2989,7 @@
         },
         {
           "Key": "ver",
+          "Label": "Version",
           "Description": "Set DOS version (5.0 by default). Specify in major.minor format. A single number is treated as the major version. Common settings are 3.3, 5.0, 6.22, and 7.1.",
           "DefaultValue": "5.0",
           "Value": "5.0",
@@ -2943,6 +3014,7 @@
         },
         {
           "Key": "keyboardlayout",
+          "Label": "Keyboard Layout",
           "Description": "Language code of the keyboard layout, or 'auto' ('auto' by default).",
           "DefaultValue": "auto",
           "Value": "auto",
@@ -3002,6 +3074,7 @@
       "Options": [
         {
           "Key": "ipx",
+          "Label": "IPX",
           "Description": "Enable IPX over UDP/IP emulation (enabled by default).",
           "DefaultValue": "false",
           "Value": "false",
@@ -3033,6 +3106,7 @@
         },
         {
           "Key": "nicbase",
+          "Label": "NIC Base",
           "Description": "Base address of the NE2000 card (300 by default).\nNote: Addresses 220 and 240 might not be available as they're assigned to the Sound Blaster and Gravis UltraSound by default.\nPossible values: 200, 220, 240, 260, 280, 2c0, 300, 320, 340, 360.",
           "DefaultValue": "300",
           "Value": "300",
@@ -3056,6 +3130,7 @@
         },
         {
           "Key": "nicirq",
+          "Label": "NIC IRQ",
           "Description": "The interrupt used by the NE2000 card (3 by default).\nNote: IRQs 3 and 5 might not be available as they're assigned to 'serial2' and the Gravis UltraSound by default.\nPossible values: 3, 4, 5, 9, 10, 11, 12, 14, 15.",
           "DefaultValue": "3",
           "Value": "3",
@@ -3078,6 +3153,7 @@
         },
         {
           "Key": "macaddr",
+          "Label": "MAC Address",
           "Description": "The MAC address of the NE2000 card ('AC:DE:48:88:99:AA' by default).",
           "DefaultValue": "AC:DE:48:88:99:AA",
           "Value": "AC:DE:48:88:99:AA",
@@ -3090,6 +3166,7 @@
         },
         {
           "Key": "tcp_port_forwards",
+          "Label": "TCP Port Forwards",
           "Description": "Forward one or more TCP ports from the host into the DOS guest (unset by default).\nThe format is:\n - port1  port2  port3 ... (e.g., 21 80 443)\n - This will forward FTP, HTTP, and HTTPS into the DOS guest.\nIf the ports are privileged on the host, a mapping can be used\n - host:guest  ..., (e.g., 8021:21 8080:80)\n - This will forward ports 8021 and 8080 to FTP and HTTP in the guest\nA range of adjacent ports can be abbreviated with a dash:\n - start-end ... (e.g., 27910-27960)\n - This will forward ports 27910 to 27960 into the DOS guest.\nMappings and ranges can be combined, too:\n - hstart-hend:gstart-gend ..., (e.g, 8040-8080:20-60)\n - This forwards ports 8040 to 8080 into 20 to 60 in the guest\nNotes:\n - If mapped ranges differ, the shorter range is extended to fit.\n - If conflicting host ports are given, only the first one is setup.\n - If conflicting guest ports are given, the latter rule takes precedent.",
           "DefaultValue": "",
           "Value": "",
@@ -3102,6 +3179,7 @@
         },
         {
           "Key": "udp_port_forwards",
+          "Label": "UDP Port Forwards",
           "Description": "Forward one or more UDP ports from the host into the DOS guest (unset by default). The format is the same as for TCP port forwards.",
           "DefaultValue": "",
           "Value": "",
