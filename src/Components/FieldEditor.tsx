@@ -27,6 +27,7 @@ interface FieldProps {
 };
 
 const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
+    const label = field.Label ?? formatLabel(field.Key);
     const [parentValue, setParentValue] = useState("");
     useEffect(() => {
         if (field.Parents && field.Parents.length > 0) {
@@ -44,7 +45,7 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
         case ValueType.Boolean:
             return (
                 <ToggleField
-                    label={field.Key + " " + parentValue}
+                    label={label + " " + parentValue}
                     checked={value === "true"}
                     onChange={(newValue) => onChange(newValue.toString())}
 
@@ -52,7 +53,7 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
             );
         case ValueType.Number:
             return (
-                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldContainerNumber}>
+                <Field label={label + " " + parentValue} className={sectionEditorFieldContainerNumber}>
                     <TextField
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
@@ -64,7 +65,7 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
         case ValueType.Range:
             return (
                 <SliderField
-                    label={field.Key + " " + parentValue}
+                    label={label + " " + parentValue}
                     value={Number(value)}
                     onChange={(newValue) => onChange(newValue.toString())}
                     min={field.Min}
@@ -75,15 +76,15 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
             );
         case ValueType.String:
             return (
-                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
+                <Field label={label + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
                     <TextField value={value} onChange={(e) => onChange(e.target.value)} />
                 </Field>
             );
         case ValueType.Enum:
             return (
-                <Field label={field.Key + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
+                <Field label={label + " " + parentValue} className={sectionEditorFieldFlexShrink} inlineWrap='keep-inline'>
                     <Dropdown
-                        menuLabel={field.Key}
+                        menuLabel={label}
                         selectedOption={value}
                         rgOptions={field.EnumValues.map((enumValue) => ({
                             data: enumValue.Key,
@@ -182,3 +183,7 @@ export const FieldEditor: VFC<FieldEditorProps> = ({ field, onChange, updateHelp
         </PanelSectionRow>
     );
 };
+
+function formatLabel(key: string) {
+    return key.split(/[_ ]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
