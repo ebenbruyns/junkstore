@@ -8,6 +8,7 @@
       "Options": [
         {
           "Key": "Forkname",
+          "Label": "Fork Name",
           "Description": "The name of the fork to use for DosBox. This will be used to determine the DosBox binary to use.",
           "DefaultValue": "staging",
           "Value": "staging",

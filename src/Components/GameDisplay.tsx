@@ -12,7 +12,6 @@ import {
     afterPatch,
     Button,
     joinClassNames,
-    SimpleModal,
     ConfirmModal,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
@@ -111,14 +110,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                 {steamClientID !== "" &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
-                    <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => uninstaller()} closeModal={() => { }}/>)
-
-                        }>Uninstall Game</MenuItem>
+                        <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => { uninstaller(); }} />)}> {/*pass uninstall fn like this so it doesn't wait for the async fn to close the modal */}
+                            Uninstall Game
+                        </MenuItem>
                     </>
                 }
-
                 {actions && actions.length > 0 && actions.map((action) => {
-
                     const installed = steamClientID != "";
                     const mustBeInstalled = action.InstalledOnly != undefined && action.InstalledOnly == true;
                     const show = installed || !mustBeInstalled;
@@ -136,12 +133,11 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                     appId: ""
                                 };
                                 if (steamClientID != "") {
-                                    logger.debug("steamClientID: ", steamClientID);
+                                    logger.debug("steamClientID: ", steamClientID, action);
                                     const id = parseInt(steamClientID);
                                     const details = await getAppDetails(id);
                                     if (details == null) {
                                         logger.error("details is null"); return;
-
                                     }
                                     else {
                                         logger.debug("details: ", details);
@@ -155,13 +151,15 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                     }
                                 }
                                 if (action.Type == "ScriptActionConfirm") {
-                                    showModal(<ConfirmModal strTitle="Confirm" strDescription={action.Title} onOK={() => scriptRunner(initActionSet, action.ActionId, args)} closeModal={() => { }}/>);
+                                    showModal(<ConfirmModal strTitle="Confirm" strDescription={action.Title + '?'} onOK={() => { scriptRunner(initActionSet, action.ActionId, args); }} />);
                                 }
                                 else {
                                     scriptRunner(initActionSet, action.ActionId, args);
                                 }
                             }
-                        }>{action.Title}</MenuItem>;
+                        }>
+                            {action.Title}
+                        </MenuItem>;
                     else
                         return null;
 
@@ -276,14 +274,12 @@ const ImageMarquee: VFC<ImageMarqueeProps> = ({ sources, height }) => {
     return (
         <Marquee key={key} play={true} center={true} delay={0} speed={10}>
             <div key={'content'} style={{ height: height }} ref={ref}>
-                {Array.isArray(sources) && //* this should not be necessary if the type is correct
-                    sources.map((src: string) => (
-                        <MarqueeImage
-                            src={src}
-                            onLoad={checkOverflow}
-                        />
-                    ))
-                }
+                {sources.map((src: string) => (
+                    <MarqueeImage
+                        src={src}
+                        onLoad={checkOverflow}
+                    />
+                ))}
             </div>
         </Marquee>
     );

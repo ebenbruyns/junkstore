@@ -13,6 +13,7 @@ export interface ParentValue {
 }
 export interface KeyValuePair {
   Key: string;
+  Label?: string;
   Value: string;
   DefaultValue: string;
   Description: string;

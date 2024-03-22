@@ -8,6 +8,7 @@
       "Options": [
         {
           "Key": "OffLineMode",
+          "Label": "OffLine Mode",
           "Description": "Enable Epic Games Store Offline Mode. This will allow you to play games without an internet connection.",
           "DefaultValue": "false",
           "Value": "false",
@@ -20,6 +21,7 @@
         },
         {
           "Key": "InstallLocation",
+          "Label": "Install Location",
           "Description": "Set the install location for Epic Games Store games. This will be used when installing new games.",
           "DefaultValue": "SSD",
           "Value": "SSD",

@@ -1,15 +1,16 @@
 import {
     Focusable,
-    PanelSection, Dropdown, ModalRoot, ModalRootProps, 
+    PanelSection, Dropdown, ModalRoot, ModalRootProps,
     quickAccessControlsClasses,
     gamepadDialogClasses
 } from "decky-frontend-lib";
 import { VFC, useEffect, useState, useRef } from "react";
 import { ValueType, Section, ConfData, KeyValuePair, ActionSet, ContentError, SaveRefresh, ExecuteGetActionSetArgs } from "./Types/Types";
-import { SectionEditor, sectionEditorFieldContainer } from "./Components/SectionEditor";
+import { SectionEditor, sectionEditorFieldRoot } from "./Components/SectionEditor";
 import Logger from "./Utils/logger";
 import { EditorProperties } from "./Types/EditorProperties";
 import { executeAction } from "./Utils/executeAction";
+import { sectionEditorFieldContainerNumber, sectionEditorFieldFlexShrink } from './Components/FieldEditor';
 
 const confEditorRootClass = 'conf-editor-modal-root';
 
@@ -21,8 +22,8 @@ export interface ErrorModalProps extends ModalRootProps {
 export const ConfEditor: VFC<EditorProperties> = ({
     serverAPI, initActionSet, initAction, contentId, closeModal, refreshParent
 }) => {
-    const logger = new Logger("ConfEditor")
-    logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`)
+    const logger = new Logger("ConfEditor");
+    logger.log(`initActionSet: ${initActionSet}, initAction: ${initAction}, contentId: ${contentId}`);
     const [confData, setConfData] = useState<ConfData>();
     const focusRef = useRef<HTMLTextAreaElement>(null);
     const [modeLevel, setModeLevel] = useState<number>(0);
@@ -38,7 +39,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
         Max: 100,
         Parents: [],
         EnumValues: [],
-    } );
+    });
     const [sectionHelpText, setSectionHelpText] = useState<string>();
     useEffect(() => {
         OnInit();
@@ -52,17 +53,17 @@ export const ConfEditor: VFC<EditorProperties> = ({
             {
                 content_id: contentId
             }
-        )
-        
-        logger.log("OnInit result: ", actionSetResult)
+        );
+
+        logger.log("OnInit result: ", actionSetResult);
         if (!actionSetResult) {
             closeModal();
             return;
         }
 
         const setName = actionSetResult.Content.SetName;
-        logger.log("SetName: ", setName)
-       
+        logger.log("SetName: ", setName);
+
         const configDataResult = await executeAction<ExecuteGetActionSetArgs, ConfData>( //supposedly here we know that this action will return this type of Content
             serverAPI,
             setName,
@@ -70,7 +71,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
             {
                 content_id: contentId
             }
-        )
+        );
 
         if (!configDataResult) {
             closeModal();
@@ -80,13 +81,13 @@ export const ConfEditor: VFC<EditorProperties> = ({
         setActionSetName(setName);
         setConfData(configDataResult.Content);
 
-    }
+    };
     const handleSectionChange = (section: Section) => {
         if (!confData) {
-          return;
+            return;
         }
         const updatedSections = confData.Sections.map((s) => s.Name === section.Name ? section : s); //as per type def Sections should always be defined
-        
+
         setConfData({ ...confData, Sections: updatedSections });
     };
     const updateHelpText = (field: KeyValuePair) => {
@@ -94,18 +95,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
     };
     return (
         <>
-            <style>{`
-                .${confEditorRootClass} {
-                    padding: 0 !important;
-                    width: 100% !important;
-                }
-                .${confEditorRootClass} .${quickAccessControlsClasses.PanelSection} {
-                    padding: 0 2.8vw;
-                }
-                .${confEditorRootClass} .${sectionEditorFieldContainer} .${gamepadDialogClasses.Field} {
-                    margin: 0;
-                }
-            `}</style>
+            {confEditorStyle}
             <ModalRoot className={confEditorRootClass} closeModal={closeModal}>
                 <Focusable
                     style={{ display: "flex", minHeight: '400px' }}
@@ -138,7 +128,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         }}
                     >
                         <PanelSection title="Configuration: ">
-                            <div style={{ marginBottom: '10px'}}>
+                            <div style={{ marginBottom: '10px' }}>
                                 <Dropdown
                                     rgOptions={[
                                         { data: 0, label: "Basic" },
@@ -176,7 +166,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                     onActivate={() => { }}
                                     onSecondaryActionDescription="Save config"
                                     onSecondaryButton={async () => {
-                                        logger.log("Saving config: ", confData)
+                                        logger.log("Saving config: ", confData);
                                         const result = await executeAction<ExecuteGetActionSetArgs, SaveRefresh /*| SomeOtherContentPossibility */>( //pass multiple possible Content types with a union
                                             serverAPI,
                                             actionSetName,
@@ -185,15 +175,15 @@ export const ConfEditor: VFC<EditorProperties> = ({
                                                 content_id: contentId,
                                                 inputData: confData
                                             });
-                                        logger.log("Save result: ", result)
+                                        logger.log("Save result: ", result);
                                         if (!result) {
-                                            closeModal(); 
+                                            closeModal();
                                             return;
                                         }
                                         if (result.Type === "Refresh") {
-                                            const tmp = result.Content //if some other possibilties then you can cast here
+                                            const tmp = result.Content; //if some other possibilties then you can cast here
                                             if (tmp.Refresh) {
-                                                refreshParent()
+                                                refreshParent();
                                             }
                                         }
                                         //Router.Navigate("/game/" + tabindex + "/" + shortname)
@@ -221,7 +211,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                         }}
                     >
                         <Focusable
-                            onActivate={() => {}}
+                            onActivate={() => { }}
                             style={{
                                 minHeight: 0,
                                 position: "sticky",
@@ -231,7 +221,7 @@ export const ConfEditor: VFC<EditorProperties> = ({
                             }}
                             noFocusRing={false}
                         >
-                            <h3 style={{ margin: 0, marginBottom: '5px' }}>{sectionHelpText}</h3>
+                            <h4 style={{ margin: 0, marginBottom: '5px', textTransform: 'uppercase' }}>{sectionHelpText}</h4>
                             <div>{helpText.Description}</div>
                             {helpText.EnumValues &&
                                 helpText.EnumValues.map((enumValue) => (
@@ -246,3 +236,41 @@ export const ConfEditor: VFC<EditorProperties> = ({
         </>
     );
 };
+
+const confEditorStyle = <style>
+    {`
+    .${confEditorRootClass} {
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    .${confEditorRootClass} .${quickAccessControlsClasses.PanelSection} {
+        padding: 0 2.8vw;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldRoot} .${gamepadDialogClasses.Field} {
+        margin: 0;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldRoot} .${gamepadDialogClasses.FieldLabelRow} {
+        height: 40px;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldFlexShrink} .${gamepadDialogClasses.FieldLabel} {
+        flex: 0 1 auto;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldFlexShrink} .${gamepadDialogClasses.FieldChildrenWithIcon} {
+        flex: auto;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldFlexShrink} .${gamepadDialogClasses.DropDownControlButtonContents}>:first-child {
+        overflow: hidden;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldFlexShrink} .${gamepadDialogClasses.FieldChildrenInner}>:first-child {
+        max-width: 140px;
+        min-width: 80px;
+        margin-left: auto;
+    }
+    .${confEditorRootClass} .${gamepadDialogClasses.DropDownControlButtonContents}>svg {
+        min-width: 1em;
+    }
+    .${confEditorRootClass} .${sectionEditorFieldContainerNumber} .${gamepadDialogClasses.FieldChildrenInner} {
+        width: 80px;
+    }
+    `}
+</style>;
