@@ -316,6 +316,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 await SteamClient.Apps.SpecifyCompatTool(id, "");
             }
             setInstalling(false);
+            serverAPI.toaster.toast({
+                title: "Junk-Store",   
+                body: "Launch options set",
+            });
 
         }
         const imageResult = await executeAction<ExecuteGetGameDetailsArgs, GameImages>(

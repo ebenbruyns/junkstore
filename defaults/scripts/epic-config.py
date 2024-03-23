@@ -3,10 +3,10 @@ import epic
 import json
 import argparse
 
-import sharedgameset
+import GameSet
 
 
-class EpicArgs(sharedgameset.GenericArgs):
+class EpicArgs(GameSet.GenericArgs):
     def __init__(self, setNameConfig):
         super().__init__()
         self.addArguments()

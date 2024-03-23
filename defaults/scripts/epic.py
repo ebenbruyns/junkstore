@@ -10,14 +10,14 @@ import xml.etree.ElementTree as ET
 from typing import List
 import subprocess
 import time
-import sharedgameset
+import GameSet
 import re
 from datetime import datetime, timedelta
 
 class CmdException(Exception):
     pass
 
-class Epic(sharedgameset.GameSet):
+class Epic(GameSet.GameSet):
     def __init__(self, db_file, setNameConfig=None):
         super().__init__(db_file, setNameConfig)
 

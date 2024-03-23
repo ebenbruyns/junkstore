@@ -3,6 +3,8 @@ EPICCONF="${DECKY_PLUGIN_DIR}/scripts/epic-config.py"
 export LEGENDARY="/bin/flatpak run com.github.derrod.legendary"
 PROTON_TRICKS="/bin/flatpak run com.github.Matoking.protontricks"
 # the launcher script to use in steam
+export PYTHONPATH="${DECKY_PLUGIN_DIR}/scripts/":"${DECKY_PLUGIN_DIR}/scripts/shared/":$PYTHONPATH
+
 export LAUNCHER="${DECKY_PLUGIN_DIR}/scripts/${Extensions}/Epic/epic-launcher.sh"
 export ARGS_SCRIPT="${DECKY_PLUGIN_DIR}/scripts/${Extensions}/Epic/get-epic-args.sh"
 DBNAME="epic.db"
