@@ -38,7 +38,7 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
     const [isLimitedLoading, setIsLimitedLoading] = useState(false);
     const [installedFilterLoading, setInstalledLoading] = useState(false);
     const [scriptActions, setScriptActions] = useState<MenuAction[] | null>();
-    const [filter, setFilter] = useState<string>("")
+    const [filter, setFilter] = useState(argsCache.filter);
 
     useEffect(() => {
         (async () => {
@@ -50,8 +50,6 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                 }
                 const scriptActions = actionRes.Content;
                 setScriptActions(scriptActions.Actions);
-                setFilter(argsCache.filter)
-
             }
             catch (e) {
                 logger.error(e);
@@ -141,10 +139,9 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                         placeholder="Search"
                         value={filter}
                         onChange={(e) => {
-                            updateCache('filter', e.target.value)
-                            setFilter(e.target.value)
-                        
-                    }}
+                            updateCache('filter', e.target.value);
+                            setFilter(e.target.value);
+                        }}
                     />
                 </div>
                 <DialogButton

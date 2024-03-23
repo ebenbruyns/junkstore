@@ -8,7 +8,8 @@
       "Options": [
         {
           "Key": "EasyAntiCheat",
-          "Description": "Enable steam easy anti-cheat runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
+          "Label": "Easy Anti-Cheat",
+          "Description": "Enable steam Easy Anti-Cheat runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
           "DefaultValue": "false",
           "Value": "false",
           "Type": "Boolean",
@@ -20,7 +21,8 @@
         },
         {
           "Key": "BattleEye",
-          "Description": "Enable BattleEye runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
+          "Label": "BattlEye",
+          "Description": "Enable BattlEye runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
           "DefaultValue": "false",
           "Value": "false",
           "Type": "Boolean",
@@ -56,6 +58,7 @@
         },
         {
           "Key": "PULSE_LATENCY_MSEC",
+          "Label": "Pulse Audio Latency ms",
           "Description": "Enable PulseAudio latency fix. This can help with audio latency in some games, but can also cause issues in others.",
           "DefaultValue": "0",
           "Value": "0",
@@ -68,6 +71,7 @@
         },
         {
           "Key": "RADV_PERFTEST",
+          "RADV": "RADV Perf Test",
           "Description": "Enable RADV performance test. This can help with performance in some games, but can also cause issues in others.",
           "DefaultValue": "",
           "Value": "",
@@ -77,13 +81,14 @@
           "ModeLevel": 0,
           "Parents": [],
           "EnumValues": [
-            { "Key": "gpl", "Description": "" },
-            { "Key": "aco", "Description": "" },
-            { "Key": "amdvlk", "Description": "" }
+            { "Key": "gpl", "Description": "", "Label": "gpl" },
+            { "Key": "aco", "Description": "", "Label": "aco" },
+            { "Key": "amdvlk", "Description": "", "Label": "amdvlk" }
           ]
         },
         {
           "Key": "VKD3D",
+          "Label": "VKD3D",
           "Description": "Enable VKD3D. This can help with performance in some games, but can also cause issues in others.",
           "DefaultValue": "false",
           "Value": "false",
@@ -96,6 +101,7 @@
         },
         {
           "Key": "VKD3D_PROTON",
+          "Label": "VKD3D-Proton",
           "Description": "Enable VKD3D-Proton. This can help with performance in some games, but can also cause issues in others.",
           "DefaultValue": "false",
           "Value": "false",
@@ -108,6 +114,7 @@
         },
         {
           "Key": "FSR_STRENGTH",
+          "Label": "FSR Strength",
           "Description": "Enable FidelityFX Super Resolution. This can help with performance in some games, but can also cause issues in others. 0 = Off, 1 = Ultra Performance, 2 = Performance, 3 = Balanced, 4 = Quality, 5 = Ultra Quality",
           "DefaultValue": "0",
           "Value": "0",

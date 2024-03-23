@@ -291,8 +291,10 @@ class Plugin:
             temp_file = "/tmp/custom_backend.zip"
             # disabling ssl verfication for testing, github doesn't seem to have a valid ssl cert, seems wrong
             async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
-                async with session.get(url) as response:
-                    assert response.status == 200
+                decky_plugin.logger.info(f"Downloading {url}")
+                async with session.get(url, allow_redirects=True) as response:
+                    decky_plugin.logger.debug(f"Response status: {response}")
+                    # assert response.status == 200 
                     with open(temp_file, "wb") as f:
                         while True:
                             chunk = await response.content.readany()
@@ -304,11 +306,13 @@ class Plugin:
 
             if backup:
                 # Find the latest backup folder
+                decky_plugin.logger.info("Creating backup")
                 backup_dir = os.path.join(runtime_dir, "backup")
                 backup_count = 1
                 while os.path.exists(f"{backup_dir} {backup_count}"):
                     backup_count += 1
                 latest_backup_dir = f"{backup_dir} {backup_count}"
+                decky_plugin.logger.info(f"Creating backup at {latest_backup_dir}")
 
                 # Create the latest backup folder
                 os.makedirs(latest_backup_dir, exist_ok=True)
@@ -317,9 +321,13 @@ class Plugin:
                 for item in os.listdir(runtime_dir):
                     item_path = os.path.join(runtime_dir, item)
                     if (os.path.isfile(item_path) or os.path.isdir(item_path)) and not item.startswith("backup"):
-                        shutil.move(item_path, latest_backup_dir)
-                        decky_plugin.logger.info(
-                            "Backup completed successfully")
+                        if item.endswith(".db"):
+                            shutil.copy(item_path, latest_backup_dir)
+                        else:
+                            shutil.move(item_path, latest_backup_dir)
+                decky_plugin.logger.info(
+                    "Backup completed successfully")
+               
 
             with zipfile.ZipFile(temp_file, "r") as zip_ref:
                 zip_ref.extractall(runtime_dir)
