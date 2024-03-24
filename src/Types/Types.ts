@@ -1,3 +1,9 @@
+import { AppDetailsStore } from './steam/AppDetailsStore';
+
+declare global {
+    var appDetailsStore: AppDetailsStore;
+    var appStore: AppStore;
+}
 
 export interface EnumStrings {
   Key: string;
