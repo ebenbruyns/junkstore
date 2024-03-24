@@ -1,4 +1,4 @@
-import { Focusable, ServerAPI, ModalRoot, sleep, gamepadDialogClasses } from "decky-frontend-lib";
+import { Focusable, ServerAPI, ModalRoot, sleep, gamepadDialogClasses, showModal, Navigation } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
 import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
@@ -180,7 +180,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             const result = await executeAction<ExecuteGetGameDetailsArgs, ContentType>(
                 serverAPI,
                 initActionSet,
-                update?"Update":"Download",
+                update ? "Update" : "Download",
                 {
                     shortname: shortname
                 }
@@ -192,7 +192,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             logger.error(error);
         }
     };
-    
+
     const runScript = async (actionSet: string, actionId: string, args: any) => {
         const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
             logger.log("runscript game state update: ", data);
@@ -228,9 +228,9 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
             logger.error(error);
         }
     };
-    const runner = async () => {
+    const runner = () => {
 
-        setTimeout(async () => {
+        setTimeout(() => {
             let id = parseInt(steamClientID);
             let gid = gameIDFromAppID(id);
             const { unregister } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: GameStateUpdate) => {
@@ -239,7 +239,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                     // This might not work in desktop mode.
                     let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance;
                     if (gamepadWindowInstance) {
-                        setTimeout(async () => {
+                        setTimeout(() => {
                             gamepadWindowInstance.NavigateBack();
                             unregister();
                         }, 1000);
@@ -247,7 +247,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                 }
             });
 
-            await SteamClient.Apps.RunGame(gid, "", -1, 100);
+            SteamClient.Apps.RunGame(gid, "", -1, 103);
             closeModal();
         }, 500);
     };
@@ -343,14 +343,14 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
         if (images.GridH !== null) {
             SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
         }
-        
+
 
     };
 
     const cleanupIds = async () => {
         const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824);
         for (const app of apps) {
-            SteamClient.Apps.RemoveShortcut(app.appid); 
+            SteamClient.Apps.RemoveShortcut(app.appid);
         }
     };
 
@@ -438,7 +438,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({
                             runner={runner}
                             actions={scriptActions}
                             resetLaunchOptions={resetLaunchOptions}
-                            updater={()=> download(true)}
+                            updater={() => download(true)}
                             scriptRunner={runScript}
                             clearActiveGame={clearActiveGame}
                             reloadData={reloadData}

@@ -39,8 +39,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
        
         logger.debug("setName: ", setName);
         logger.debug("result: ", actionSetResult);
-        const id = parseInt(contentId)
-        const details = await getAppDetails(id)
+        const details = getAppDetails(contentId);
         if (details == null) {
             logger.error("details is null"); return;
 
@@ -91,11 +90,11 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                 {!busy && filesData.Files && filesData.Files.map((file) => {
                     const runExe = async () => {
                         setBusy(true);
-                        logger.debug(`steamclientid ${parseInt(contentId)}`)
-                        const appDetails = await getAppDetails(parseInt(contentId))
-                        logger.debug("app details: ", appDetails)
+                        logger.debug(`steamclientid ${contentId}`);
+                        const appDetails = getAppDetails(contentId);
+                        logger.debug("app details: ", appDetails);
                         if (appDetails == null) {
-                            logger.error("app details is null")
+                            logger.error("app details is null");
                             return;
                         }
 

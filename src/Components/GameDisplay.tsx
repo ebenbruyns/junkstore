@@ -122,7 +122,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
                     if (show)
                         return <MenuItem onSelected={
-                            async () => {
+                            () => {
                                 const args = {
                                     shortname: shortName,
                                     steamClientID: "",
@@ -134,8 +134,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 };
                                 if (steamClientID != "") {
                                     logger.debug("steamClientID: ", steamClientID, action);
-                                    const id = parseInt(steamClientID);
-                                    const details = await getAppDetails(id);
+                                    const details = getAppDetails(steamClientID);
                                     if (details == null) {
                                         logger.error("details is null"); return;
                                     }
@@ -146,8 +145,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                         args.startDir = startDir;
                                         args.compatToolName = compatToolName;
                                         args.steamClientID = steamClientID;
-                                        args.gameId = String(steamClientID);
-                                        args.appId = String(id);
+                                        args.gameId = steamClientID;
+                                        args.appId = steamClientID;
                                     }
                                 }
                                 if (action.Type == "ScriptActionConfirm") {

@@ -19,17 +19,17 @@ export async function runApp(id: number) {
     }, 1500);
 }
 
-export async function configureShortcut(id: Number, launchOptions: LaunchOptions) {
+export function configureShortcut(id: Number, launchOptions: LaunchOptions) {
     const logger = new Logger("configureShortcut");
 
     if (launchOptions) {
         logger.debug("launchOptions: ", launchOptions);
-        await SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
-        await SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
-        await SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
+        SteamClient.Apps.SetAppLaunchOptions(id, launchOptions.Options);
+        SteamClient.Apps.SetShortcutExe(id, launchOptions.Exe);
+        SteamClient.Apps.SetShortcutStartDir(id, launchOptions.WorkingDir);
 
         if (launchOptions.Compatibility) {
-            await SteamClient.Apps.SpecifyCompatTool(id, launchOptions.CompatToolName);
+            SteamClient.Apps.SpecifyCompatTool(id, launchOptions.CompatToolName);
         }
     }
 }
@@ -56,7 +56,7 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
         const newLaunchOptions = res.result.Content as LaunchOptions; //only acceptable if this is gauranteed that in this case (res.result.Type === 'RunExe') Content is indeed LaunchOptions
         if (args.appId) {
             const id = parseInt(args.appId);
-            const details = await getAppDetails(id)
+            const details = getAppDetails(id);
             logger.log("details: ", details);
             const oldLaunchOptions: LaunchOptions = { //TODO: what happens if details is null? should it be handled specifically or should it be a allowed to set properties of undefined
                 Name: details?.strDisplayName || "",
@@ -75,16 +75,16 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
                     // This might not work in desktop mode.
                     let gamepadWindowInstance = SteamUIStore.m_WindowStore.GamepadUIMainWindowInstance
                     if (gamepadWindowInstance) {
-                        setTimeout(async () => {
+                        setTimeout( () => {
                             gamepadWindowInstance.NavigateBack();
                             unregister();
-                            await configureShortcut(id, oldLaunchOptions);
+                            configureShortcut(id, oldLaunchOptions);
 
                         }, 1000)
                     }
                 }
             })
-            await configureShortcut(id, newLaunchOptions);
+            configureShortcut(id, newLaunchOptions);
             logger.debug("running app: ", id);
             const gameId = gameIDFromAppID(id)
             SteamClient.Apps.RunGame(gameId, "", -1, 100);
@@ -121,32 +121,9 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
     return res.result as ContentResult<Content>; //only acceptable because we've handle the other possibilities explicitly
 }
 
-export async function getAppDetails(appId: number): Promise<AppDetails | null> {
-    const logger = new Logger("getAppDetails");
-    return await new Promise((resolve) => {
-        let timeoutId: NodeJS.Timeout | undefined;
-        try {
-            const { unregister } = (SteamClient as SteamClientEx).Apps.RegisterForAppDetails(appId, (details) => {
-                clearTimeout(timeoutId);
-                unregister();
-                logger.debug("App details: ", details);
-                resolve(details);
-            });
-
-            timeoutId = setTimeout(() => {
-                unregister();
-                logger.debug("App details: timeout.");
-                resolve(null);
-            }, 1000);
-        } catch (error) {
-            clearTimeout(timeoutId);
-            logger.error(error);
-            resolve(null);
-        }
-    });
+export function getAppDetails(appId: number | string) {
+    return appDetailsStore.GetAppDetails(typeof appId === 'string' ? parseInt(appId) : appId);
 }
-
-
 
 
 export interface SystemSuspendInfo {
