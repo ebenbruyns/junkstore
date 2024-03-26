@@ -1,4 +1,3 @@
-
 type AppOverview = {
     app_type: number,
     gameid: string,
@@ -16,7 +15,7 @@ type AppOverview = {
     library_capsule_filename: string | undefined,
     library_id: number | string | undefined,
     local_per_client_data: SteamGameClientData,
-    m_gameid: number | string | undefined,
+    m_gameid: string | undefined,
     m_setStoreCategories: Set<number>,
     m_setStoreTags: Set<number>,
     mastersub_appid: number | string | undefined,
@@ -27,7 +26,7 @@ type AppOverview = {
     most_available_clientid: string,
     most_available_per_client_data: SteamGameClientData,
     mru_index: number | undefined,
-    optional_parent_app_id: number | string | undefined,
+    optional_parent_app_id: number | undefined,
     owner_account_id: number | string | undefined,
     per_client_data: SteamGameClientData[],
     review_percentage_with_bombs: number,

@@ -8,7 +8,7 @@ import {
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
 import { ErrorDisplay } from "./ErrorDisplay";
-import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
+import { gameIDFromAppID } from "../Utils/utils";
 
 
 export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
