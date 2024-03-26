@@ -55,6 +55,7 @@ const FieldItem: VFC<FieldProps> = ({ field, value, onChange, fieldType }) => {
             return (
                 <Field label={label + " " + parentValue} className={sectionEditorFieldContainerNumber}>
                     <TextField
+                        style={{ overflow: 'hidden' }}
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         //@ts-ignore
