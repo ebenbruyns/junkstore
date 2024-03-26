@@ -13,6 +13,8 @@ import {
     Button,
     joinClassNames,
     ConfirmModal,
+    Navigation,
+    FooterLegendProps,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
@@ -166,6 +168,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         );
     };
 
+    const focusableProps: FooterLegendProps = steamClientID === '' ? {} :
+        {
+            onOptionsButton: () => Navigation.Navigate(`/library/app/${steamClientID}`),
+            onOptionsActionDescription: 'Go to Steam App Page'
+        };
+
     return (
         <>
             <div
@@ -186,6 +194,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     padding: '20px 24px',
                     background: 'radial-gradient(155.42% 100% at 0% 0%, #060a0e 0 0%, #0e141b 100%)'
                 }}
+                {...focusableProps}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '30px 0' }}>
                     <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{name}</div>
@@ -198,8 +207,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <ProgressBar nProgress={progress.Percentage} />
                             </div>
                         )}
-                        <Focusable
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
+                        <Focusable style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
                             <div
                                 className={joinClassNames(basicAppDetailsClasses.AppActionButton, appActionButtonClasses.PlayButtonContainer, installing || steamClientID == "" ? '' : appActionButtonClasses.Green)}
                                 style={{ height: '100%', width: '100%' }}
@@ -234,7 +242,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </div>
                 </div>
                 <div style={{ width: '100%', padding: '8px 0', color: '#c2c0c0' }}>
-                    <ScrollableWindow height='100%' onCancel={closeModal}>
+                    <ScrollableWindow height='100%' onCancel={closeModal} {...focusableProps}>
                         <div
                             style={{ paddingRight: '10px', whiteSpace: 'pre-wrap' }}
                             dangerouslySetInnerHTML={{ __html: description }}
