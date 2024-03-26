@@ -52,7 +52,7 @@ class Epic(GameSet.GameSet):
         offline_switch = "--offline" if offline else ""
         result = self.execute_shell(
             os.path.expanduser(
-                f"{self.legendary_cmd} launch {game_id} --json {offline_switch}"
+                f"{self.legendary_cmd} launch {game_id} --json --skip-version-check {offline_switch}"
             )
         )
         print(result[type])
@@ -85,7 +85,7 @@ class Epic(GameSet.GameSet):
         offline_switch = "--offline" if offline else ""
         try:
             result = self.execute_shell(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch} ")
+            f"{self.legendary_cmd} launch {game_id} --json --skip-version-check {offline_switch} ")
             return " ".join(result['egl_parameters'])
         except CmdException as e:
             raise e
@@ -105,7 +105,7 @@ class Epic(GameSet.GameSet):
         offline_switch = "--offline" if offline else ""
         launcher = os.environ['LAUNCHER']
         result = self.execute_shell(
-            f"{self.legendary_cmd} launch {game_id} --json {offline_switch}")
+            f"{self.legendary_cmd} launch {game_id} --json  --skip-version-check {offline_switch}")
        
         script_path = os.path.expanduser(launcher)
         return json.dumps(

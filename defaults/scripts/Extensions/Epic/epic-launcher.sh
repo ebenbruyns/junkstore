@@ -72,14 +72,28 @@ else
 fi
 
 CMD=$@
-ARGS=$("${ARGS_SCRIPT}" $ID)
 function sync-saves(){
     if [[ "${OFFLINE_MODE}" == "" ]]; then
     $LEGENDARY sync-saves $ID
 fi
 }
 sync-saves
-eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+
+QUOTED_ARGS=""
+for arg in "$@"; do
+    QUOTED_ARGS+=" \"${arg}\"" 
+done
+
+ARGS=$("${ARGS_SCRIPT}" $ID)
+echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+for arg in $ARGS; do
+    QUOTED_ARGS+=" \"${arg}\"" 
+done
+
+echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+
+eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+# eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 sync-saves
 
 
