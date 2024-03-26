@@ -133,9 +133,9 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         setBusy(false);
                     };
 
-                    const setExecutable = async () => {
+                    const setExecutable = () => {
                         logger.debug(`steamclientid ${parseInt(contentId)}`);
-                        await SteamClient.Apps.SetShortcutExe(parseInt(contentId), file.Path);
+                        SteamClient.Apps.SetShortcutExe(parseInt(contentId), file.Path);
                         closeModal();
                     };
                     return (

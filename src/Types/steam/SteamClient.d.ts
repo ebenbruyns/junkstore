@@ -16,14 +16,16 @@ interface SteamClient {
         RegisterForAppDetails: (appId: number, callback: (details: AppDetails) => void) => { unregister: () => void; };
         RemoveShortcut: (appId: number) => void;
         RunGame: (gameId: string, _1: string, _2: number, _3: number) => void;
+        TerminateApp: (gameId: string, _1: boolean) => void;
+        SetAppHidden: (appId: number, value: boolean) => void;
         SetAppLaunchOptions: (appId: number, options: string) => void;
         SetAppResolutionOverride: (appId: number, resolution: AppResolutionOverrideConstants | string) => void;
         SetShortcutName: (appId: number, name: string) => void;
-        TerminateApp: (gameId: string, _1: boolean) => void;
-        SpecifyCompatTool: (appId: number, strToolName: string) => void;
+        SetShortcutLaunchOptions: (appId: number, options: string) => void;
         SetShortcutExe: (appId: number, exe: string) => void;
         SetShortcutStartDir: (appId: number, directory: string) => void;
         SetCustomArtworkForApp: (appId: number, base64Image: string, imageType: string, assetType: AppArtworkAssetType) => Promise<any>;
+        SpecifyCompatTool: (appId: number, strToolName: string) => void;
     };
     GameSessions: {
         RegisterForAppLifetimeNotifications: (callback: (data: LifetimeNotification) => void) => { unregister: () => void; };
@@ -39,4 +41,7 @@ interface SteamClient {
             RegisterForStateChanges: (callback: () => void) => { unregister: () => void; };
         };
     };
+    Installs: {
+        OpenInstallWizard: (appIds: number[]) => void;
+    }
 }
