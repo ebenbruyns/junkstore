@@ -13,6 +13,8 @@ import {
     Button,
     joinClassNames,
     ConfirmModal,
+    Navigation,
+    FooterLegendProps,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
@@ -21,7 +23,7 @@ import { ConfEditor } from "../ConfEditor";
 import { BatEditor } from "../BatEditor";
 import Logger from "../Utils/logger";
 import { ExeRunner } from "../ExeRunner";
-import { getAppDetails } from "../Utils/executeAction";
+import { getAppDetails } from '../Utils/utils';
 import { ScrollableWindow } from '../ScrollableWindow';
 import { appActionButtonClasses, basicAppDetailsClasses } from '../staticClasses';
 
@@ -46,8 +48,8 @@ interface GameDisplayProperties {
     resetLaunchOptions: () => void;
     updater: () => void;
     scriptRunner: (actionSet: string, actionId: string, args: any) => void;
-    clearActiveGame: () => void;
     reloadData: () => void;
+    onExeExit: () => void;
 }
 
 
@@ -71,8 +73,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         actions,
         resetLaunchOptions,
         scriptRunner,
-        clearActiveGame,
-        reloadData
+        reloadData,
+        onExeExit
     }
 ) => {
     const logger = new Logger("GameDisplay");
@@ -100,13 +102,10 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
                 {steamClientID !== "" &&
-                    <MenuItem onSelected={
-                        () => {
-
-                            logger.debug("show exe list");
-                            showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} refreshParent={reloadData} />);
-                        }
-                    }>Run exe in Game folder</MenuItem>}
+                    <MenuItem onSelected={() => showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} refreshParent={reloadData} onExeExit={onExeExit} />)}>
+                        Run exe in Game folder
+                    </MenuItem>
+                }
                 {steamClientID !== "" &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
@@ -122,7 +121,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
 
                     if (show)
                         return <MenuItem onSelected={
-                            async () => {
+                            () => {
                                 const args = {
                                     shortname: shortName,
                                     steamClientID: "",
@@ -134,8 +133,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 };
                                 if (steamClientID != "") {
                                     logger.debug("steamClientID: ", steamClientID, action);
-                                    const id = parseInt(steamClientID);
-                                    const details = await getAppDetails(id);
+                                    const details = getAppDetails(steamClientID);
                                     if (details == null) {
                                         logger.error("details is null"); return;
                                     }
@@ -146,8 +144,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                         args.startDir = startDir;
                                         args.compatToolName = compatToolName;
                                         args.steamClientID = steamClientID;
-                                        args.gameId = String(steamClientID);
-                                        args.appId = String(id);
+                                        args.gameId = steamClientID;
+                                        args.appId = steamClientID;
                                     }
                                 }
                                 if (action.Type == "ScriptActionConfirm") {
@@ -170,6 +168,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         );
     };
 
+    const focusableProps: FooterLegendProps = steamClientID === '' ? {} :
+        {
+            onOptionsButton: () => Navigation.Navigate(`/library/app/${steamClientID}`),
+            onOptionsActionDescription: 'Go to Steam App Page'
+        };
+
     return (
         <>
             <div
@@ -190,6 +194,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     padding: '20px 24px',
                     background: 'radial-gradient(155.42% 100% at 0% 0%, #060a0e 0 0%, #0e141b 100%)'
                 }}
+                {...focusableProps}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '30px 0' }}>
                     <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{name}</div>
@@ -202,8 +207,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <ProgressBar nProgress={progress.Percentage} />
                             </div>
                         )}
-                        <Focusable
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
+                        <Focusable style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
                             <div
                                 className={joinClassNames(basicAppDetailsClasses.AppActionButton, appActionButtonClasses.PlayButtonContainer, installing || steamClientID == "" ? '' : appActionButtonClasses.Green)}
                                 style={{ height: '100%', width: '100%' }}
@@ -211,7 +215,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <Button
                                     style={{ display: 'flex', justifyContent: 'left', fontSize: '14px' }}
                                     className={installing ? 'DialogButton' : joinClassNames(appActionButtonClasses.PlayButton, appActionButtonClasses.ButtonChild)}
-                                    onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}>
+                                    onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}
+                                >
                                     {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
                                 </Button>
                             </div>
@@ -237,13 +242,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </div>
                 </div>
                 <div style={{ width: '100%', padding: '8px 0', color: '#c2c0c0' }}>
-                    <ScrollableWindow
-                        height='100%'
-                        onCancel={() => {
-                            clearActiveGame();
-                            closeModal();
-                        }}
-                    >
+                    <ScrollableWindow height='100%' onCancel={closeModal} {...focusableProps}>
                         <div
                             style={{ paddingRight: '10px', whiteSpace: 'pre-wrap' }}
                             dangerouslySetInnerHTML={{ __html: description }}

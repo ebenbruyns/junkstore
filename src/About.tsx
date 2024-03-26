@@ -177,7 +177,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                 <DialogButton
                                     disabled={isRuntimeInstalled("Proton EasyAntiCheat Runtime")}
                                     onClick={async () => {
-                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton EasyAntiCheat Runtime")]);
+                                        SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton EasyAntiCheat Runtime")]);
                                     }
                                     }>Install Proton Easy Anti Cheat</DialogButton>
 
@@ -187,7 +187,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                 <DialogButton
                                     disabled={isRuntimeInstalled("Proton BattlEye Runtime")}
                                     onClick={async () => {
-                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
+                                        SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
                                     }
                                     }>Install Proton BattlEye Runtime</DialogButton>
 

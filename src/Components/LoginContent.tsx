@@ -8,7 +8,7 @@ import {
 import Logger from "../Utils/logger";
 import { executeAction } from "../Utils/executeAction";
 import { ErrorDisplay } from "./ErrorDisplay";
-import { gameIDFromAppID } from "../Utils/gameIDFromAppID";
+import { gameIDFromAppID } from "../Utils/utils";
 
 
 export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
@@ -40,9 +40,9 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         logger.debug("Creating shortcut for login: ", launchOptions);
         const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "");
         logger.debug("Shortcut created for login: ", id);
-        await SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
-        await SteamClient.Apps.SetAppHidden(id, false);
-        await SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
+        SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
+        SteamClient.Apps.SetAppHidden(id, false);
+        SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
         logger.debug("Saving shortcut for login: ", id);
         await executeAction<SaveSettingsArgs, ContentType>(serverAPI, actionSetName,
             "SaveSetting",
