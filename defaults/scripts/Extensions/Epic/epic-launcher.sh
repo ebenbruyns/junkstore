@@ -5,8 +5,6 @@ export DECKY_PLUGIN_DIR="${HOME}/homebrew/plugins/Junk-Store"
 export DECKY_PLUGIN_LOG_DIR="${HOME}/homebrew/logs/Junk-Store"
 export WORKING_DIR=$DECKY_PLUGIN_DIR
 export Extensions="Extensions"
-echo -e $@
-echo $#
 ID=$1
 echo $1
 shift
@@ -71,28 +69,29 @@ if [[ "${RUNTIMES_RADV_PERFTEST}" == "" ]]; then
     unset RADV_PERFTEST
 else
     export RADV_PERFTEST=$RUNTIMES_RADV_PERFTEST
- fi
+fi
 
-
-function sync-saves {
+CMD=$@
+ARGS=$("${ARGS_SCRIPT}" $ID)
+function sync-saves(){
     if [[ "${OFFLINE_MODE}" == "" ]]; then
-        $LEGENDARY sync-saves $ID -y
-    fi
+    $LEGENDARY sync-saves $ID
+fi
 }
-
 sync-saves
-
-#re quote all arguments as they get stripped of quotes
 
 QUOTED_ARGS=""
 for arg in "$@"; do
     QUOTED_ARGS+=" \"${arg}\"" 
 done
 
-eval "`echo -e $QUOTED_ARGS`"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-
+eval "`echo -e "${QUOTED_ARGS} ${ARGS}"`"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+# eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 sync-saves
 
 
-
+# echo "#!/bin/bash" > run.sh
+# echo "${CMD} ${ARGS}" >> run.sh
+# chmod +x run.sh
+# ./run.sh && rm run.sh
  
