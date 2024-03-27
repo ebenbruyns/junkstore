@@ -294,6 +294,12 @@
           "Command": "./scripts/junk-store.sh Epic getgames"
         },
         {
+          "Id": "GetGameSize",
+          "Title": "Get game size",
+          "Type": "GameSize",
+          "Command": "./scripts/junk-store.sh Epic getgamesize"
+        },
+        {
           "Id": "GetDetails",
           "Title": "Get game details",
           "Type": "GameDetails",

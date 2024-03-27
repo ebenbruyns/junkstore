@@ -323,3 +323,8 @@ function savetabconfig(){
     echo "{\"Type\": \"Success\", \"Content\": {\"success\": \"True\"}}"
     
 }
+
+function getgamesize(){
+    echo "{\"Type\": \"GameSize\", \"Content\": {\"Size\": \"\"}}"
+}
+

@@ -36,7 +36,8 @@ class GameSet:
             "ConfigurationPath",
             "Developer",
             "ReleaseDate",
-            "Size"]
+            "Size",
+            "DownloadSize"]
 
     def read_json_from_stdin(self):
         json_str = sys.stdin.read()
@@ -73,6 +74,8 @@ class GameSet:
         columns = [column[1] for column in c.fetchall()]
         if "Size" not in columns:
             c.execute("ALTER TABLE Game ADD COLUMN Size TEXT")
+        if "DownloadSize" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN DownloadSize TEXT")
         conn.commit()
         conn.close()
     
@@ -88,6 +91,7 @@ class GameSet:
         self.flush_cache()
         conn = self.get_connection()
         c = conn.cursor()
+
         c.execute("SELECT Value FROM Cache WHERE Key=?", (key,))
         result = c.fetchone()
         conn.close()
@@ -106,6 +110,7 @@ class GameSet:
     def get_games_with_images(self,  image_prefix, filter_str, installed, isLimited, urlencode, needsLogin):
         conn = self.get_connection()
         c = conn.cursor()
+        c.row_factory = sqlite3.Row
         limited_clause = ""
         if (isLimited.lower() == "true"):
             limited_clause = "LIMIT 100"
@@ -118,10 +123,10 @@ class GameSet:
         games = c.fetchall()
         result = []
         for game in games:
-            game_id = game[0]
-            shortname = game[1]
-            title = game[2]
-            steam_client_id = game[3]
+            game_id = game['ID']
+            shortname = game['ShortName']
+            title = game['Title']
+            steam_client_id = game['SteamClientID']
             c.execute(
                 "SELECT ImagePath FROM Images WHERE GameID=? order by SortOrder", (game_id,))
             images = c.fetchall()
@@ -357,7 +362,7 @@ class GameSet:
                     configs.section = 'autoexec' AND configs.key = 'text'""", (id,))
                 row = c.fetchone()
                 if row is not None:
-                    autoexec_text += row[0]
+                    autoexec_text += row['value']
                 parent_name = shortname
             config_data['Autoexec'] = autoexec_text
             conn.close()
@@ -381,11 +386,12 @@ class GameSet:
     def get_base64_images(self, game_id, image_prefix="", url_encode=False):
         conn = self.get_connection()
         c = conn.cursor()
+        c.row_factory = sqlite3.Row
         c.execute("SELECT ImagePath FROM Images join Game on Game.ID = Images.GameID WHERE ShortName=? order by Images.SortOrder", (game_id,))
         images = []
 
         for row in c.fetchall():
-            url = f"{image_prefix}{row[0]}"
+            url = f"{image_prefix}{row['ImagePath']}"
             if url_encode:
                 url = f"{image_prefix}{urllib.parse.quote(row[0])}"
 
@@ -405,31 +411,33 @@ class GameSet:
         conn = self.get_connection()
 
         c = conn.cursor()
-
-        c.execute(
-            f"SELECT {', '.join([f'{col} TEXT' for col in self.cols])} , SteamClientID FROM Game WHERE ShortName=? ", (shortname,))
+        c.row_factory = sqlite3.Row
+        query = f"SELECT {', '.join([f'{col}' for col in self.cols])} , SteamClientID FROM Game WHERE ShortName=? "
+        print(query, file=sys.stderr)
+        c.execute(query , (shortname,)
+            )
 
         result = c.fetchone()
 
         if result:
-            releseDate = result[11]
-            if releseDate:
-                releseDate = releseDate.split("-")[0]
+            releaseDate = result['ReleaseDate']
+            if releaseDate:
+                releaseDate = releaseDate.split("-")[0]
             game_data = {
-                'Name': result[0],
-                'Description': result[1],
-                'ApplicationPath': result[2],
-                'ManualPath': result[3],
-                'Publisher': result[4],
-                'RootFolder': result[5],
-                'Source': result[6],
-                'DatabaseID': result[7],
-                'Genre': result[8],
-                'ConfigurationPath': result[9],
-                'Developer': result[10],
-                'ReleaseDate': releseDate,
-                'Size': result[12],
-                'SteamClientID': result[13],
+                'Name': result['Title'],
+                'Description': result['Notes'],
+                'ApplicationPath': result['ApplicationPath'],
+                'ManualPath': result['ManualPath'],
+                'Publisher': result['Publisher'],
+                'RootFolder': result['RootFolder'],
+                'Source': result['Source'],
+                'DatabaseID': result['DatabaseID'],
+                'Genre': result['Genre'],
+                'ConfigurationPath': result['ConfigurationPath'],
+                'Developer': result['Developer'],
+                'ReleaseDate': releaseDate,
+                'Size': result['Size'],
+                'SteamClientID': result['SteamClientID'],
                 'ShortName': shortname,
                 'HasDosConfig': False,
                 'HasBatFiles': False
@@ -443,7 +451,7 @@ class GameSet:
                 "SELECT ImagePath FROM Images join Game on Game.ID = Images.GameID WHERE ShortName=? order by Images.SortOrder", (shortname,))
             images = c.fetchall()
             for image in images:
-                image_path = image[0]
+                image_path = image['ImagePath']
                 if (image_path == None):
                     image_url = ""
                 else:
@@ -454,13 +462,13 @@ class GameSet:
 
             conn.close()
             result = {
-                'Name': result[0],
+                'Name': result['Title'],
                 'Description': self.display_game_details(game_data),
-                'ApplicationPath': result[2],
-                'ManualPath': result[3],
-                'RootFolder': result[5],
-                'ConfigurationPath': result[9],
-                'SteamClientID': result[12],
+                'ApplicationPath': result['ApplicationPath'],
+                'ManualPath': result['ManualPath'],
+                'RootFolder': result['RootFolder'],
+                'ConfigurationPath': result['ConfigurationPath'],
+                'SteamClientID': result['SteamClientID'],
                 'ShortName': shortname,
                 'HasDosConfig': False,
                 'HasBatFiles': False,
@@ -471,13 +479,28 @@ class GameSet:
         else:
             return None
 
+    def get_game_size(self, shortname):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.row_factory = sqlite3.Row
+        c.execute("SELECT Size, DownloadSize FROM Game WHERE ShortName=?", (shortname,))
+        result = c.fetchone()
+        conn.close()
+        if result:
+            size = result['Size']
+            diskSize = result['DownloadSize']
+            return json.dumps({'Type': 'GameSize', 'Content': {'DiskSize': size, 'DownloadSize': diskSize}})
+        else:
+            return json.dumps({'Type': 'GameSize', 'Content': {'DiskSize': ''}})
+        
+
     def display_game_details(self, game_data):
         html = f"<div style=' width: 100%;'>"
         html += f"<p style='width:100%; white-space: pre-wrap;'>{game_data['Description']}</p>"
         html += f"</div>"
         html += f"<div>"
-        if game_data['Size'] != None:
-            html += f"<p>Size: {game_data['Size']}</p>"
+        # if game_data['Size'] != None:
+        #     html += f"<p>Size: {game_data['Size']}</p>"
         html += f"<p>Publisher: {game_data['Publisher']}</p>"
         html += f"<p>Developer: {game_data['Developer']}</p>"
         html += f"<p>Genre: {game_data['Genre']}</p>"
@@ -488,6 +511,7 @@ class GameSet:
     def get_editors(self, shortname, platform, forkname, version):
         conn = self.get_connection()
         c = conn.cursor()
+        c.row_factory = sqlite3.Row
         c.execute("SELECT ID FROM Game WHERE ShortName=?", (shortname,))
         game_id = c.fetchone()[0]
         editors = []
@@ -516,9 +540,9 @@ class GameSet:
                     order by config_set.platform desc, config_set.forkname desc, config_set.version desc
                     LIMIT 1""", (shortname, forkname, version, platform,))
             for row in c.fetchall():
-                platform = row[1]
-                forkname = row[2]
-                version = row[3]
+                platform = row['platform']
+                forkname = row['forkname']
+                version = row['version']
                 title = f"dosbox.config"
 
                 editors.append({
@@ -544,6 +568,7 @@ class GameSet:
     def get_setting(self, name):
         conn = self.get_connection()
         c = conn.cursor()
+        c.row_factory = sqlite3.Row
         c.execute("SELECT value FROM Settings WHERE name=?", (name,))
         result = c.fetchone()
         conn.close()

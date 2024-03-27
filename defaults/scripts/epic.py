@@ -186,28 +186,35 @@ class Epic(GameSet.GameSet):
                 print(f"Error parsing metadata for game: {title} {e}")
 
         conn.close()
+       
     def update_game_details(self, game_id, offline):
-        offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(
-            f"{self.legendary_cmd} info {game_id} --json {offline_switch}")
-        game = result['game']
-        title = game['title']
-        manifest = result['manifest']
-        print(f"manifest: {manifest}", file=sys.stderr)
-        download_size = manifest['download_size']
-        disk_size = manifest['disk_size']
-        print(f"download_size: {download_size}, disk_size: {disk_size}", file=sys.stderr)
-
-        size = f"{self.convert_bytes(download_size)} ({self.convert_bytes(disk_size)})"
-        print(f"size: {size}", file=sys.stderr)
         conn = self.get_connection()
         c = conn.cursor()
-       
-        c.execute(
-            "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 
-            (title, size, game_id))
-        conn.commit()
-        conn.close()
+        c.execute("SELECT * FROM Game WHERE ShortName=? and DownloadSize is null", (game_id,))
+        result = c.fetchone()
+        if result is not None:
+            offline_switch = "--offline" if offline else ""
+            result = self.execute_shell(
+                f"{self.legendary_cmd} info {game_id} --json {offline_switch}")
+            game = result['game']
+            title = game['title']
+            manifest = result['manifest']
+            print(f"manifest: {manifest}", file=sys.stderr)
+            download_size = manifest['download_size']
+            disk_size = manifest['disk_size']
+            print(f"download_size: {download_size}, disk_size: {disk_size}", file=sys.stderr)
+
+            size = f"{self.convert_bytes(disk_size)}"
+            downloadSize = f"{self.convert_bytes(download_size)}"
+        
+            print(f"size: {size}", file=sys.stderr)
+
+        
+            c.execute(
+                "UPDATE Game SET Title=?, Size=?, DownloadSize=? WHERE ShortName=?", 
+                (title, size, downloadSize, game_id))
+            conn.commit()
+            conn.close()
 
     def insert_game(self, game):
         conn = self.get_connection()

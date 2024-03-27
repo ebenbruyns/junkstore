@@ -195,12 +195,17 @@ function Epic_uninstall(){
 }
 function Epic_getgamedetails(){
     IMAGE_PATH=""
-    # always offline to speed things up.
-    TEMP=$($EPICCONF --update-game-details "${1}" --offline --dbfile $DBFILE)
-    echo $TEMP
     TEMP=$($EPICCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE --forkname "Proton" --version "null" --platform "Windows")
     echo $TEMP
     exit 0
+}
+
+function Epic_getgamesize(){
+    # always offline to speed things up.
+    TEMP=$($EPICCONF --update-game-details "${1}" --dbfile $DBFILE)
+    TEMP=$($EPICCONF --get-game-size "${1}" --dbfile $DBFILE)
+    echo $TEMP
+
 }
 
 function Epic_getprogress()

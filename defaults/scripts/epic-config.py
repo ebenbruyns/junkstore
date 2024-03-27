@@ -39,6 +39,8 @@ class EpicArgs(GameSet.GenericArgs):
             '--offline', help='Offline mode', action='store_true')
         self.parser.add_argument(
             '--update-game-details', help='Update game details')
+        self.parser.add_argument(
+            '--get-game-size', help='Update game details')
 
     def parseArgs(self):
         super().parseArgs()
@@ -82,6 +84,9 @@ class EpicArgs(GameSet.GenericArgs):
             if self.args.update_game_details:
                 self.gameSet.update_game_details(
                     self.args.update_game_details, self.args.offline)
+            if self.args.get_game_size:
+                print(self.gameSet.get_game_size(
+                    self.args.get_game_size))
             if not any(vars(self.args).values()):
                 self.parser.print_help()
         except epic.CmdException as e:
