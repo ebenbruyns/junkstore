@@ -278,7 +278,7 @@ class Epic(GameSet.GameSet):
                     if match := progress_re.search(''.join(lines[i: i + 6])):
                         last_progress_update = {
                             "Percentage": float(match.group(1)),
-                            "Description": f"Downloaded {match.group(2)} MB of {match.group(3)} MB ({match.group(1)}%)\nSpeed: {match.group(11)} MB/s"
+                            "Description": f"Downloaded {match.group(6)} MB ({match.group(1)}%)\nSpeed: {match.group(11)} MB/s"
                         }
 
                 if lines[-1].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
