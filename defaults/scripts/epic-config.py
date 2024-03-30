@@ -40,7 +40,7 @@ class EpicArgs(GameSet.GenericArgs):
         self.parser.add_argument(
             '--update-game-details', help='Update game details')
         self.parser.add_argument(
-            '--get-game-size', help='Update game details')
+            '--get-game-size', nargs=2, help='Get game size')
 
     def parseArgs(self):
         super().parseArgs()
@@ -83,10 +83,10 @@ class EpicArgs(GameSet.GenericArgs):
                     self.args.get_base64_images))
             if self.args.update_game_details:
                 self.gameSet.update_game_details(
-                    self.args.update_game_details, self.args.offline)
+                    self.args.update_game_details)
             if self.args.get_game_size:
                 print(self.gameSet.get_game_size(
-                    self.args.get_game_size))
+                    self.args.get_game_size[0], self.args.get_game_size[1]))
             if not any(vars(self.args).values()):
                 self.parser.print_help()
         except epic.CmdException as e:
