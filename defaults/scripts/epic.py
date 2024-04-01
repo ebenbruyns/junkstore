@@ -268,17 +268,33 @@ class Epic(GameSet.GameSet):
     def get_last_progress_update(self, file_path):
         progress_re = re.compile(
             r"\[DLManager\] INFO: = Progress: (\d+\.\d+)% \((\d+)/(\d+)\), Running for (\d+:\d+:\d+), ETA: (\d+:\d+:\d+)\n\[DLManager\] INFO:  - Downloaded: (\d+\.\d+) MiB, Written: (\d+\.\d+) MiB\n\[DLManager\] INFO:  - Cache usage: (\d+\.\d+) MiB, active tasks: (\d+)\n\[DLManager\] INFO:  \+ Download\t- (\d+\.\d+) MiB/s \(raw\) / (\d+\.\d+) MiB/s \(decompressed\)\n\[DLManager\] INFO:  \+ Disk\t- (\d+\.\d+) MiB/s \(write\) / (\d+\.\d+) MiB/s \(read\)")
+        download_size_re = re.compile(r"\[cli\] INFO: Download size: (\d+\.\d+) MiB")
         last_progress_update = None
+        total_dl_size = None
+        remaining_dl_size = None
 
         try:
             with open(file_path, "r") as f:
                 lines = f.readlines()
 
+                for line in lines:
+                    if match := download_size_re.search(line):
+                        total_dl_size = float(match.group(1))
+                        break
+                for line in reversed(lines):
+                    if match := download_size_re.search(line):
+                        remaining_dl_size = float(match.group(1))
+                        break
+                
+                previously_dl_size = total_dl_size - remaining_dl_size if total_dl_size != None else 0
+
                 for i in range(len(lines) - 5):
                     if match := progress_re.search(''.join(lines[i: i + 6])):
+                        downloaded = round(float(match.group(6)), 2)
+                        percent = round(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)))
                         last_progress_update = {
-                            "Percentage": float(match.group(1)),
-                            "Description": f"Downloaded {match.group(6)} MB ({match.group(1)}%)\nSpeed: {match.group(11)} MB/s"
+                            "Percentage": percent,
+                            "Description": (f"Downloaded {round(downloaded + previously_dl_size, 2)} MB/{total_dl_size} MB" if previously_dl_size else f"Downloaded {downloaded} MB/{total_dl_size} MB" if total_dl_size != None else f"Downloaded {downloaded} MB") + f" ({percent}%)\nSpeed: {match.group(11)} MB/s"
                         }
 
                 if lines[-1].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":

@@ -57,7 +57,9 @@ function Epic_getplatformconfig(){
 
 function Epic_cancelinstall(){
     PID=$(cat "${DECKY_PLUGIN_LOG_DIR}/${1}.pid")
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     killall -w legendary
+    grep -m 1 '^\[cli\] INFO: Download size:' $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/tmp" && mv "${DECKY_PLUGIN_LOG_DIR}/tmp" $PROGRESS_LOG
     rm "${DECKY_PLUGIN_LOG_DIR}/tmp.pid"
     rm "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} installation Cancelled\"}}"
