@@ -57,7 +57,9 @@ function Epic_getplatformconfig(){
 
 function Epic_cancelinstall(){
     PID=$(cat "${DECKY_PLUGIN_LOG_DIR}/${1}.pid")
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     killall -w legendary
+    grep -m 1 '^\[cli\] INFO: Download size:' $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/tmp" && mv "${DECKY_PLUGIN_LOG_DIR}/tmp" $PROGRESS_LOG
     rm "${DECKY_PLUGIN_LOG_DIR}/tmp.pid"
     rm "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} installation Cancelled\"}}"
@@ -67,28 +69,15 @@ function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
-    $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
-
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
 }
-
-function Epic_download(){
-    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
-    
-    $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG  && \
-    $EPICCONF --update-game-details "${1}" --dbfile $DBFILE &> /dev/null &
-
-    echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
-    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
-}
-
 
 function Epic_update(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY update  $1 --update -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY update  $1 --update -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
@@ -125,14 +114,14 @@ function Epic_verify(){
 }
 function Epic_repair(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY repair $1  --repair -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY repair $1  --repair -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
 function Epic_repair_and_update(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY repair $1  --repair-and-update -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY repair $1  --repair-and-update -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
@@ -144,10 +133,6 @@ function Epic_protontricks(){
     
     ARGS="--verbose $2 --gui &> \\\"${DECKY_PLUGIN_LOG_DIR}/${1}.log\\\""
     launchoptions "${PROTON_TRICKS}"  "${ARGS}" "${3}" "Protontricks" false ""
-    
-  
-   
-
 }
 
 #this needs more thought
@@ -155,7 +140,7 @@ function Epic_import(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
      GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
     if [ -d "${GAME_DIR}" ]; then
-        $LEGENDARY import $1 "${GAME_DIR}" $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+        updategamedetailsaftercmd $1 $LEGENDARY import $1 "${GAME_DIR}" $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
         echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
         if [ $? -ne 0 ]; then
             move $1 > /dev/null
@@ -172,7 +157,7 @@ function Epic_move(){
     if [ -d "${GAME_DIR}" ]; then
         SKIP_MOVE="--skip-move"
     fi
-    $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
@@ -197,7 +182,7 @@ function Epic_getlaunchoptions(){
 }
 
 function Epic_uninstall(){
-    $LEGENDARY uninstall $1  -y $OFFLINE_MODE>> "${DECKY_PLUGIN_LOG_DIR}/${1}.log"
+    updategamedetailsaftercmd $1 $LEGENDARY uninstall $1  -y $OFFLINE_MODE>> "${DECKY_PLUGIN_LOG_DIR}/${1}.log"
 
     # this should be fixed before used, it might kill the entire machine
     # WORKING_DIR=$($EPICCONF --get-working-dir "${1}")
@@ -214,11 +199,8 @@ function Epic_getgamedetails(){
 }
 
 function Epic_getgamesize(){
-    # always offline to speed things up.
-    TEMP=$($EPICCONF --update-game-details "${1}" --dbfile $DBFILE)
-    TEMP=$($EPICCONF --get-game-size "${1}" --dbfile $DBFILE)
+    TEMP=$($EPICCONF --get-game-size "${1}" "${2}"  --dbfile $DBFILE)
     echo $TEMP
-
 }
 
 function Epic_getprogress()
@@ -357,4 +339,11 @@ function Epic_savetabconfig(){
     cat > "${DECKY_PLUGIN_RUNTIME_DIR}/conf_schemas/epictabconfig.json"
     echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Epic tab config saved\"}}"
     
+}
+
+function updategamedetailsaftercmd() {
+    game=$1
+    shift
+    "$@"
+    $EPICCONF --update-game-details $game --dbfile $DBFILE &> /dev/null
 }

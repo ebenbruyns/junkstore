@@ -36,8 +36,7 @@ class GameSet:
             "ConfigurationPath",
             "Developer",
             "ReleaseDate",
-            "Size",
-            "DownloadSize"]
+            "Size"]
 
     def read_json_from_stdin(self):
         json_str = sys.stdin.read()
@@ -74,8 +73,6 @@ class GameSet:
         columns = [column[1] for column in c.fetchall()]
         if "Size" not in columns:
             c.execute("ALTER TABLE Game ADD COLUMN Size TEXT")
-        if "DownloadSize" not in columns:
-            c.execute("ALTER TABLE Game ADD COLUMN DownloadSize TEXT")
         conn.commit()
         conn.close()
     
@@ -485,21 +482,6 @@ class GameSet:
             return json.dumps({'Type': 'GameDetails', 'Content':  result}, indent=2)
         else:
             return None
-
-    def get_game_size(self, shortname):
-        conn = self.get_connection()
-        c = conn.cursor()
-        c.row_factory = sqlite3.Row
-        c.execute("SELECT Size, DownloadSize FROM Game WHERE ShortName=?", (shortname,))
-        result = c.fetchone()
-        conn.close()
-        if result:
-            size = result['Size']
-            diskSize = result['DownloadSize']
-            return json.dumps({'Type': 'GameSize', 'Content': {'DiskSize': size, 'DownloadSize': diskSize}})
-        else:
-            return json.dumps({'Type': 'GameSize', 'Content': {'DiskSize': ''}})
-        
 
     def display_game_details(self, game_data):
         html = f"<div style=' width: 100%;'>"

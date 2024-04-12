@@ -167,11 +167,11 @@ class Helper:
                                    'Content': {
                                        'Message': f"Error parsing json result {e}", 'Data': result, 'ActionName': actionName, 'ActionSet': actionSet}}
                 return json_result
-            return json.dumps({'Type': 'Error', 'Content': {'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]}, 'ActionName': actionName, 'ActionSet': actionSet})
+            return {'Type': 'Error', 'Content': {'Message': f"Action not found {actionSet}, {actionName}", 'Data': result[:300]}, 'ActionName': actionName, 'ActionSet': actionSet}
 
         except Exception as e:
             decky_plugin.logger.error(f"Error executing action: {e}")
-            return json.dumps({'Type': 'Error', 'Content': {'Message': 'Action not found', 'Data': str(e), 'ActionName': actionName, 'ActionSet': actionSet}})
+            return {'Type': 'Error', 'Content': {'Message': 'Action not found', 'Data': str(e), 'ActionName': actionName, 'ActionSet': actionSet}}
 
     @staticmethod
     def write_action_set_to_cache(setName, actionSet, writeToDisk: bool = False):

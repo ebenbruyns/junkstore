@@ -90,6 +90,9 @@ export interface GameData {
   ShortName: string;
   SteamClientID: string;
 }
+export interface GameSize extends ContentType {
+    Size: string;
+}
 export interface LaunchOptions extends ContentType {
   Exe: string;
   Options: string;
@@ -205,6 +208,9 @@ export interface SaveSettingsArgs extends GetSettingArgs {
 
 export interface ExecuteGetGameDetailsArgs extends ExecuteArgs {
   shortname: string;
+}
+export interface ExecuteGetGameSizeArgs extends ExecuteGetGameDetailsArgs {
+  installed: string;
 }
 export interface ExecuteInstallArgs extends ExecuteGetGameDetailsArgs {
   steamClientID: string;

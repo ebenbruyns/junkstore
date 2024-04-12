@@ -18,7 +18,7 @@ import {
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
-import { EditorAction, MenuAction, ProgressUpdate } from "../Types/Types";
+import { EditorAction, ExecuteGetGameSizeArgs, GameSize, MenuAction, ProgressUpdate } from "../Types/Types";
 import { ConfEditor } from "../ConfEditor";
 import { BatEditor } from "../BatEditor";
 import Logger from "../Utils/logger";
@@ -26,6 +26,7 @@ import { ExeRunner } from "../ExeRunner";
 import { getAppDetails } from '../Utils/utils';
 import { ScrollableWindow } from '../ScrollableWindow';
 import { appActionButtonClasses, basicAppDetailsClasses } from '../staticClasses';
+import { executeAction } from '../Utils/executeAction';
 
 
 interface GameDisplayProperties {
@@ -78,6 +79,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     }
 ) => {
     const logger = new Logger("GameDisplay");
+    const isInstalled = !!steamClientID;
+    const [gameSize, setGameSize] = useState('');
+
     logger.log(`initActionSet: ${initActionSet}`);
     const contextMenu = (e: any) => {
         showContextMenu(
@@ -101,12 +105,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     const actionsMenu = (e: any) => {
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-                {steamClientID !== "" &&
+                {isInstalled &&
                     <MenuItem onSelected={() => showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} refreshParent={reloadData} onExeExit={onExeExit} />)}>
                         Run exe in Game folder
                     </MenuItem>
                 }
-                {steamClientID !== "" &&
+                {isInstalled &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
                         <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => { uninstaller(); }} />)}> {/*pass uninstall fn like this so it doesn't wait for the async fn to close the modal */}
@@ -115,9 +119,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </>
                 }
                 {actions && actions.length > 0 && actions.map((action) => {
-                    const installed = steamClientID != "";
                     const mustBeInstalled = action.InstalledOnly != undefined && action.InstalledOnly == true;
-                    const show = installed || !mustBeInstalled;
+                    const show = isInstalled || !mustBeInstalled;
 
                     if (show)
                         return <MenuItem onSelected={
@@ -131,7 +134,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                     gameId: "",
                                     appId: ""
                                 };
-                                if (steamClientID != "") {
+                                if (isInstalled) {
                                     logger.debug("steamClientID: ", steamClientID, action);
                                     const details = getAppDetails(steamClientID);
                                     if (details == null) {
@@ -168,7 +171,16 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         );
     };
 
-    const focusableProps: FooterLegendProps = steamClientID === '' ? {} :
+    useEffect(() => {
+        setGameSize('');
+        (async () => {
+            const gameSizeResult = await executeAction<ExecuteGetGameSizeArgs, GameSize>(serverApi, initActionSet, 'GetGameSize', { shortname: shortName, installed: String(isInstalled) });
+            if (!gameSizeResult) return;
+            setGameSize(gameSizeResult.Content.Size);
+        })();
+    }, [isInstalled]);
+
+    const focusableProps: FooterLegendProps = !isInstalled ? {} :
         {
             onOptionsButton: () => Navigation.Navigate(`/library/app/${steamClientID}`),
             onOptionsActionDescription: 'Go to Steam App Page'
@@ -199,12 +211,16 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '30px 0' }}>
                     <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{name}</div>
                     <div>
-                        {installing && (
-                            <div style={{ margin: '5px 2px 10px' }}>
+                        {installing ? (
+                            <div key={'download'} style={{ margin: '5px 2px 10px', animation: 'fadeIn .3s ease-in-out forwards' }}>
                                 <div style={{ marginBottom: '5px', color: '#969696', fontSize: '11px', lineHeight: '11px' }}>
                                     {progress.Description}
                                 </div>
                                 <ProgressBar nProgress={progress.Percentage} />
+                            </div>
+                        ) : !!gameSize && (
+                            <div key={'size'} style={{ margin: '0 2px 5px', color: '#969696', fontSize: '11px', lineHeight: '11px', animation: 'fadeIn .3s ease-in-out forwards' }}>
+                                {gameSize}
                             </div>
                         )}
                         <Focusable style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
@@ -215,9 +231,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <Button
                                     style={{ display: 'flex', justifyContent: 'left', fontSize: '14px' }}
                                     className={installing ? 'DialogButton' : joinClassNames(appActionButtonClasses.PlayButton, appActionButtonClasses.ButtonChild)}
-                                    onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}
+                                    onClick={installing ? cancelInstall : !isInstalled ? installer : runner}
                                 >
-                                    {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
+                                    {installing ? 'Cancel' : !isInstalled ? 'Install Game' : 'Play Game'}
                                 </Button>
                             </div>
                             <div style={{ display: 'flex', gap: '15px', height: '100%' }}>

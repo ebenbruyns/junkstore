@@ -124,8 +124,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                         setProgress(progressUpdate);
                         logger.debug(progressUpdate.Percentage);
                         if (progressUpdate.Percentage >= 100) {
-                            setInstalling(false);
-                            logger.debug("setInstalling(false)");
                             install();
                             return;
                         }
@@ -237,7 +235,6 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
 
     };
     const configureShortcut = async (id: number) => {
-        setSteamClientID(id.toString());
         const result = await executeAction<ExecuteInstallArgs, ContentType>(
             serverAPI,
             initActionSet,
@@ -284,9 +281,10 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
             }
             setInstalling(false);
             serverAPI.toaster.toast({
-                title: "Junk-Store",   
+                title: "Junk-Store",
                 body: "Launch options set",
             });
+            setSteamClientID(id.toString());
 
         }
         const imageResult = await executeAction<ExecuteGetGameDetailsArgs, GameImages>(
@@ -378,6 +376,14 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                 }
                 .${footerClasses.BasicFooter} {
                     border-top: unset;
+                }
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
                 }
             `}
             </style>
