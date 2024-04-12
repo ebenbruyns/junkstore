@@ -325,6 +325,6 @@ function savetabconfig(){
 }
 
 function getgamesize(){
-    echo "{\"Type\": \"GameSize\", \"Content\": {\"Size\": \"\"}}"
+    echo "{\"Type\": \"GameSize\", \"Content\": {\"DiskSize\": \"\"}}"
 }
 

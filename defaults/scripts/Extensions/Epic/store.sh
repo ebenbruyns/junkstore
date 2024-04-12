@@ -73,6 +73,19 @@ function Epic_download(){
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
 }
+
+function Epic_download(){
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
+    GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
+    
+    $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG  && \
+    $EPICCONF --update-game-details "${1}" --dbfile $DBFILE &> /dev/null &
+
+    echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
+    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
+}
+
+
 function Epic_update(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     $LEGENDARY update  $1 --update -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
@@ -255,7 +268,7 @@ function Epic_get-exe-list(){
     GAME_PATH=$($EPICCONF --get-game-dir $GAME_SHORTNAME --dbfile $DBFILE --offline)
     export STEAM_COMPAT_DATA_PATH="${HOME}/.local/share/Steam/steamapps/compatdata/${STEAM_ID}"
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
-    cd $STEAM_COMPAT_CLIENT_INSTALL_PATH
+    cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
     LIST=$(find . -name "*.exe")
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"Files\": ["
     for FILE in $LIST; do

@@ -106,6 +106,13 @@ class GameSet:
         c.execute("INSERT INTO Cache (Key, Value, ExpiryDate) VALUES (?, ?, ?)", (key, value, expiry_date))
         conn.commit()
         conn.close()
+        
+    def clear_cache(self, key):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("DELETE FROM Cache WHERE Key=?", (key,))
+        conn.commit()
+        conn.close()
 
     def get_games_with_images(self,  image_prefix, filter_str, installed, isLimited, urlencode, needsLogin):
         conn = self.get_connection()
