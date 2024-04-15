@@ -219,7 +219,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     const checkid = async () => {
         let id = parseInt(steamClientID);
         logger.debug("checkid", id);
-        const apps = appStore.allApps.filter(app => app.appid == id);
+        const apps = appStore.allApps.filter(app => app.appid == id && app.per_client_data[0].client_name == "This Machine");
         if (apps.length == 0) {
             return await getSteamId();
         } else {
@@ -250,11 +250,12 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         const name = (gameData.Content as GameDetails).Name; //* this should be dealt with
 
         const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.appid != id);
+        logger.debug("apps", apps);
         for (const app of apps) {
             logger.debug("removing shortcut", app.appid);
             SteamClient.Apps.RemoveShortcut(app.appid);
         }
-        cleanupIds();
+        //cleanupIds();
 
 
         if (result == null) {
@@ -273,6 +274,13 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                 logger.debug("Setting compatibility", launchOptions.CompatToolName);
                 if (defaultProton) {
                     SteamClient.Apps.SpecifyCompatTool(id, defaultProton);
+                }
+                else
+                {
+                    const compatTools = await SteamClient.Apps.GetAvailableCompatTools(1)
+                    const firstAvailable = compatTools.filter(tool => tool.strToolName.startsWith('proton') && tool.strToolName.indexOf('experimental') == -1)
+                    if (firstAvailable.length > 0) {
+                        SteamClient.Apps.SpecifyCompatTool(id, firstAvailable[0].CompatToolName);
                 }
             }
             else {
@@ -320,6 +328,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         //* wait what? why is this removing all shortcuts with empty display_name?
         const apps = appStore.allApps.filter(app => (app.display_name == "bash" || app.display_name == "") && app.app_type == 1073741824);
         for (const app of apps) {
+            logger.debug("removing shortcut", app.appid);
             SteamClient.Apps.RemoveShortcut(app.appid);
         }
     };
@@ -327,12 +336,16 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     const getSteamId = async () => {
 
         const name = (gameData.Content as GameDetails).Name;
-        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824);
+        logger.debug("GetSteamId name:", name);
+        const apps = appStore.allApps.filter(app => app.display_name == name && app.app_type == 1073741824 && app.per_client_data[0].client_name == "This Machine");
+        logger.debug("GetSteamId apps found:", apps);
         cleanupIds();
         if (apps.length > 0) {
             const id = apps[0].appid;
+            logger.debug("using app", apps[0])
             if (apps.length > 1) {
                 for (let i = 1; i < apps.length; i++) {
+                    logger.debug("removing duplicate shortcut", apps[i]);
                     SteamClient.Apps.RemoveShortcut(apps[i].appid);
                 }
             }
@@ -344,7 +357,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
             if (gameData.Type !== "GameDetails") {
                 return id;
             }
-            SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
             return id;
         }
     };
