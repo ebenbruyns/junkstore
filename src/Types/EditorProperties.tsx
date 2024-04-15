@@ -8,9 +8,3 @@ export interface EditorProperties {
     closeModal?: any;
     refreshParent: () => void;
 }
-export interface ExeRunnerProperties extends EditorProperties {
-
-    shortName: string;
-    closeParent: () => void;
-
-}

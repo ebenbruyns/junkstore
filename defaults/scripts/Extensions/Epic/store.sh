@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-ACTIONS+=("install-overlay" "update-overlay" "remove-overlay")
+ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-idaste")
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
@@ -57,7 +57,9 @@ function Epic_getplatformconfig(){
 
 function Epic_cancelinstall(){
     PID=$(cat "${DECKY_PLUGIN_LOG_DIR}/${1}.pid")
+    PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     killall -w legendary
+    grep -m 1 '^\[cli\] INFO: Download size:' $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/tmp" && mv "${DECKY_PLUGIN_LOG_DIR}/tmp" $PROGRESS_LOG
     rm "${DECKY_PLUGIN_LOG_DIR}/tmp.pid"
     rm "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} installation Cancelled\"}}"
@@ -67,15 +69,15 @@ function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
-    $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
-
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
 }
+
 function Epic_update(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY update  $1 --update -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY update  $1 --update -y  >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
@@ -112,14 +114,14 @@ function Epic_verify(){
 }
 function Epic_repair(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY repair $1  --repair -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY repair $1  --repair -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
 function Epic_repair_and_update(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY repair $1  --repair-and-update -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY repair $1  --repair-and-update -y >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
@@ -131,10 +133,6 @@ function Epic_protontricks(){
     
     ARGS="--verbose $2 --gui &> \\\"${DECKY_PLUGIN_LOG_DIR}/${1}.log\\\""
     launchoptions "${PROTON_TRICKS}"  "${ARGS}" "${3}" "Protontricks" false ""
-    
-  
-   
-
 }
 
 #this needs more thought
@@ -142,7 +140,7 @@ function Epic_import(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
      GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
     if [ -d "${GAME_DIR}" ]; then
-        $LEGENDARY import $1 "${GAME_DIR}" $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+        updategamedetailsaftercmd $1 $LEGENDARY import $1 "${GAME_DIR}" $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
         echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
         if [ $? -ne 0 ]; then
             move $1 > /dev/null
@@ -159,17 +157,21 @@ function Epic_move(){
     if [ -d "${GAME_DIR}" ]; then
         SKIP_MOVE="--skip-move"
     fi
-    $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
-
+function Epic_update-umu-id(){
+    TEMP=$($EPICCONF --update-umu-id "${1}" egs --dbfile $DBFILE)
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Umu Id updated\"}}"
+}   
 function Epic_install(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     rm $PROGRESS_LOG &>> ${DECKY_PLUGIN_LOG_DIR}/${1}.log
     RESULT=$($EPICCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
-    mkdir -p "${HOME}/.compat/${1}"
+    TEMP=$($EPICCONF --update-umu-id "${1}" egs --dbfile $DBFILE)
+    # mkdir -p "${HOME}/.compat/${1}"
     ARGS=$($ARGS_SCRIPT "${1}")
     TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE $OFFLINE_MODE)
     echo $TEMP
@@ -184,7 +186,7 @@ function Epic_getlaunchoptions(){
 }
 
 function Epic_uninstall(){
-    $LEGENDARY uninstall $1  -y $OFFLINE_MODE>> "${DECKY_PLUGIN_LOG_DIR}/${1}.log"
+    updategamedetailsaftercmd $1 $LEGENDARY uninstall $1  -y $OFFLINE_MODE>> "${DECKY_PLUGIN_LOG_DIR}/${1}.log"
 
     # this should be fixed before used, it might kill the entire machine
     # WORKING_DIR=$($EPICCONF --get-working-dir "${1}")
@@ -195,12 +197,14 @@ function Epic_uninstall(){
 }
 function Epic_getgamedetails(){
     IMAGE_PATH=""
-    # always offline to speed things up.
-    TEMP=$($EPICCONF --update-game-details "${1}" --offline --dbfile $DBFILE)
-    echo $TEMP
     TEMP=$($EPICCONF --getgamedata "${1}" "${IMAGE_PATH}" --dbfile $DBFILE --forkname "Proton" --version "null" --platform "Windows")
     echo $TEMP
     exit 0
+}
+
+function Epic_getgamesize(){
+    TEMP=$($EPICCONF --get-game-size "${1}" "${2}"  --dbfile $DBFILE)
+    echo $TEMP
 }
 
 function Epic_getprogress()
@@ -209,7 +213,12 @@ function Epic_getprogress()
     echo $TEMP
 }
 function Epic_loginstatus(){
-    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE)
+     if [ -z "${1}" ]; then
+        FLUSH_CACHE="--flush-cache"
+    else
+        FLUSH_CACHE=""
+    fi
+    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE  $FLUSH_CACHE)
     echo $TEMP
 
 }
@@ -250,16 +259,26 @@ function Epic_get-exe-list(){
     GAME_PATH=$($EPICCONF --get-game-dir $GAME_SHORTNAME --dbfile $DBFILE --offline)
     export STEAM_COMPAT_DATA_PATH="${HOME}/.local/share/Steam/steamapps/compatdata/${STEAM_ID}"
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
-    cd $STEAM_COMPAT_CLIENT_INSTALL_PATH
+    cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
+    IFS=$'\n' 
     LIST=$(find . -name "*.exe")
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"Files\": ["
+   
     for FILE in $LIST; do
-        
-        JSON="${JSON}{\"Path\": \"${FILE}\"},"
+       JSON="${JSON}{\"Path\": \"${FILE}\"},"
     done
     JSON=$(echo "$JSON" | sed 's/,$//')
     JSON="${JSON}]}}"
     echo $JSON
+}
+function Epic_registry-fix(){
+    # reg add HKEY_CLASSES_ROOT\\com.epicgames.launcher /f
+      STEAM_ID="${2}"
+    GAME_SHORTNAME="${1}"
+    GAME_PATH="${3}"
+    COMPAT_TOOL="${4}"
+    launchoptions "reg"  "add HKEY_CLASSES_ROOT\\\\\\\\com.epicgames.launcher /f" "${GAME_PATH}" "Registry Fix" true "${COMPAT_TOOL}"
+
 }
 function launchoptions () {
     Exe=$1 
@@ -307,7 +326,7 @@ function Epic_login-launch-options(){
 
 function Epic_logout(){
     TEMP=$($LEGENDARY auth --delete)
-    loginstatus
+    loginstatus --flush-cache
 }
 
 function Epic_getsetting(){
@@ -339,4 +358,11 @@ function Epic_savetabconfig(){
     cat > "${DECKY_PLUGIN_RUNTIME_DIR}/conf_schemas/epictabconfig.json"
     echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Epic tab config saved\"}}"
     
+}
+
+function updategamedetailsaftercmd() {
+    game=$1
+    shift
+    "$@"
+    $EPICCONF --update-game-details $game --dbfile $DBFILE &> /dev/null
 }

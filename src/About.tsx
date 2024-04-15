@@ -1,7 +1,7 @@
 import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, PanelSection, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi } from "react-icons/si";
+import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi, SiPatreon, SiReddit } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger from "./Utils/logger";
 import { LogViewer } from "./LogViewer";
@@ -37,9 +37,15 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             buttonText: "Join Us",
         },
         {
+            label: "Patreon",
+            icon: <SiPatreon />,
+            link: "https://www.patreon.com/junkstore",
+            buttonText: "Support me on Patreon",
+        },
+        {
             label: "Ko-Fi",
             icon: <SiKofi />,
-            link: "https://ko-fi.com/junkrunner",
+            link: "https://ko-fi.com/junkstore",
             buttonText: "Buy me a coffee",
         },
         {
@@ -53,7 +59,13 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             icon: <SiGithubsponsors />,
             link: "https://github.com/sponsors/ebenbruyns",
             buttonText: "Sponsor",
-        }
+        }//,
+        // {
+        //     label: "Junk Store",
+        //     icon: <SiReddit />,
+        //     link: "https://www.reddit.com/r/JunkStore/",
+        //     buttonText: "Reddit",
+        // }
     ];
     useEffect(() => {
         // Create a WebSocket connection to the backend server
@@ -177,7 +189,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                 <DialogButton
                                     disabled={isRuntimeInstalled("Proton EasyAntiCheat Runtime")}
                                     onClick={async () => {
-                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton EasyAntiCheat Runtime")]);
+                                        SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton EasyAntiCheat Runtime")]);
                                     }
                                     }>Install Proton Easy Anti Cheat</DialogButton>
 
@@ -187,7 +199,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                 <DialogButton
                                     disabled={isRuntimeInstalled("Proton BattlEye Runtime")}
                                     onClick={async () => {
-                                        await SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
+                                        SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
                                     }
                                     }>Install Proton BattlEye Runtime</DialogButton>
 

@@ -1,3 +1,12 @@
+import { AppDetailsStore } from './steam/AppDetailsStore';
+import { SteamUiStore } from './steam/SteamUIStore';
+
+declare global {
+    var appDetailsStore: AppDetailsStore;
+    var appStore: AppStore;
+    var SteamClient: SteamClient;
+    var SteamUIStore: SteamUiStore;
+}
 
 export interface EnumStrings {
   Key: string;
@@ -80,6 +89,9 @@ export interface GameData {
   Images: string[];
   ShortName: string;
   SteamClientID: string;
+}
+export interface GameSize extends ContentType {
+    Size: string;
 }
 export interface LaunchOptions extends ContentType {
   Exe: string;
@@ -196,6 +208,9 @@ export interface SaveSettingsArgs extends GetSettingArgs {
 
 export interface ExecuteGetGameDetailsArgs extends ExecuteArgs {
   shortname: string;
+}
+export interface ExecuteGetGameSizeArgs extends ExecuteGetGameDetailsArgs {
+  installed: string;
 }
 export interface ExecuteInstallArgs extends ExecuteGetGameDetailsArgs {
   steamClientID: string;

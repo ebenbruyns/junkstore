@@ -32,6 +32,8 @@ class Epic(GameSet.GameSet):
         if "[cli] ERROR:" in result:
             raise CmdException(result)
         print(f" result: {result}", file=sys.stderr)
+        if result.strip() == "":
+            raise CmdException("Command produced no output")
         return json.loads(result)
 
     # sample json for game returned from legendary list --json
@@ -57,12 +59,14 @@ class Epic(GameSet.GameSet):
         )
         print(result[type])
 
-    def get_login_status(self, offline):
+    def get_login_status(self, offline, flush_cache=False):
         offline_switch = "--offline" if offline else ""
         cache_key = "egs-login"
         if offline:
             cache_key = "egs-login-offline"
-        
+        if(flush_cache):
+            self.clear_cache(cache_key)
+            
         cache = self.get_cache(cache_key)
         if cache is not None:
             return cache
@@ -89,8 +93,30 @@ class Epic(GameSet.GameSet):
             return " ".join(result['egl_parameters'])
         except CmdException as e:
             raise e
-
-        
+    
+    def get_game_size(self, game_id, installed):
+        if installed == 'true':
+            conn = self.get_connection()
+            c = conn.cursor()
+            c.row_factory = sqlite3.Row
+            c.execute("SELECT Size FROM Game WHERE ShortName=?", (game_id,))
+            result = c.fetchone()
+            conn.close()
+            if result and bool(result['Size']):
+                disk_size = result['Size']
+                size = f"Size on Disk: {disk_size}"
+            else:
+                size = ""
+        else:
+            result = self.execute_shell(f"{self.legendary_cmd} info {game_id} --json")
+            manifest = result.get('manifest')
+            if manifest != None:
+                disk_size_str = f"Install Size: {self.convert_bytes(manifest['disk_size'])}" if bool(manifest.get('disk_size')) else ""
+                download_size_str = f"Download Size: {self.convert_bytes(manifest['download_size'])}" if bool(manifest.get('download_size')) else ""
+                size = disk_size_str + (f" ({download_size_str})" if download_size_str != "" else "") if disk_size_str != "" else download_size_str
+            else:
+                size = ""
+        return json.dumps({'Type': 'GameSize', 'Content': {'Size': size }})
 
     def has_updates(self, game_id, offline):
         offline_switch = "--offline" if offline else ""
@@ -186,43 +212,39 @@ class Epic(GameSet.GameSet):
                 print(f"Error parsing metadata for game: {title} {e}")
 
         conn.close()
-    def update_game_details(self, game_id, offline):
-        offline_switch = "--offline" if offline else ""
-        result = self.execute_shell(
-            f"{self.legendary_cmd} info {game_id} --json {offline_switch}")
-        game = result['game']
-        title = game['title']
-        manifest = result['manifest']
-        print(f"manifest: {manifest}", file=sys.stderr)
-        download_size = manifest['download_size']
-        disk_size = manifest['disk_size']
-        print(f"download_size: {download_size}, disk_size: {disk_size}", file=sys.stderr)
-
-        size = f"{self.convert_bytes(download_size)} ({self.convert_bytes(disk_size)})"
-        print(f"size: {size}", file=sys.stderr)
+       
+    def update_game_details(self, game_id):
         conn = self.get_connection()
         c = conn.cursor()
-       
-        c.execute(
-            "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 
-            (title, size, game_id))
-        conn.commit()
-        conn.close()
+        c.execute("SELECT * FROM Game WHERE ShortName=?", (game_id,))
+        result = c.fetchone()
+        if result is not None:
+            result = self.execute_shell(f"{self.legendary_cmd} info {game_id} --json --offline")
+            game = result['game']
+            title = game['title']
+            install = result['install']
+            print(f"install info: {install}", file=sys.stderr)
+            if install != None and bool(install['disk_size']):
+                disk_size = install['disk_size']
+                print(f"disk_size: {disk_size}", file=sys.stderr)
+
+                size = f"{self.convert_bytes(disk_size)}"
+                print(f"size: {size}", file=sys.stderr)
+
+            else:
+                size = None
+
+            c.execute(
+                "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 
+                (title, size, game_id))
+            conn.commit()
+            conn.close()
 
     def insert_game(self, game):
         conn = self.get_connection()
         c = conn.cursor()
 
-    def convert_bytes(self , size):
-        if size >= 1024**3:
-            size = f"{size / 1024**3:.2f} GB"
-        elif size >= 1024**2:
-            size = f"{size / 1024**2:.2f} MB"
-        elif size >= 1024:
-            size = f"{size / 1024:.2f} KB"
-        else:
-            size = f"{size} bytes"
-        return size
+    
 
     # [DLManager] INFO: = Progress: 0.51% (368/72002), Running for 00:01:58, ETA: 06:23:02
     # [DLManager] INFO:  - Downloaded: 316.12 MiB, Written: 361.03 MiB
@@ -236,20 +258,41 @@ class Epic(GameSet.GameSet):
     def get_last_progress_update(self, file_path):
         progress_re = re.compile(
             r"\[DLManager\] INFO: = Progress: (\d+\.\d+)% \((\d+)/(\d+)\), Running for (\d+:\d+:\d+), ETA: (\d+:\d+:\d+)\n\[DLManager\] INFO:  - Downloaded: (\d+\.\d+) MiB, Written: (\d+\.\d+) MiB\n\[DLManager\] INFO:  - Cache usage: (\d+\.\d+) MiB, active tasks: (\d+)\n\[DLManager\] INFO:  \+ Download\t- (\d+\.\d+) MiB/s \(raw\) / (\d+\.\d+) MiB/s \(decompressed\)\n\[DLManager\] INFO:  \+ Disk\t- (\d+\.\d+) MiB/s \(write\) / (\d+\.\d+) MiB/s \(read\)")
+        download_size_re = re.compile(r"\[cli\] INFO: Download size: (\d+\.\d+) MiB")
         last_progress_update = None
+        total_dl_size = None
+        remaining_dl_size = None
 
         try:
             with open(file_path, "r") as f:
                 lines = f.readlines()
 
+                for line in lines:
+                    if match := download_size_re.search(line):
+                        total_dl_size = float(match.group(1))
+                        break
+                for line in reversed(lines):
+                    if match := download_size_re.search(line):
+                        remaining_dl_size = float(match.group(1))
+                        break
+                
+                previously_dl_size = total_dl_size - remaining_dl_size if total_dl_size != None else 0
+
                 for i in range(len(lines) - 5):
                     if match := progress_re.search(''.join(lines[i: i + 6])):
+                        downloaded = round(float(match.group(6)), 2)
+                        percent = round(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)))
                         last_progress_update = {
-                            "Percentage": float(match.group(1)),
-                            "Description": f"Downloaded {match.group(2)} MB of {match.group(3)} MB ({match.group(1)}%)\nSpeed: {match.group(11)} MB/s"
+                            "Percentage": percent,
+                            "Description": (f"Downloaded {round(downloaded + previously_dl_size, 2)} MB/{total_dl_size} MB" if previously_dl_size else f"Downloaded {downloaded} MB/{total_dl_size} MB" if total_dl_size != None else f"Downloaded {downloaded} MB") + f" ({percent}%)\nSpeed: {match.group(11)} MB/s"
                         }
 
                 if lines[-1].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Download size is 0, the game is either already up to date or has not changed. Exiting..."
+                    }
+                if lines[-2].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
                     last_progress_update = {
                         "Percentage": 100,
                         "Description": "Download size is 0, the game is either already up to date or has not changed. Exiting..."

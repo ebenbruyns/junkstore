@@ -13,17 +13,20 @@ import {
     Button,
     joinClassNames,
     ConfirmModal,
+    Navigation,
+    FooterLegendProps,
 } from "decky-frontend-lib";
 import { FC, VFC, useEffect, useRef, useState } from "react";
 import { FaCog, FaSlidersH } from "react-icons/fa";
-import { EditorAction, MenuAction, ProgressUpdate } from "../Types/Types";
+import { EditorAction, ExecuteGetGameSizeArgs, GameSize, MenuAction, ProgressUpdate } from "../Types/Types";
 import { ConfEditor } from "../ConfEditor";
 import { BatEditor } from "../BatEditor";
 import Logger from "../Utils/logger";
 import { ExeRunner } from "../ExeRunner";
-import { getAppDetails } from "../Utils/executeAction";
+import { getAppDetails } from '../Utils/utils';
 import { ScrollableWindow } from '../ScrollableWindow';
 import { appActionButtonClasses, basicAppDetailsClasses } from '../staticClasses';
+import { executeAction } from '../Utils/executeAction';
 
 
 interface GameDisplayProperties {
@@ -46,8 +49,8 @@ interface GameDisplayProperties {
     resetLaunchOptions: () => void;
     updater: () => void;
     scriptRunner: (actionSet: string, actionId: string, args: any) => void;
-    clearActiveGame: () => void;
     reloadData: () => void;
+    onExeExit: () => void;
 }
 
 
@@ -71,11 +74,14 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         actions,
         resetLaunchOptions,
         scriptRunner,
-        clearActiveGame,
-        reloadData
+        reloadData,
+        onExeExit
     }
 ) => {
     const logger = new Logger("GameDisplay");
+    const isInstalled = !!steamClientID;
+    const [gameSize, setGameSize] = useState('');
+
     logger.log(`initActionSet: ${initActionSet}`);
     const contextMenu = (e: any) => {
         showContextMenu(
@@ -99,15 +105,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
     const actionsMenu = (e: any) => {
         showContextMenu(
             <Menu label="Actions" cancelText="Cancel" onCancel={() => { }}>
-                {steamClientID !== "" &&
-                    <MenuItem onSelected={
-                        () => {
-
-                            logger.debug("show exe list");
-                            showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} closeParent={closeModal} refreshParent={reloadData} />);
-                        }
-                    }>Run exe in Game folder</MenuItem>}
-                {steamClientID !== "" &&
+                {isInstalled &&
+                    <MenuItem onSelected={() => showModal(<ExeRunner serverAPI={serverApi} initActionSet={initActionSet} initAction="GetExeActions" contentId={steamClientID} shortName={shortName} refreshParent={reloadData} onExeExit={onExeExit} />)}>
+                        Run exe in Game folder
+                    </MenuItem>
+                }
+                {isInstalled &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
                         <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => { uninstaller(); }} />)}> {/*pass uninstall fn like this so it doesn't wait for the async fn to close the modal */}
@@ -116,13 +119,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </>
                 }
                 {actions && actions.length > 0 && actions.map((action) => {
-                    const installed = steamClientID != "";
                     const mustBeInstalled = action.InstalledOnly != undefined && action.InstalledOnly == true;
-                    const show = installed || !mustBeInstalled;
+                    const show = isInstalled || !mustBeInstalled;
 
                     if (show)
                         return <MenuItem onSelected={
-                            async () => {
+                            () => {
                                 const args = {
                                     shortname: shortName,
                                     steamClientID: "",
@@ -132,10 +134,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                     gameId: "",
                                     appId: ""
                                 };
-                                if (steamClientID != "") {
+                                if (isInstalled) {
                                     logger.debug("steamClientID: ", steamClientID, action);
-                                    const id = parseInt(steamClientID);
-                                    const details = await getAppDetails(id);
+                                    const details = getAppDetails(steamClientID);
                                     if (details == null) {
                                         logger.error("details is null"); return;
                                     }
@@ -146,8 +147,8 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                         args.startDir = startDir;
                                         args.compatToolName = compatToolName;
                                         args.steamClientID = steamClientID;
-                                        args.gameId = String(steamClientID);
-                                        args.appId = String(id);
+                                        args.gameId = steamClientID;
+                                        args.appId = steamClientID;
                                     }
                                 }
                                 if (action.Type == "ScriptActionConfirm") {
@@ -170,6 +171,21 @@ const GameDisplay: VFC<GameDisplayProperties> = (
         );
     };
 
+    useEffect(() => {
+        setGameSize('');
+        (async () => {
+            const gameSizeResult = await executeAction<ExecuteGetGameSizeArgs, GameSize>(serverApi, initActionSet, 'GetGameSize', { shortname: shortName, installed: String(isInstalled) });
+            if (!gameSizeResult) return;
+            setGameSize(gameSizeResult.Content.Size);
+        })();
+    }, [isInstalled]);
+
+    const focusableProps: FooterLegendProps = !isInstalled ? {} :
+        {
+            onOptionsButton: () => Navigation.Navigate(`/library/app/${steamClientID}`),
+            onOptionsActionDescription: 'Go to Steam App Page'
+        };
+
     return (
         <>
             <div
@@ -190,20 +206,24 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     padding: '20px 24px',
                     background: 'radial-gradient(155.42% 100% at 0% 0%, #060a0e 0 0%, #0e141b 100%)'
                 }}
+                {...focusableProps}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '30px 0' }}>
                     <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{name}</div>
                     <div>
-                        {installing && (
-                            <div style={{ margin: '5px 2px 10px' }}>
+                        {installing ? (
+                            <div key={'download'} style={{ margin: '5px 2px 10px', animation: 'fadeIn .3s ease-in-out forwards' }}>
                                 <div style={{ marginBottom: '5px', color: '#969696', fontSize: '11px', lineHeight: '11px' }}>
                                     {progress.Description}
                                 </div>
                                 <ProgressBar nProgress={progress.Percentage} />
                             </div>
+                        ) : !!gameSize && (
+                            <div key={'size'} style={{ margin: '0 2px 5px', color: '#969696', fontSize: '11px', lineHeight: '11px', animation: 'fadeIn .3s ease-in-out forwards' }}>
+                                {gameSize}
+                            </div>
                         )}
-                        <Focusable
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
+                        <Focusable style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', height: '40px' }}>
                             <div
                                 className={joinClassNames(basicAppDetailsClasses.AppActionButton, appActionButtonClasses.PlayButtonContainer, installing || steamClientID == "" ? '' : appActionButtonClasses.Green)}
                                 style={{ height: '100%', width: '100%' }}
@@ -211,8 +231,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                                 <Button
                                     style={{ display: 'flex', justifyContent: 'left', fontSize: '14px' }}
                                     className={installing ? 'DialogButton' : joinClassNames(appActionButtonClasses.PlayButton, appActionButtonClasses.ButtonChild)}
-                                    onClick={installing ? cancelInstall : steamClientID == "" ? installer : runner}>
-                                    {installing ? 'Cancel' : steamClientID == "" ? 'Install Game' : 'Play Game'}
+                                    onClick={installing ? cancelInstall : !isInstalled ? installer : runner}
+                                >
+                                    {installing ? 'Cancel' : !isInstalled ? 'Install Game' : 'Play Game'}
                                 </Button>
                             </div>
                             <div style={{ display: 'flex', gap: '15px', height: '100%' }}>
@@ -237,13 +258,7 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                     </div>
                 </div>
                 <div style={{ width: '100%', padding: '8px 0', color: '#c2c0c0' }}>
-                    <ScrollableWindow
-                        height='100%'
-                        onCancel={() => {
-                            clearActiveGame();
-                            closeModal();
-                        }}
-                    >
+                    <ScrollableWindow height='100%' onCancel={closeModal} {...focusableProps}>
                         <div
                             style={{ paddingRight: '10px', whiteSpace: 'pre-wrap' }}
                             dangerouslySetInnerHTML={{ __html: description }}
