@@ -41,7 +41,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         const id = await SteamClient.Apps.AddShortcut("Login", launchOptions.Exe, "", "");
         logger.debug("Shortcut created for login: ", id);
         SteamClient.Apps.SetShortcutLaunchOptions(id, launchOptions.Options);
-        SteamClient.Apps.SetAppHidden(id, false);
+        SteamClient.Apps.SetAppHidden(id, true);
         SteamClient.Apps.SetShortcutName(id, launchOptions.Name);
         logger.debug("Saving shortcut for login: ", id);
         await executeAction<SaveSettingsArgs, ContentType>(serverAPI, actionSetName,
