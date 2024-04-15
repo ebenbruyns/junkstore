@@ -59,12 +59,14 @@ class Epic(GameSet.GameSet):
         )
         print(result[type])
 
-    def get_login_status(self, offline):
+    def get_login_status(self, offline, flush_cache=False):
         offline_switch = "--offline" if offline else ""
         cache_key = "egs-login"
         if offline:
             cache_key = "egs-login-offline"
-        
+        if(flush_cache):
+            self.clear_cache(cache_key)
+            
         cache = self.get_cache(cache_key)
         if cache is not None:
             return cache
@@ -242,19 +244,7 @@ class Epic(GameSet.GameSet):
         conn = self.get_connection()
         c = conn.cursor()
 
-    def convert_bytes(self , size):
-        try:
-            if size >= 1024**3:
-                size = f"{size / 1024**3:.2f} GB"
-            elif size >= 1024**2:
-                size = f"{size / 1024**2:.2f} MB"
-            elif size >= 1024:
-                size = f"{size / 1024:.2f} KB"
-            else:
-                size = f"{size} bytes"
-            return size
-        except Exception as e:
-            return ""
+    
 
     # [DLManager] INFO: = Progress: 0.51% (368/72002), Running for 00:01:58, ETA: 06:23:02
     # [DLManager] INFO:  - Downloaded: 316.12 MiB, Written: 361.03 MiB
@@ -298,6 +288,11 @@ class Epic(GameSet.GameSet):
                         }
 
                 if lines[-1].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Download size is 0, the game is either already up to date or has not changed. Exiting..."
+                    }
+                if lines[-2].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
                     last_progress_update = {
                         "Percentage": 100,
                         "Description": "Download size is 0, the game is either already up to date or has not changed. Exiting..."

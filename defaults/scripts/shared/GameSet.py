@@ -36,8 +36,24 @@ class GameSet:
             "ConfigurationPath",
             "Developer",
             "ReleaseDate",
-            "Size"]
+            "Size",
+            "InstallPath",
+            "UmuId"]
 
+    def convert_bytes(self , size):
+        try:
+            if size >= 1024**3:
+                size = f"{size / 1024**3:.2f} GB"
+            elif size >= 1024**2:
+                size = f"{size / 1024**2:.2f} MB"
+            elif size >= 1024:
+                size = f"{size / 1024:.2f} KB"
+            else:
+                size = f"{size} bytes"
+            return size
+        except Exception as e:
+            return ""
+        
     def read_json_from_stdin(self):
         json_str = sys.stdin.read()
         return json.loads(json_str)
@@ -73,6 +89,42 @@ class GameSet:
         columns = [column[1] for column in c.fetchall()]
         if "Size" not in columns:
             c.execute("ALTER TABLE Game ADD COLUMN Size TEXT")
+        
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "InstallPath" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN InstallPath TEXT")
+        
+
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "UmuId" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN UmuId TEXT")
+        conn.commit()
+        conn.close()
+
+    def get_umu_id(self, shortname):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("SELECT UmuId FROM Game WHERE ShortName=?", (shortname))
+        result = c.fetchone()
+        conn.close()
+        if result:
+            return result[0]
+        else:
+            return None
+    
+    def update_umu_id(self, shortname, store):
+        url = "https://umu.openwinecomponents.org/umu_api.php?codename=" + shortname + "&store=" + store
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        req = urllib.request.Request(url, headers=headers)
+        response = urllib.request.urlopen(req, timeout=5)
+        data = response.read()
+        json_data = json.loads(data)
+        umu_id = json_data[0]['umu_id']
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute("UPDATE Game SET UmuId=? WHERE ShortName=?", (umu_id, shortname))
         conn.commit()
         conn.close()
     
@@ -316,6 +368,7 @@ class GameSet:
 
     def get_config_json(self, shortnames, forkname, version, platform):
         try:
+            print(f"Getting config for {shortnames} {forkname} {version} {platform}", file=sys.stderr)
             config_schema = f"{platform}_{forkname}_{version}"
             runtime_dir = os.environ.get('DECKY_PLUGIN_RUNTIME_DIR', "")
             plugin_dir = os.environ.get('DECKY_PLUGIN_DIR', "")
@@ -330,6 +383,7 @@ class GameSet:
             config_data = self.load_conf_data_from_json(
                 os.path.expanduser(
                     filepath))
+            print(f"Loaded config data from {filepath}", file=sys.stderr)
             conn = self.get_connection()
             c = conn.cursor()
 
@@ -343,8 +397,9 @@ class GameSet:
                         (config_set.platform = '' or config_set.platform = ?)
                         order by config_set.platform desc, config_set.forkname desc, config_set.version desc""", (shortname, forkname, version, platform))
                 row = c.fetchone()
-
+                print(f"Found config set {row}", file=sys.stderr)
                 id = row[0]
+                print(f"Found config set id {id}", file=sys.stderr)
                 c.execute(
                     """SELECT config_set.ShortName, configs.section, configs.key, configs.value FROM configs 
                     JOIN config_set ON configs.config_set_id = config_set.id 
@@ -352,6 +407,7 @@ class GameSet:
                     configs.section != 'autoexec'""", (id,))
                 for row in c.fetchall():
                     _, section, key, value = row
+                    print(f"Found config {section} {key} {value}", file=sys.stderr)
                     section = self.find_section(config_data, section)
                     if section is not None:
                         option = self.find_option(section, key)
@@ -364,15 +420,21 @@ class GameSet:
                     """SELECT value FROM configs JOIN config_set ON configs.config_set_id = config_set.id 
                     WHERE config_set.id = ? AND 
                     configs.section = 'autoexec' AND configs.key = 'text'""", (id,))
+                c.row_factory = sqlite3.Row
                 row = c.fetchone()
+                print(f"Found autoexec {row}", file=sys.stderr)
                 if row is not None:
+                    print(f"Found autoexec {row[0]}", file=sys.stderr)
                     autoexec_text += row['value']
+
                 parent_name = shortname
+            print(f"Setting autoexec config data", file=sys.stderr)
             config_data['Autoexec'] = autoexec_text
+            print(f"Returning config data: {config_data}", file=sys.stderr)
             conn.close()
             return json.dumps({'Type': 'IniContent', 'Content': config_data})
         except Exception as e:
-            print(f"An error occurred: ", e)
+            print(f"An error occurred: ", e, file=sys.stderr)
             # Handle the exception here
 
     def find_section(self, config_data, section_name):
@@ -657,6 +719,11 @@ class GenericArgs:
 
         self.parser.add_argument(
             '--generate-env-settings-json', help='Generate environment settings')
+        
+        self.parser.add_argument(
+            '--update-umu-id', nargs=2, help='Update UMU ID')
+        self.parser.add_argument(
+            '--get-umu-id', nargs=1, help='Get UMU ID')
 
     def parseArgs(self):
         self.args = self.parser.parse_args()
@@ -718,3 +785,7 @@ class GenericArgs:
                 needsLogin = self.args.getgameswithimages[4]
             print(self.gameSet.get_games_with_images(
                 self.args.getgameswithimages[0], filter, installed, isLimited, urlencode, needsLogin))
+        if self.args.update_umu_id:
+            self.gameSet.update_umu_id(self.args.update_umu_id[0], self.args.update_umu_id[1])
+        if self.args.get_umu_id:
+            print(self.gameSet.get_umu_id(self.args.get_umu_id[0]))

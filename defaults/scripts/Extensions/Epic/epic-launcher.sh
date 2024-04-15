@@ -77,7 +77,7 @@ function sync-saves(){
     $LEGENDARY sync-saves $ID
 fi
 }
-sync-saves
+# sync-saves
 
 QUOTED_ARGS=""
 for arg in "$@"; do
@@ -92,9 +92,13 @@ done
 
 echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
+export STORE="egs"
+export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
+
+# export PROTON_FORCE_LARGE_ADDRESS_AWARE=1
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-sync-saves
+# sync-saves
 
 
 # echo "#!/bin/bash" > run.sh

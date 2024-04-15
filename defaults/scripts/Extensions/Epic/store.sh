@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-ACTIONS+=("install-overlay" "update-overlay" "remove-overlay")
+ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-idaste")
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
@@ -69,7 +69,7 @@ function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
-    updategamedetailsaftercmd $1 $LEGENDARY install $1 --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
@@ -162,12 +162,16 @@ function Epic_move(){
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
 
 }
-
+function Epic_update-umu-id(){
+    TEMP=$($EPICCONF --update-umu-id "${1}" egs --dbfile $DBFILE)
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"Umu Id updated\"}}"
+}   
 function Epic_install(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
     rm $PROGRESS_LOG &>> ${DECKY_PLUGIN_LOG_DIR}/${1}.log
     RESULT=$($EPICCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
-    mkdir -p "${HOME}/.compat/${1}"
+    TEMP=$($EPICCONF --update-umu-id "${1}" egs --dbfile $DBFILE)
+    # mkdir -p "${HOME}/.compat/${1}"
     ARGS=$($ARGS_SCRIPT "${1}")
     TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE $OFFLINE_MODE)
     echo $TEMP
@@ -209,7 +213,12 @@ function Epic_getprogress()
     echo $TEMP
 }
 function Epic_loginstatus(){
-    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE)
+     if [ -z "${1}" ]; then
+        FLUSH_CACHE="--flush-cache"
+    else
+        FLUSH_CACHE=""
+    fi
+    TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE  $FLUSH_CACHE)
     echo $TEMP
 
 }
@@ -251,15 +260,25 @@ function Epic_get-exe-list(){
     export STEAM_COMPAT_DATA_PATH="${HOME}/.local/share/Steam/steamapps/compatdata/${STEAM_ID}"
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
     cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
+    IFS=$'\n' 
     LIST=$(find . -name "*.exe")
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"Files\": ["
+   
     for FILE in $LIST; do
-        
-        JSON="${JSON}{\"Path\": \"${FILE}\"},"
+       JSON="${JSON}{\"Path\": \"${FILE}\"},"
     done
     JSON=$(echo "$JSON" | sed 's/,$//')
     JSON="${JSON}]}}"
     echo $JSON
+}
+function Epic_registry-fix(){
+    # reg add HKEY_CLASSES_ROOT\\com.epicgames.launcher /f
+      STEAM_ID="${2}"
+    GAME_SHORTNAME="${1}"
+    GAME_PATH="${3}"
+    COMPAT_TOOL="${4}"
+    launchoptions "reg"  "add HKEY_CLASSES_ROOT\\\\\\\\com.epicgames.launcher /f" "${GAME_PATH}" "Registry Fix" true "${COMPAT_TOOL}"
+
 }
 function launchoptions () {
     Exe=$1 
@@ -307,7 +326,7 @@ function Epic_login-launch-options(){
 
 function Epic_logout(){
     TEMP=$($LEGENDARY auth --delete)
-    loginstatus
+    loginstatus --flush-cache
 }
 
 function Epic_getsetting(){

@@ -41,6 +41,9 @@ class EpicArgs(GameSet.GenericArgs):
             '--update-game-details', help='Update game details')
         self.parser.add_argument(
             '--get-game-size', nargs=2, help='Get game size')
+        
+        self.parser.add_argument(
+            '--flush-cache', help='Flush cache' , action='store_true')
 
     def parseArgs(self):
         super().parseArgs()
@@ -73,7 +76,7 @@ class EpicArgs(GameSet.GenericArgs):
                     self.args.launchoptions[0], self.args.launchoptions[1], self.args.launchoptions[2], self.args.offline))
 
             if self.args.getloginstatus:
-                print(self.gameSet.get_login_status(self.args.offline))
+                print(self.gameSet.get_login_status(self.args.offline, self.args.flush_cache))
 
             if self.args.hasupdates:
                 print(self.gameSet.has_updates(

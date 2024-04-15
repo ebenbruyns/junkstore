@@ -15,12 +15,6 @@
           "Title": "Get content",
           "Type": "TabPage",
           "Command": "./scripts/get-json.py junk-store-tabs"
-        },
-        {
-          "Id": "GetLoginActions",
-          "Title": "Get login status",
-          "Type": "Init",
-          "Command": "./scripts/get-json.py epic-games-login-actions"
         }
       ]
     }
@@ -56,12 +50,6 @@
     "Content": {
       "SetName": "MainMenu",
       "Actions": [
-        {
-          "Id": "GetContent",
-          "Title": "Populate Store",
-          "Type": "GetContent",
-          "Command": "./scripts/get-json.py main-menu-content"
-        },
         {
           "Id": "JunkStoreInit",
           "Title": "Content",
@@ -185,6 +173,18 @@
         {
           "ActionId": "ProtonTricks",
           "Title": "Proton Tricks",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "RegistryFix",
+          "Title": "Registry Fix",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
+        {
+          "ActionId": "UmuIdUpdate",
+          "Title": "Update UMU Id",
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         }
@@ -461,6 +461,18 @@
           "Title": "Refresh Games List",
           "Type": "Refresh",
           "Command": "./scripts/junk-store.sh Epic refresh"
+        },
+        {
+          "Id": "RegistryFix",   
+          "Title": "Registry Fix",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic registry-fix"
+        },
+        {
+          "Id": "UmuIdUpdate",   
+          "Title": "Update UMU Id",
+          "Type": "Executable",
+          "Command": "./scripts/junk-store.sh Epic update-umu-id"
         }
       ]
     }
