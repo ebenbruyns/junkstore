@@ -186,6 +186,8 @@ class Epic(GameSet.GameSet):
                         release_date,
                         "",
                         "",
+                        "",
+                        "",
                         shortname,
                         
                     ]
