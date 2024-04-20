@@ -31,6 +31,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     }
   );
 
+
+
+
   return {
     title: <div className={staticClasses.Title}>Custom Games Store</div>,
     content: <Content serverAPI={serverApi} initActionSet="init" initAction="InitActions" />,

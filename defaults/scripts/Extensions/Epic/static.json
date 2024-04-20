@@ -133,12 +133,7 @@
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         },
-        {
-          "ActionId": "DownloadSaves",
-          "Title": "Download saves",
-          "Type": "ScriptAction",
-          "InstalledOnly": "True"
-        },
+       
         {
           "ActionId": "Verify",
           "Title": "Verify Game",

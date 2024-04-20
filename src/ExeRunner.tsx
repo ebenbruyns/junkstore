@@ -44,7 +44,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
 
         logger.debug("setName: ", setName);
         logger.debug("result: ", actionSetResult);
-        const details = getAppDetails(contentId);
+        const details = await getAppDetails(contentId);
         if (details == null) {
             logger.error("details is null"); return;
 
@@ -95,7 +95,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                     const runExe = async () => {
                         setBusy(true);
                         logger.debug(`steamclientid ${contentId}`);
-                        const appDetails = getAppDetails(contentId);
+                        const appDetails = await getAppDetails(contentId);
                         logger.debug("app details: ", appDetails);
                         if (appDetails == null) {
                             logger.error("app details is null");
