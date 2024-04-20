@@ -17,10 +17,8 @@ export function gameIDFromAppID(appid: number) {
     }
 };
 
-export async function getAppDetails(appId: number | string) {
-    const id = typeof appId === 'string' ? parseInt(appId) : appId
-    await appDetailsStore.RequestAppDetails(id);
-    return appDetailsStore.GetAppDetails(id);
+export function getAppDetails(appId: number | string) {
+    return appDetailsStore.GetAppDetails(typeof appId === 'string' ? parseInt(appId) : appId);
 }
 
 export function runApp(appId: number, onAppClose?: () => void, onAppLaunch?: () => void) {

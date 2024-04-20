@@ -44,7 +44,7 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
 
         logger.debug("setName: ", setName);
         logger.debug("result: ", actionSetResult);
-        const details = await getAppDetails(contentId);
+        const details = getAppDetails(contentId);
         if (details == null) {
             logger.error("details is null"); return;
 
