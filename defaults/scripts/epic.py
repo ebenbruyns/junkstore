@@ -139,7 +139,7 @@ class Epic(GameSet.GameSet):
                 'Type': 'LaunchOptions',
                 'Content':
                 {
-                    'Exe': f"\\\"{os.path.join(result['game_directory'], result['game_executable'])}\\\"",
+                    'Exe': f"\"{os.path.join(result['game_directory'], result['game_executable'])}\"",
                     'Options': f"{script_path} {game_id}%command%",
                     'WorkingDir': result['working_directory'],
                     'Compatibility': True,
