@@ -106,7 +106,7 @@ class GameSet:
     def get_umu_id(self, shortname):
         conn = self.get_connection()
         c = conn.cursor()
-        c.execute("SELECT UmuId FROM Game WHERE ShortName=?", (shortname))
+        c.execute("SELECT UmuId FROM Game WHERE ShortName=?", (shortname,))
         result = c.fetchone()
         conn.close()
         if result:
