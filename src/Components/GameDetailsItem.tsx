@@ -133,7 +133,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
             }
 
             logger.debug("sleeping");
-            await sleep(5);
+            await sleep(1000);
             logger.debug("woke up");
         }
     };
