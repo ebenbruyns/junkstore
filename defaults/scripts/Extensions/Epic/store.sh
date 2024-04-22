@@ -67,6 +67,7 @@ function Epic_cancelinstall(){
 
 function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
+    $LEGENDARY move "${1}" "${INSTALL_DIR}" &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
     updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
@@ -152,14 +153,15 @@ function Epic_import(){
 }
 function Epic_move(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
-    SKIP_MOVE=""
-    if [ -d "${GAME_DIR}" ]; then
-        SKIP_MOVE="--skip-move"
-    fi
-    updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    $LEGENDARY move "${1}" "${INSTALL_DIR}" &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
+    # GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
+    # SKIP_MOVE=""
+    # if [ -d "${GAME_DIR}" ]; then
+    #     SKIP_MOVE="--skip-move"
+    # fi
+    # updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
-    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} moved to ${INSTALL_DIR}\"}}"
 
 }
 function Epic_update-umu-id(){

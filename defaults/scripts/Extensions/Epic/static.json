@@ -133,6 +133,12 @@
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         },
+        {
+          "ActionId": "Move",
+          "Title": "Move Game",
+          "Type": "ScriptAction",
+          "InstalledOnly": "True"
+        },
        
         {
           "ActionId": "Verify",
@@ -359,6 +365,12 @@
           "Title": "Uninstall game",
           "Type": "Uninstall",
           "Command": "./scripts/junk-store.sh Epic uninstall"
+        },
+        {
+          "Id": "Move",
+          "Title": "Move game",
+          "Type": "Move",
+          "Command": "./scripts/junk-store.sh Epic move"
         },
         {
           "Id": "EnableEOSoverlay",
