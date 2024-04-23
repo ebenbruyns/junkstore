@@ -9,6 +9,21 @@ ID=$1
 echo $1
 shift
 
+
+
+#########################################################################
+# If you enable cloud saves and things go wrong, you got what you       #
+# deserved this is a minefield and a lot can go wrong here.             #
+# Do not ask me for support and do not cry about losing you saves,      #
+# you have been warned. If you complain on a public forum I will        #
+# link to this code and make sure people understand it was YOUR fault.  #
+#########################################################################
+
+function sync-saves(){
+}
+
+
+
 source "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
@@ -72,12 +87,12 @@ else
 fi
 
 CMD=$@
-function sync-saves(){
-    if [[ "${OFFLINE_MODE}" == "" ]]; then
-    $LEGENDARY sync-saves $ID
-fi
-}
-# sync-saves
+
+
+
+
+sync-saves
+
 
 QUOTED_ARGS=""
 for arg in "$@"; do
@@ -98,7 +113,8 @@ export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
 # export PROTON_FORCE_LARGE_ADDRESS_AWARE=1
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-# sync-saves
+
+sync-saves
 
 
 # echo "#!/bin/bash" > run.sh

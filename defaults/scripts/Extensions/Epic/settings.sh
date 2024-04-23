@@ -34,6 +34,9 @@ else
 fi
 
 
+if [[ -f "${DECKY_PLUGIN_RUNTIME_DIR}/epic_overrides.sh" ]]; then
+   source "${DECKY_PLUGIN_RUNTIME_DIR}/epic_overrides.sh"
+fi
 
 
 
