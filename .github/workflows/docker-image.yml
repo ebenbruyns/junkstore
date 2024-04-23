@@ -151,7 +151,7 @@ jobs:
       if: ${{ !env.ACT }}
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-        name: Junk-Store
-        path: /tmp/output/*.zip
+        name: Junk-Store.zip
+        path: /tmp/output/Junk-Store.zip
 
    
