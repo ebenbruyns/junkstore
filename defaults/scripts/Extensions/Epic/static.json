@@ -134,13 +134,6 @@
           "InstalledOnly": "True"
         },
         {
-          "ActionId": "Move",
-          "Title": "Move Game",
-          "Type": "ScriptAction",
-          "InstalledOnly": "True"
-        },
-       
-        {
           "ActionId": "Verify",
           "Title": "Verify Game",
           "Type": "ScriptAction",
