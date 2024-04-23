@@ -149,8 +149,7 @@ jobs:
     - name: Prep Artifacts
       run: |
         mkdir /tmp/artifacts -p
-        cd /tmp/artifacts
-        unzip /tmp/output/junkstore.zip
+        unzip /tmp/output/junkstore.zip -d /tmp/artifacts
         |
     - name: Upload Artifacts to Github
       if: ${{ !env.ACT }}
