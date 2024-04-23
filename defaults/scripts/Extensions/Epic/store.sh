@@ -67,7 +67,8 @@ function Epic_cancelinstall(){
 
 function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    $LEGENDARY move "${1}" "${INSTALL_DIR}" &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
+    # attempting to fix path issues if an install failed.
+    $LEGENDARY move "${1}" "${INSTALL_DIR}" --skip-move &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
    
     updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
