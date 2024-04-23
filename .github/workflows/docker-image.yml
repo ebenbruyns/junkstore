@@ -59,7 +59,7 @@ jobs:
         echo "::notice::This run was triggered by a pull request. Appending the commit hash to the plugin version."
         echo "::group::Appending hash to plugin $plugin"
 
-        PACKAGE_FILE="plugins/$plugin/package.json"
+        PACKAGE_FILE="package.json"
 
         SHA=$(cut -c1-7 <<< "${{ github.event.pull_request.head.sha || github.sha }}")
         VERSION=$(jq -r '.version' $PACKAGE_FILE)
@@ -121,12 +121,12 @@ jobs:
       if: ${{ inputs.force_pnpm != 'none' }}
       run: |
         if [[ "${{ env.pnpm_force }}" == "pnpm" ]]; then
-            $(which pnpm) -C plugins/$plugin install --lockfile-only
+            $(which pnpm) -C .  install --lockfile-only
         elif [[ "${{ env.pnpm_force }}" == "dfl" ]]; then
-            $(which pnpm) -C plugins/$plugin update --latest decky-frontend-lib
+            $(which pnpm) -C . update --latest decky-frontend-lib
         elif [[ "${{ env.pnpm_force }}" == "pnpm-dfl" ]]; then
-            $(which pnpm) -C plugins/$plugin install --lockfile-only
-            $(which pnpm) -C plugins/$plugin update --latest decky-frontend-lib
+            $(which pnpm) -C . install --lockfile-only
+            $(which pnpm) -C . update --latest decky-frontend-lib
         fi
 
     - name: Download Decky CLI
