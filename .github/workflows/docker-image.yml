@@ -146,12 +146,17 @@ jobs:
         sudo chown -R $(whoami) .
 
         echo "::endgroup::"
-
+    - name: Prep Artifacts
+      run: |
+        mkdir /tmp/artifacts -p
+        cd /tmp/artifacts
+        unzip /tmp/output/junkstore.zip
+        |
     - name: Upload Artifacts to Github
       if: ${{ !env.ACT }}
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
         name: Junk-Store.zip
-        path: /tmp/output/junkstore.zip
+        path: /tmp/artifacts/**/*
 
    
