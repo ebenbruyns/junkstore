@@ -283,7 +283,7 @@ class Epic(GameSet.GameSet):
                 for i in range(len(lines) - 5):
                     if match := progress_re.search(''.join(lines[i: i + 6])):
                         downloaded = round(float(match.group(6)), 2)
-                        percent = round(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)))
+                        percent, _ = divmod(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)), 1)
                         last_progress_update = {
                             "Percentage": percent,
                             "Description": (f"Downloaded {round(downloaded + previously_dl_size, 2)} MB/{total_dl_size} MB" if previously_dl_size else f"Downloaded {downloaded} MB/{total_dl_size} MB" if total_dl_size != None else f"Downloaded {downloaded} MB") + f" ({percent}%)\nSpeed: {match.group(11)} MB/s"
