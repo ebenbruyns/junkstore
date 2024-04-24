@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - "plugins/**"
-      - ".github/workflows/build-plugins.yml"
+      - "**/*"
+    
   pull_request_target:
     branches: ['*']
   workflow_dispatch:
