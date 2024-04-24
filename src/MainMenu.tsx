@@ -1,5 +1,5 @@
 import { ButtonItem, ModalRoot, Navigation, PanelSection, PanelSectionRow, ServerAPI, showModal } from "decky-frontend-lib";
-import { VFC } from "react";
+import { VFC, useEffect } from "react";
 import { StoreContent } from "./Types/Types";
 import QRCode from "react-qr-code";
 
@@ -30,7 +30,13 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
     content,
     initAction,
     initActionSet }) => {
-
+    useEffect(() => {
+        if (localStorage.getItem('js_firstlaunch') != "false") {
+            Navigation.CloseSideMenus();
+            Navigation.Navigate("/about-junk-store");
+            localStorage.setItem('js_firstlaunch', 'false');
+        }
+    }, []);
 
     return (
         <>
