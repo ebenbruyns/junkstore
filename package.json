@@ -1,6 +1,6 @@
 {
   "name": "Junk-Store",
-  "version": "0.8.4.1",
+  "version": "0.9",
   "description": "A custom games store plugin for games from other sources",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
