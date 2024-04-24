@@ -1,0 +1,160 @@
+name: Build Junk-Store
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "plugins/**"
+      - ".github/workflows/build-plugins.yml"
+  pull_request_target:
+    branches: ['*']
+  workflow_dispatch:
+    inputs:
+      plugin_override:
+        description: Whitespace-separated list of plugin names to be built and uploaded. Enter "#all" to build and upload all plugins. Leave blank to use the default behavior.
+        type: string
+        required: false
+      force_revision:
+        type: boolean
+        description: Force a revision for for a plugin upload (used to fix issues caused by CI.)
+      force_pnpm:
+        type: choice
+        description: Forces an update to pnpm lockfile version and or Decky Frontend Library. This is only to be used in "oh shit" situations. Otherwise defer to the plugin developer so that they can submit a fix/update.
+        default: 'none'
+        options:
+          - none
+          - pnpm
+          - dfl
+          - pnpm-dfl
+env:
+  revision_force: ${{ inputs.force_revision }}
+  pnpm_force: ${{ inputs.force_pnpm }}
+  testing: ${{ inputs.test_build }}
+  testing_plugins: "Bluetooth ControllerTools SDH-AudioLoader SDH-CssLoader moondeck memory-deck Fantastic"
+
+jobs:
+
+  build:
+    name: Build Junk-Store
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.plugin_override))) && 'env' || 'testing_env' }}
+    
+    strategy:
+      fail-fast: false
+     
+    env:
+      plugin: "Junk-Store"
+    steps:
+    - name: Checkout
+      if: ${{ !env.ACT }}
+      uses: actions/checkout@8230315d06ad95c617244d2f265d237a1682d445
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Append hash to plugin version
+      if: ${{ github.event_name == 'pull_request_target' }}
+      run: |
+        echo "::notice::This run was triggered by a pull request. Appending the commit hash to the plugin version."
+        echo "::group::Appending hash to plugin $plugin"
+
+        PACKAGE_FILE="package.json"
+
+        SHA=$(cut -c1-7 <<< "${{ github.event.pull_request.head.sha || github.sha }}")
+        VERSION=$(jq -r '.version' $PACKAGE_FILE)
+        NEW_VERSION="$VERSION-$SHA"
+
+        echo "::notice::Going from $VERSION to $NEW_VERSION"
+
+        tmp=$(mktemp)
+        jq --arg newversion "$NEW_VERSION" '.version = $newversion' $PACKAGE_FILE > $tmp
+        mv $tmp $PACKAGE_FILE
+
+        echo "::endgroup::"
+
+    - name: Append revision to force update
+      if: ${{ env.revision_force == 'true' }}
+      run: |
+        echo "::notice::This run was manually to force an appended revision. Appending a revision to the plugin version."
+        echo "::group::Appending revision to plugin $plugin"
+
+        PACKAGE_FILE="package.json"
+
+        VERSION=$(jq -r '.version' $PACKAGE_FILE)
+        echo "Version: $VERSION"
+        VERSION_WO_REVISION=$(echo $VERSION | sed -e 's|-[^-]*$||')
+        echo "Version without revisions: $VERSION"
+        PREV_REVISION=$(echo $VERSION | sed -e 's|[0-9][0-9.]*[0-9]-||')
+        echo "Current revision: $PREV_REVISION"
+        if [[ "$PREV_REVISION" =~ "-" ]]; then
+          IS_REVISED=true
+          echo "Is revised"
+        else
+          IS_REVISED=false
+          echo "Is not revised"
+        fi
+        if [[ "$IS_REVISED" == "false" ]]; then
+          echo "Plugin is not revised, setting to revision 1."
+          REVISION="1"
+          echo "Revision: $REVISION"
+          NEW_VERSION="$VERSION-$REVISION"
+        else
+          REVISION=$(($PREV_REVISION + 1))
+          echo "Revision: $REVISION"
+          NEW_VERSION="$VERSION_WO_REVISION-$REVISION"
+        fi
+        
+        echo "New version: $NEW_VERISION"
+        echo "::notice::Going from $VERSION to $NEW_VERSION"
+
+        tmp=$(mktemp)
+        jq --arg newversion "$NEW_VERSION" '.version = $newversion' $PACKAGE_FILE > $tmp
+        mv $tmp $PACKAGE_FILE
+
+        echo "::endgroup::"
+    
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8.5.1
+    - name: Force update pnpm lockfile and/or DFL
+      if: ${{ inputs.force_pnpm != 'none' }}
+      run: |
+        if [[ "${{ env.pnpm_force }}" == "pnpm" ]]; then
+            $(which pnpm) -C .  install --lockfile-only
+        elif [[ "${{ env.pnpm_force }}" == "dfl" ]]; then
+            $(which pnpm) -C . update --latest decky-frontend-lib
+        elif [[ "${{ env.pnpm_force }}" == "pnpm-dfl" ]]; then
+            $(which pnpm) -C . install --lockfile-only
+            $(which pnpm) -C . update --latest decky-frontend-lib
+        fi
+
+    - name: Download Decky CLI
+      run: |
+        mkdir /tmp/decky-cli
+        curl -L -o /tmp/decky-cli/decky "https://github.com/SteamDeckHomebrew/cli/releases/download/0.0.2/decky-linux-x86_64"
+        chmod +x /tmp/decky-cli/decky
+
+        echo "/tmp/decky-cli" >> $GITHUB_PATH
+
+    - name: Build plugin
+      run: |
+        echo "::group::Building plugin $plugin"
+
+        # Run the CLI as root to get around Docker's weird permissions
+        sudo $(which decky) plugin build -b -o /tmp/output -s directory .
+        sudo chown -R $(whoami) .
+
+        echo "::endgroup::"
+    - name: Prep Artifacts
+      run: |
+        mkdir /tmp/artifacts -p
+        unzip /tmp/output/junkstore.zip -d /tmp/artifacts
+    - name: Upload Artifacts to Github
+      if: ${{ !env.ACT }}
+      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+      with:
+        name: Junk-Store
+        path: /tmp/artifacts/junkstore/**/*
+
+   
