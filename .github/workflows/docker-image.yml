@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "
-      "**/*"
+      - "**/*"
     
   pull_request_target:
     branches: ['*']
