@@ -67,6 +67,12 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             buttonText: "Sponsor",
         },
         {
+            label: "Reddit Community",
+            icon: <SiReddit />,
+            link: "https://www.reddit.com/r/JunkStore",
+            buttonText: "Reddit",
+        },
+        {
             label: "X (Twitter)",
             icon: <SiX />,
             link: "https://x.com/JunkStore4deck",
@@ -144,7 +150,8 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                             <br />
                                             <h2>Contributors</h2>
                                             <ul>
-                                                <li>Eben Bruyns - Software Sorcerer</li>
+                                                <li>Eben Bruyns (junkrunner) - Software Sorcerer</li>
+                                                <li>Annie Ryan (mrs junkrunner) - Order Oracle</li>
                                                 <li>Jesse Bofill - Visual Virtuoso</li>
                                                 <li>Tech - Glitch Gladiator</li>
                                             </ul>
