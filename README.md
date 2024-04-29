@@ -1,6 +1,6 @@
 # Junk Store plugin [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/Dy7JUNc44A)
 
-![Decky Loader](https://img.shields.io/badge/dynamic/json?url=https://plugins.deckbrew.xyz/plugins&query=$[?(@.name == 'Junk-Store')].downloads&suffix= installs&label=decky&color=3ea6a3)
+[![Decky Loader](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fplugins.deckbrew.xyz%2Fplugins&query=%24%5B%3F(%40.name%20%3D%3D%20'Junk-Store')%5D.downloads&suffix=%20installs&label=decky&color=3ea6a3)]
 
 ## About Junk-Store
 Junk-Store is a revolutionary plugin designed to enhance your gaming experience on the Steam Deck. Developed with passion and innovation, Junk-Store seamlessly integrates non-Steam games into your Steam Deck library, opening up a world of gaming possibilities beyond Steam.
