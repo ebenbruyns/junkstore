@@ -1,7 +1,7 @@
 {
   "name": "Junk-Store",
-  "version": "0.9",
-  "description": "A custom games store plugin for games from other sources",
+  "version": "1.0",
+  "description": "Transform your gaming experience with Junk-Store - the ultimate solution for seamlessly integrating non-Steam games into your Steam Deck library. Say goodbye to clunky work arounds and hello to a world of endless gaming possibilities. Get ready to elevate your gaming to the next level with Junk-Store!",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
     "watch": "rollup -c -w",
