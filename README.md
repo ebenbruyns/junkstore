@@ -5,7 +5,10 @@
 ## About Junk-Store
 Junk-Store is a revolutionary plugin designed to enhance your gaming experience on the Steam Deck. Developed with passion and innovation, Junk-Store seamlessly integrates non-Steam games into your Steam Deck library, opening up a world of gaming possibilities beyond Steam.
 
-### Check it out in this video below for installion instructions
+### Check it out in these videos below for installion instructions
+
+[![Steam Deck Gaming's awesome video](https://i.ytimg.com/vi/u9Z66HMD31Y/hqdefault.jpg)](https://www.youtube.com/watch?v=tgc7yiKtpW0?si=u9Z66HMD31Y)
+
 
 [![GameTechPlanet's awesome video](https://i.ytimg.com/vi/tgc7yiKtpW0/hqdefault.jpg)](https://www.youtube.com/watch?v=tgc7yiKtpW0?si=6SyGMX_VHHDm0QhV)
 
