@@ -1,9 +1,9 @@
-import { DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, PanelSection, ServerAPI, SidebarNavigation, TextField, ToggleField } from "decky-frontend-lib";
+import { ConfirmModal, DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, PanelSection, ServerAPI, SidebarNavigation, TextField, ToggleField, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import { SiDiscord, SiFacebook, SiGithub, SiGithubsponsors, SiKofi, SiPatreon, SiReddit, SiX } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
-import Logger from "./Utils/logger";
+import Logger, { log } from "./Utils/logger";
 import { LogViewer } from "./LogViewer";
 import { ScrollableWindowRelative } from './ScrollableWindow';
 import { Developer } from "./Developer";
@@ -81,22 +81,28 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     ];
     useEffect(() => {
         // Create a WebSocket connection to the backend server
-        socket.current = new WebSocket("ws://localhost:8765/ws");
+        logger.debug("Connecting to WebSocket");
+        serverAPI.callPluginMethod<{}, Number>("get_websocket_port", {}).then((port) => {
+            logger.debug("configuring WebSocket on port: " + port.result);
+            const address = "ws://localhost:" + port.result + "/ws"
+            logger.debug("Connecting to WebSocket: " + address);
+            socket.current = new WebSocket(address);
 
-        // Listen for messages from the backend server
-        socket.current.onmessage = (event) => {
-            logger.debug("Received message: " + event.data);
+            // Listen for messages from the backend server
+            socket.current.onmessage = (event) => {
+                logger.debug("Received message: " + event.data);
 
-            const message = JSON.parse(event.data)
-            // Update the UI with the received output
-            setOutput((prevOutput) => prevOutput + message.data + "\n");
-            if (textareaRef.current !== null) {
-                textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
-            }
-            if (message.status === "closed") {
-                setIsInstalling(false)
-            }
-        };
+                const message = JSON.parse(event.data)
+                // Update the UI with the received output
+                setOutput((prevOutput) => prevOutput + message.data + "\n");
+                if (textareaRef.current !== null) {
+                    textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+                }
+                if (message.status === "closed") {
+                    setIsInstalling(false)
+                }
+            };
+        });
 
         // Clean up the WebSocket connection
         return () => {
@@ -231,7 +237,30 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                         SteamClient.Installs.OpenInstallWizard([getRuntimeId("Proton BattlEye Runtime")]);
                                     }
                                     }>Install Proton BattlEye Runtime</DialogButton>
+                            </PanelSection>
 
+                            <PanelSection>
+
+                                <DialogButton
+                                    disabled={isInstalling}
+                                    onClick={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall dependencies?"} onOK={
+                                        async () => {
+                                            try {
+                                                logger.debug("Sending message: uninstall_dependencies");
+                                                if (socket.current) {
+                                                    setOutput("");
+                                                    setIsInstalling(true);
+                                                    socket.current.send(JSON.stringify({ action: "uninstall_dependencies" }));
+                                                }
+                                            }
+                                            catch (e) {
+                                                logger.debug(e);
+                                            }
+                                        }} />)}
+
+                                >
+                                    {isInstalling ? "Working... Do not close this screen." : "Uninstall Dependencies"}
+                                </DialogButton>
                             </PanelSection>
                         </>
                     },
@@ -294,63 +323,71 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
                                             If you like what I'm doing please consider supporting me. I have a Github Sponsors page. I have also arranged to accept donations in Bitcoin, Etherium and Monero as requested by some. If you would like to support me in other ways please contact me on Discord.
 
+
+
                                             <br />
                                             <br />
+                                            See the links Tab for more information on how you can support me.
                                         </div>
-                                    </ScrollableWindowRelative>
+                                    
+                                
+                                        </ScrollableWindowRelative>
                                 </div>
-                                <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                                    {socialLinks.map((linkInfo, index) => (
-                                        <Field
-                                            key={index}
-                                            label={linkInfo.label}
-                                            icon={linkInfo.icon}
-                                            bottomSeparator={"none"}
-                                            padding={"none"}
-                                            indentLevel={1}
-                                        >
-                                            <Focusable
-                                                style={{
-                                                    marginLeft: "auto",
-                                                    boxShadow: "none",
-                                                    display: "flex",
-                                                    justifyContent: "right",
-                                                    padding: "4px",
-                                                }}
-                                            >
-                                                <DialogButton
-                                                    onClick={() => {
-                                                        Navigation.NavigateToExternalWeb(linkInfo.link);
-                                                    }}
-                                                    style={{
-                                                        padding: "10px",
-                                                        fontSize: "14px",
-                                                    }}
-                                                >
-                                                    {linkInfo.buttonText}
-                                                </DialogButton>
-                                                <DialogButton
-                                                    onClick={() => {
-                                                        showQrModal(linkInfo.link);
-                                                    }}
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
-                                                        padding: "10px",
-                                                        maxWidth: "40px",
-                                                        minWidth: "auto",
-                                                        marginLeft: ".5em",
-                                                    }}
-                                                >
-                                                    <HiOutlineQrCode />
-                                                </DialogButton>
-                                            </Focusable>
-                                        </Field>
-                                    ))}
-                                </Focusable>
                             </div>
                         </>
+                    },
+                    {
+                        title: "Links",
+                        content: <Focusable style={{ display: "flex", flexDirection: "column" }}>
+                        {socialLinks.map((linkInfo, index) => (
+                            <Field
+                                key={index}
+                                label={linkInfo.label}
+                                icon={linkInfo.icon}
+                                bottomSeparator={"none"}
+                                padding={"none"}
+                                indentLevel={1}
+                            >
+                                <Focusable
+                                    style={{
+                                        marginLeft: "auto",
+                                        boxShadow: "none",
+                                        display: "flex",
+                                        justifyContent: "right",
+                                        padding: "4px",
+                                    }}
+                                >
+                                    <DialogButton
+                                        onClick={() => {
+                                            Navigation.NavigateToExternalWeb(linkInfo.link);
+                                        }}
+                                        style={{
+                                            padding: "10px",
+                                            fontSize: "14px",
+                                        }}
+                                    >
+                                        {linkInfo.buttonText}
+                                    </DialogButton>
+                                    <DialogButton
+                                        onClick={() => {
+                                            showQrModal(linkInfo.link);
+                                        }}
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            padding: "10px",
+                                            maxWidth: "40px",
+                                            minWidth: "auto",
+                                            marginLeft: ".5em",
+                                        }}
+                                    >
+                                        <HiOutlineQrCode />
+                                    </DialogButton>
+                                </Focusable>
+                            </Field>
+                        ))}
+                            </Focusable>
                     },
 
 
