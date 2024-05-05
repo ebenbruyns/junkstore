@@ -64,9 +64,8 @@ if [ -z "${RUNTIMES_FSR_STRENGTH}" ]; then
 else
     export WINE_FULLSCREEN_FSR_STRENGTH=${RUNTIMES_FSR_STRENGTH}
 fi
-if [ -z "${RUNTIMES_LIMIT_FRAMERATE}" ]; then
-    unset DXVK_FRAME_RATE
-else
+
+if [[ "${RUNTIMES_LIMIT_FRAMERATE}" == "true" ]]; then
     export DXVK_FRAME_RATE=${RUNTIMES_FRAME_RATE}
 fi
 if [[ "${RUNTIMES_EASYANTICHEAT}" == "true" ]]; then
