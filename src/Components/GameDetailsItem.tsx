@@ -1,13 +1,15 @@
 import { Focusable, ServerAPI, ModalRoot, sleep, gamepadDialogClasses, showModal, Navigation } from "decky-frontend-lib";
 import { useState, useEffect, VFC, useRef } from "react";
 import GameDisplay from "./GameDisplay";
-import { ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
+import { ContentError, ContentResult, ContentType, EmptyContent, ExecuteGetGameDetailsArgs, ExecuteInstallArgs, GameDetails, GameImages, LaunchOptions, MenuAction, ProgressUpdate, ScriptActions } from "../Types/Types";
 import { runApp } from "../Utils/utils";
 import Logger from "../Utils/logger";
 import { Loading } from "./Loading";
 import { executeAction } from "../Utils/executeAction";
 import { footerClasses } from '../staticClasses';
 import { reaction } from 'mobx';
+import { ErrorDisplay } from "./ErrorDisplay";
+import { ErrorModal } from "../ErrorModal";
 
 const gameDetailsRootClass = 'game-details-modal-root';
 
@@ -47,7 +49,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     }, [installing]);
 
 
-   
+
     //const [] = useState("Play Game");
     useEffect(() => {
         logger.log("GameDetailsItem onInit");
@@ -118,16 +120,21 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                     logger.debug(progressUpdate);
                     setProgress(progressUpdate);
                     logger.debug(progressUpdate.Percentage);
+                    if (progressUpdate.Error != null) {
+                        showModal(<ErrorModal Error={{ ActionName: "GetProgress", ActionSet: initActionSet, Message: "Installation failed", Data: progressUpdate.Error ?? "" } as ContentError} />);
+                        cancelInstall();
+                        break;
+
+                    }
                     if (progressUpdate.Percentage >= 100) {
-                        
-                        //while (installing); //spin lock to wait for react to update the state
+
+
                         install();
-                        
-                        //return;
+
                         break;
                     }
                 }
-               
+
             } catch (e) {
                 logger.error('Error in progress updater', e);
             }
@@ -142,7 +149,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         onInit();
     }, []);
 
-   
+
     useEffect(() => {
         if (installing) {
             logger.log("GameDetailsItem updateProgress");
@@ -342,27 +349,27 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         logger.debug("GetSteamId name:", name);
         // 
         if (gameDetails.SteamClientID != "") {
-            
+
             const steamClientID = parseInt(gameDetails.SteamClientID);
             const apps = appStore.allApps.filter(app => app.appid == steamClientID);
             if (apps.length > 0) {
                 return steamClientID;
             }
-        
 
-            
+
+
         }
-       // else {
-            const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "", "");
-            // if (gameData.Type !== "GameDetails") {
-            //     return id;
-            // }
-            
-            await appDetailsCache.FetchDataForApp(id)
-            await appDetailsStore.RequestAppDetails(id);
-            await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
-            return id;
-    //    }
+        // else {
+        const id = await SteamClient.Apps.AddShortcut("Name", "/bin/bash", "", "");
+        // if (gameData.Type !== "GameDetails") {
+        //     return id;
+        // }
+
+        await appDetailsCache.FetchDataForApp(id)
+        await appDetailsStore.RequestAppDetails(id);
+        await SteamClient.Apps.SetShortcutName(id, (gameData.Content as GameDetails).Name);
+        return id;
+        //    }
     };
     const install = async () => {
         try {

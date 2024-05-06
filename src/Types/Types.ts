@@ -127,6 +127,7 @@ export interface FileData {
 export interface ProgressUpdate extends ContentType {
   Percentage: number;
   Description: string;
+  Error?: string;
 }
 export interface GameImages extends ContentType {
   Grid: string;

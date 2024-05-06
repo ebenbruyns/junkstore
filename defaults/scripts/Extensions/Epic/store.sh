@@ -13,7 +13,7 @@ if [[ "${PLATFORM}" == "Epic" ]]; then
 fi
 
 function Epic_init() {
-    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE &> /dev/null
+    $EPICCONF --list -T --dbfile $DBFILE $OFFLINE_MODE --force-refresh &> /dev/null
 }
 
 function Epic_refresh() {
@@ -70,8 +70,8 @@ function Epic_download(){
     # attempting to fix path issues if an install failed.
     $LEGENDARY move "${1}" "${INSTALL_DIR}" --skip-move &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
-   
-    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+     
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --max-shared-memory 4096 --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}"  2> $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/${1}.output" &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
@@ -302,7 +302,7 @@ function launchoptions () {
 }
 function Epic_login(){
     get_steam_env
-    launchoptions "${LEGENDARY}" "auth" "." "Epic Games Login" 
+    launchoptions "${LEGENDARY}" "auth -v &>> ${DECKY_PLUGIN_LOG_DIR}/epiclogin.log" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 function loginlaunchoptions () {
     Exe=$1 
@@ -323,7 +323,7 @@ function loginlaunchoptions () {
 }
 function Epic_login-launch-options(){
     get_steam_env
-    loginlaunchoptions  "${LEGENDARY}" "auth" "." "Epic Games Login" 
+    loginlaunchoptions  "${LEGENDARY}" "auth" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 
 

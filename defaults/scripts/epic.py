@@ -310,6 +310,20 @@ class Epic(GameSet.GameSet):
                         "Percentage": 100,
                         "Description": "Verification finished successfully."
                     }
+                if lines[-1].strip() == "[cli] CRITICAL: Installation cannot proceed, exiting.":
+                   
+                    with open(file_path.replace(".progress", ".output"), "r") as f:
+                        content = f.readlines()
+                    content = '<br />'.join(content)
+                    if content is None:
+                        content = "Installation Failed. Reason unknown, check logs for details."
+                    last_progress_update = {
+                        "Percentage": 0,
+                        "Description": "Installation Failed.",
+                        "Error": content
+                    } 
+                    
+
                 if last_progress_update is None:
                     last_progress_update = {
                         "Percentage": 0,
