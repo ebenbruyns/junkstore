@@ -552,10 +552,13 @@ class GameSet:
         html += f"<div>"
         # if game_data['Size'] != None:
         #     html += f"<p>Size: {game_data['Size']}</p>"
-        html += f"<p>Publisher: {game_data['Publisher']}</p>"
+        if game_data['Publisher'] != None and game_data['Publisher'] != "":
+            html += f"<p>Publisher: {game_data['Publisher']}</p>"
         html += f"<p>Developer: {game_data['Developer']}</p>"
-        html += f"<p>Genre: {game_data['Genre']}</p>"
-        html += f"<p>Release Date: {game_data['ReleaseDate']}</p>"
+        if game_data['Genre'] != None and game_data['Genre'] != "":
+            html += f"<p>Genre: {game_data['Genre']}</p>"
+        if game_data['ReleaseDate'] != None and game_data['ReleaseDate'] != "":
+            html += f"<p>Release Date: {game_data['ReleaseDate']}</p>"
         html += f"</div>"
         return html
 
