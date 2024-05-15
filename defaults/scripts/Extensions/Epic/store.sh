@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-idaste")
+ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-id")
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
