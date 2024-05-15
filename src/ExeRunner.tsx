@@ -133,9 +133,19 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         setBusy(false);
                     };
 
-                    const setExecutable = () => {
+                    const  setExecutable = async () => {
                         logger.debug(`steamclientid ${parseInt(contentId)}`);
-                        SteamClient.Apps.SetShortcutExe(parseInt(contentId), file.Path);
+                        const appDetails = await getAppDetails(contentId);
+                        logger.debug("app details: ", appDetails);
+                        if (appDetails == null) {
+                            logger.error("app details is null");
+                            return;
+                        }
+
+                        
+                        const startDir = appDetails.strShortcutStartDir;
+                        const gameExe = file.Path.startsWith(startDir) ?  file.Path :  startDir.substring(0,startDir.length-1)  + file.Path.substring(1) + "\"";
+                        SteamClient.Apps.SetShortcutExe(parseInt(contentId), gameExe);
                         closeModal();
                     };
                     return (
