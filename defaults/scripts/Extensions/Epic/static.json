@@ -163,16 +163,9 @@
           "Type": "ScriptActionConfirm",
           "InstalledOnly": "True"
         },
-
         {
           "ActionId": "ProtonTricks",
           "Title": "Proton Tricks",
-          "Type": "ScriptAction",
-          "InstalledOnly": "True"
-        },
-        {
-          "ActionId": "RegistryFix",
-          "Title": "Registry Fix",
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         },
