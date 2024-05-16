@@ -264,7 +264,7 @@ function Epic_get-exe-list(){
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
     cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
     IFS=$'\n' 
-    LIST=$(find . -name "*.exe")
+    LIST=$(find . \( -name "*.exe" -o -iname "*.bat" -o -iname "*.msi" \))
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"Files\": ["
    
     for FILE in $LIST; do
