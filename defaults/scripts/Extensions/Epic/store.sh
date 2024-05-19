@@ -305,7 +305,7 @@ function launchoptions () {
 }
 function Epic_login(){
     get_steam_env
-    launchoptions "${LEGENDARY}" "auth -v &>> ${DECKY_PLUGIN_LOG_DIR}/epiclogin.log" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
+    launchoptions "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/login.sh" "" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 function loginlaunchoptions () {
     Exe=$1 
@@ -326,7 +326,7 @@ function loginlaunchoptions () {
 }
 function Epic_login-launch-options(){
     get_steam_env
-    loginlaunchoptions  "${LEGENDARY}" "auth" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
+    loginlaunchoptions  "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/login.sh" "" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 
 
