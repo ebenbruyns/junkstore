@@ -81,6 +81,7 @@ export interface ScriptActions extends ContentType {
 // Define the grid container
 export interface GameDataList extends ContentType {
   NeedsLogin?: string;
+  storeURL?: string;
   Games: GameData[];
 }
 export interface GameData {

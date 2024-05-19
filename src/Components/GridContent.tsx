@@ -1,4 +1,4 @@
-import { DialogButton, Focusable, Menu, MenuItem, ServerAPI, Spinner, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
+import { DialogButton, Focusable, Menu, MenuItem, Navigation, ServerAPI, Spinner, TextField, gamepadTabbedPageClasses, showContextMenu, showModal } from "decky-frontend-lib";
 import { ContentResult, ContentType, ExecuteArgs, GameData, GameDataList, MenuAction, ScriptActions } from "../Types/Types";
 import { Dispatch, SetStateAction, VFC, memo, useEffect, useState } from "react";
 import GameGridItem from './GameGridItem';
@@ -8,6 +8,7 @@ import { FaSlidersH, FaCog, FaRegCheckCircle } from 'react-icons/fa';
 import { LoginContent } from './LoginContent';
 import { executeAction } from '../Utils/executeAction';
 import { ConfEditor } from '../ConfEditor';
+import { FaStore } from "react-icons/fa6";
 
 export const contentTabsContainerClass = 'content-tabs-container';
 export const gridContentContainerClass = 'grid-content-container';
@@ -165,6 +166,15 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                 >
                     <FaCog style={{ verticalAlign: 'middle' }} />
                 </DialogButton>
+                {content.storeURL &&
+                    <DialogButton
+                        onClick={() => {
+                            if(content.storeURL)
+                                Navigation.NavigateToExternalWeb(content.storeURL);
+                        }}
+                        style={{ width: "48px", minWidth: 'initial', padding: 'initial' }}>
+                        <FaStore />
+                    </DialogButton>}
             </Focusable>
             {content.NeedsLogin === "true" && (
                 <div style={{ paddingTop: '15px' }}>
