@@ -33,7 +33,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     logger.log("GameDetailsItem installing", installing);
 
     const originRoute = location.pathname.replace('/routes', '');
-    useEffect(() => reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal), []);
+   // useEffect(() => reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal), []);
 
     const [progress, setProgress] = useState<ProgressUpdate>({
         Percentage: 0,
@@ -53,6 +53,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     //const [] = useState("Play Game");
     useEffect(() => {
         logger.log("GameDetailsItem onInit");
+        reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal)
         onInit();
     }, []);
 
@@ -145,10 +146,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
         }
     };
 
-    useEffect(() => {
-        onInit();
-    }, []);
-
+   
 
     useEffect(() => {
         if (installing) {
@@ -314,23 +312,28 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
             }
         );
         if (imageResult == null) {
+            logger.error("imageResult is null");
             return;
         }
         const images = imageResult.Content;
         logger.debug("images", images);
         if (images.Grid !== null) {
-            SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
+            logger.debug("setting grid image:" + id)
+            await SteamClient.Apps.SetCustomArtworkForApp(id, images.Grid, 'png', 0);
         }
         if (images.Hero !== null) {
-            SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
+            logger.debug("setting hero image:" + id)
+            await SteamClient.Apps.SetCustomArtworkForApp(id, images.Hero, "png", 1);
         }
         if (images.Logo !== null) {
-            SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
+            logger.debug("setting logo image:" + id)
+            await SteamClient.Apps.SetCustomArtworkForApp(id, images.Logo, "png", 2);
         }
         if (images.GridH !== null) {
-            SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
+            logger.debug("setting gridh image:" + id)
+            await SteamClient.Apps.SetCustomArtworkForApp(id, images.GridH, "png", 3);
         }
-
+        //await appDetailsStore.RequestAppDetails(id);
 
     };
 

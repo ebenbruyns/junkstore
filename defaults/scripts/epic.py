@@ -10,16 +10,18 @@ import xml.etree.ElementTree as ET
 from typing import List
 import subprocess
 import time
-import GameSet
+
+import GamesDb
 import re
 from datetime import datetime, timedelta
 
 class CmdException(Exception):
     pass
 
-class Epic(GameSet.GameSet):
-    def __init__(self, db_file, setNameConfig=None):
-        super().__init__(db_file, setNameConfig)
+class Epic(GamesDb.GamesDb):
+    def __init__(self, db_file, storeName, setNameConfig=None):
+        super().__init__(db_file, storeName=storeName,  setNameConfig=setNameConfig)
+        self.storeURL = "https://store.epicgames.com/"
 
     legendary_cmd = os.path.expanduser( os.environ['LEGENDARY'])
 
@@ -31,7 +33,7 @@ class Epic(GameSet.GameSet):
 
         if "[cli] ERROR:" in result:
             raise CmdException(result)
-        print(f" result: {result}", file=sys.stderr)
+        # print(f" result: {result}", file=sys.stderr)
         if result.strip() == "":
             raise CmdException(f"Command produced no output: {cmd}")
         return json.loads(result)
@@ -41,8 +43,13 @@ class Epic(GameSet.GameSet):
     def get_list(self,  offline):
         offline_switch = "--offline" if offline else ""
         games_list = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} list --json {offline_switch}"))
-        self.insert_data(games_list)
+            f"{self.legendary_cmd} list -T --json {offline_switch}"))
+        id_list = []
+        for game in games_list:
+            shortname = game['metadata']['releaseInfo'][0]['appId'] if game['metadata'].get('releaseInfo') and game['metadata']['releaseInfo'][0].get('appId') else ""
+            id_list.append(shortname)
+                
+        self.insert_data(id_list)
 
     def get_working_dir(self, game_id, offline):
         self.get_directory(offline, game_id, 'working_directory')
@@ -68,9 +75,11 @@ class Epic(GameSet.GameSet):
             self.clear_cache(cache_key)
             
         cache = self.get_cache(cache_key)
+        print(f"cache: {cache}", file=sys.stderr)
         if cache is not None:
+            
             return cache
-        
+        print(f"cache miss!", file=sys.stderr)
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} status --json {offline_switch}"))
         
@@ -147,73 +156,8 @@ class Epic(GameSet.GameSet):
                 }
             })
 
-    def insert_data(self, games_list):
-        conn = self.get_connection()
-        c = conn.cursor()
-
-        for game in games_list:
-
-            try:
-                title = game['app_title'].replace("''", "'")
-                shortname = game['asset_infos']['Windows']['asset_id']
-
-                c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
-                result = c.fetchone()
-                if result is None:
-                    notes = game['metadata']['description']
-                    application_path = ""
-                    manual_path = ""
-                    root_folder = ""
-                    source = "Epic"
-                    database_id = game['app_name']
-                    genre = ""
-                    configuration_path = ""
-                    publisher = game['metadata']['developer']
-                    developer = game['metadata']['developer']
-                    release_date = game['metadata']['creationDate']
-                    vals = [
-                        title,
-                        notes,
-                        application_path,
-                        manual_path,
-                        publisher,
-                        root_folder,
-                        source,
-                        database_id,
-                        genre,
-                        configuration_path,
-                        developer,
-                        release_date,
-                        "",
-                        "",
-                        "",
-                        "",
-                        shortname,
-                        
-                    ]
-
-                    # print(f"Inserting game {title} into database: {vals}")
-
-                    placeholders = ', '.join(
-                        ['?' for _ in range(len(self.cols))])
-                    cols_with_pk = self.cols + ["SteamClientID", "ShortName"]
-                    placeholders = ', '.join(
-                        ['?' for _ in range(len(cols_with_pk))])
-                    tmp = f"INSERT INTO Game ({', '.join(cols_with_pk)}) VALUES ({placeholders})"
-                    # print(tmp)
-                    c.execute(tmp, vals)
-
-                    game_id = c.lastrowid
-                    # Insert images into the Images table
-                    for image in game['metadata']['keyImages']:
-                        c.execute(
-                            "INSERT INTO Images (GameID, ImagePath, FileName, SortOrder) VALUES (?, ?, ?, ?)", (game_id, image['url'], '', image['width']))
-                    conn.commit()
-
-            except Exception as e:
-                print(f"Error parsing metadata for game: {title} {e}")
-
-        conn.close()
+        
+        
        
     def update_game_details(self, game_id):
         conn = self.get_connection()
@@ -225,16 +169,17 @@ class Epic(GameSet.GameSet):
             game = result['game']
             title = game['title']
             install = result['install']
-            print(f"install info: {install}", file=sys.stderr)
-            if install != None and bool(install['disk_size']):
-                disk_size = install['disk_size']
-                print(f"disk_size: {disk_size}", file=sys.stderr)
+            if install != None:
+                print(f"install info: {install}", file=sys.stderr)
+                if install != None and bool(install['disk_size']):
+                    disk_size = install['disk_size']
+                    print(f"disk_size: {disk_size}", file=sys.stderr)
 
-                size = f"{self.convert_bytes(disk_size)}"
-                print(f"size: {size}", file=sys.stderr)
+                    size = f"{self.convert_bytes(disk_size)}"
+                    print(f"size: {size}", file=sys.stderr)
 
-            else:
-                size = None
+                else:
+                    size = None
 
             c.execute(
                 "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 

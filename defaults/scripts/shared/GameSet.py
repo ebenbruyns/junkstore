@@ -18,11 +18,14 @@ import base64
 class GameSet:
     db_file = ""
     setNameConfig = None
+    storeURL = None
+    storeName = None
 
-    def __init__(self, db_file, setNameConfig=None):
+    def __init__(self, db_file, storeName="", setNameConfig=None):
         parser = argparse.ArgumentParser()
         self.setNameConfig = setNameConfig
         self.db_file = db_file
+        self.storeName = storeName
 
     cols = ["Title",
             "Notes",
@@ -38,7 +41,9 @@ class GameSet:
             "ReleaseDate",
             "Size",
             "InstallPath",
-            "UmuId"]
+            "UmuId",
+            "Arguments",
+            "WorkingDir"]
 
     def convert_bytes(self , size):
         try:
@@ -77,14 +82,15 @@ class GameSet:
             'CREATE TABLE IF NOT EXISTS config_set (id INTEGER PRIMARY KEY, ShortName TEXT, forkname TEXT, version TEXT, platform TEXT)')
         c.execute(
             f"CREATE TABLE IF NOT EXISTS Game (id INTEGER PRIMARY KEY, {', '.join([f'{col} TEXT' for col in self.cols])}, SteamClientID TEXT, ShortName TEXT UNIQUE)")
-        c.execute(f"CREATE TABLE IF NOT EXISTS Images (id INTEGER PRIMARY KEY, GameID INTEGER, ImagePath TEXT UNIQUE, FileName TEXT, SortOrder INTEGER, FOREIGN KEY(GameID) REFERENCES Game(id))")
+        c.execute(f"CREATE TABLE IF NOT EXISTS Images (id INTEGER PRIMARY KEY, GameID INTEGER, ImagePath TEXT, FileName TEXT, SortOrder INTEGER, FOREIGN KEY(GameID) REFERENCES Game(id))")
         c.execute(f"CREATE TABLE IF NOT EXISTS ZipFiles (id INTEGER PRIMARY KEY, GameID INTEGER, ZipFileName TEXT UNIQUE, FOREIGN KEY(GameID) REFERENCES Game(id))")
         c.execute(f"CREATE TABLE IF NOT EXISTS BatFiles (id INTEGER PRIMARY KEY, GameID INTEGER, Path TEXT, BatFileName TEXT,  Content TEXT, FOREIGN KEY(GameID) REFERENCES Game(id))")
         c.execute(
             'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, name TEXT UNIQUE, value TEXT)')
         c.execute(f"CREATE TABLE IF NOT EXISTS Cache (id INTEGER PRIMARY KEY, Key TEXT UNIQUE, Value TEXT, ExpiryDate DateTime)")
         
-        
+         
+
         c.execute("PRAGMA table_info(Game)")
         columns = [column[1] for column in c.fetchall()]
         if "Size" not in columns:
@@ -100,8 +106,31 @@ class GameSet:
         columns = [column[1] for column in c.fetchall()]
         if "UmuId" not in columns:
             c.execute("ALTER TABLE Game ADD COLUMN UmuId TEXT")
+        
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "Arguments" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN Arguments TEXT")
+
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "WorkingDir" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN WorkingDir TEXT")
         conn.commit()
+       
+
+        c.execute("PRAGMA table_info(Game)")
+        columns = [column[1] for column in c.fetchall()]
+        if "SortingTitle" not in columns:
+            c.execute("ALTER TABLE Game ADD COLUMN SortingTitle TEXT")
+        conn.commit()
+   
+
+   
         conn.close()
+
+
+
 
     def get_umu_id(self, shortname):
         conn = self.get_connection()
@@ -117,16 +146,20 @@ class GameSet:
     def update_umu_id(self, shortname, store):
         url = "https://umu.openwinecomponents.org/umu_api.php?codename=" + shortname + "&store=" + store
         headers = {'User-Agent': 'Mozilla/5.0'}
+        print( url, file=sys.stderr)
         req = urllib.request.Request(url, headers=headers)
         response = urllib.request.urlopen(req, timeout=5)
         data = response.read()
         json_data = json.loads(data)
-        umu_id = json_data[0]['umu_id']
-        conn = self.get_connection()
-        c = conn.cursor()
-        c.execute("UPDATE Game SET UmuId=? WHERE ShortName=?", (umu_id, shortname))
-        conn.commit()
-        conn.close()
+        print(json_data, file=sys.stderr)
+        
+        if json_data.__len__() > 0:
+            umu_id = json_data[0]['umu_id']
+            conn = self.get_connection()
+            c = conn.cursor()
+            c.execute("UPDATE Game SET UmuId=? WHERE ShortName=?", (umu_id, shortname))
+            conn.commit()
+            conn.close()
     
     def flush_cache(self):
         conn = self.get_connection()
@@ -137,6 +170,7 @@ class GameSet:
 
 
     def get_cache(self, key):
+        print(f"Getting cache {key}", file=sys.stderr)
         self.flush_cache()
         conn = self.get_connection()
         c = conn.cursor()
@@ -145,6 +179,7 @@ class GameSet:
         result = c.fetchone()
         conn.close()
         if result:
+            print(f"Found cache {key} {result[0]}", file=sys.stderr)
             return result[0]
         else:
             return None
@@ -154,6 +189,7 @@ class GameSet:
         c = conn.cursor()
         c.execute("INSERT INTO Cache (Key, Value, ExpiryDate) VALUES (?, ?, ?)", (key, value, expiry_date))
         conn.commit()
+        print(f"Added cache {key} {value} {expiry_date}", file=sys.stderr)
         conn.close()
         
     def clear_cache(self, key):
@@ -200,7 +236,11 @@ class GameSet:
             result.append({'ID': game_id, 'Name': title,
                            'Images': image_files, 'ShortName': shortname, 'SteamClientID': steam_client_id})
         conn.close()
-        return json.dumps({'Type': 'GameGrid', 'Content':  {'NeedsLogin': needsLogin, 'Games': result}})
+        content =  {'NeedsLogin': needsLogin, 'Games': result}
+        if self.storeURL != None:
+            print(f"Store URL: {self.storeURL}", file=sys.stderr)
+            content['storeURL'] = self.storeURL
+        return json.dumps({'Type': 'GameGrid', 'Content': content })
 
     def load_conf_data_from_json(self, json_file):
         with open(json_file, 'r') as f:

@@ -13,7 +13,7 @@ if [[ "${PLATFORM}" == "Epic" ]]; then
 fi
 
 function Epic_init() {
-    $EPICCONF --list -T --dbfile $DBFILE $OFFLINE_MODE --force-refresh &> /dev/null
+    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE --force-refresh &> /dev/null
 }
 
 function Epic_refresh() {
@@ -42,8 +42,11 @@ function Epic_getgames(){
     # checking if the Game's content is empty, if it is, then we need to refresh the list
     #{"Type": "GameGrid", "Content": {"NeedsLogin": "true", "Games": []}}
     if [[ $TEMP == "{\"Type\": \"GameGrid\", \"Content\": {\"NeedsLogin\": \"true\", \"Games\": []}}" ]]; then
-        TEMP=$(Epic_init)
-        TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+        if [[ $FILETER == "" ]] && [[ $INSTALLED == "false" ]]; then
+            TEMP=$(Epic_init)
+            TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+        fi
+        
     fi
     echo $TEMP
 }
@@ -216,10 +219,10 @@ function Epic_getprogress()
     echo $TEMP
 }
 function Epic_loginstatus(){
-     if [ -z "${1}" ]; then
-        FLUSH_CACHE="--flush-cache"
-    else
+    if [[ -z $1 ]]; then
         FLUSH_CACHE=""
+    else 
+        FLUSH_CACHE="--flush-cache"
     fi
     TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE  $FLUSH_CACHE)
     echo $TEMP
