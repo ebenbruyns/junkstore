@@ -332,7 +332,7 @@ function Epic_login-launch-options(){
 
 function Epic_logout(){
     TEMP=$($LEGENDARY auth --delete)
-    loginstatus --flush-cache
+    Epic_loginstatus --flush-cache
 }
 
 function Epic_getsetting(){
