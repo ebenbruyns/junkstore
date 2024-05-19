@@ -664,14 +664,57 @@ class GameSet:
         conn.close()
 
 
+
+            
+class Achievements:
+    def __init__(self):
+        self.achievements_file = os.path.expanduser("~/homebrew/settings/Junk-Store/achievements.txt")
+
+    def check_achievements(self):
+        try:
+            with open(self.achievements_file, 'r') as f:
+                achievements = f.read()
+                return int(base64.b64decode(achievements).decode('utf-8'), 2)
+        except Exception as e:
+            print(f"Error checking achievements: {e}")
+            return 0
+
+    def add_achievement(self, achievement_base64):
+        achievement = int(base64.b64decode(achievement_base64).decode('utf-8'), 2)
+        achievements = self.check_achievements()
+        achievements |= 1 << achievement
+        with open(self.achievements_file, 'w') as f:
+            f.write(base64.b64encode(bin(achievements)[2:].encode('utf-8')).decode('utf-8'))
+
+    def has_achievement(self, achievement_base64):
+        achievement = int(base64.b64decode(achievement_base64).decode('utf-8'), 2)
+        achievements = self.check_achievements()
+        return (achievements & (1 << achievement)) != 0
+
+    def get_achievements(self):
+        achievements_bit_field = self.check_achievements()
+        achievements = []
+        achievement_number = 0
+        while achievements_bit_field > 0:
+            if (achievements_bit_field & 1) == 1:
+                achievements.append(base64.b64encode(bin(achievement_number)[2:].encode('utf-8')).decode('utf-8'))
+            achievements_bit_field >>= 1
+            achievement_number += 1
+        return achievements
+
+
+
+
 class GenericArgs:
     gameSet: GameSet = None
     parser = None
     args = None
+    achievements: Achievements = None
 
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         # self.addArguments()
+        self.achievements = Achievements()
 
     def addArguments(self):
         self.parser.add_argument(
@@ -727,6 +770,8 @@ class GenericArgs:
             '--update-umu-id', nargs=2, help='Update UMU ID')
         self.parser.add_argument(
             '--get-umu-id', nargs=1, help='Get UMU ID')
+        self.parser.add_argument(
+            '--add-achievement', nargs=1, help='Add achievement')
 
     def parseArgs(self):
         self.args = self.parser.parse_args()
@@ -790,5 +835,8 @@ class GenericArgs:
                 self.args.getgameswithimages[0], filter, installed, isLimited, urlencode, needsLogin))
         if self.args.update_umu_id:
             self.gameSet.update_umu_id(self.args.update_umu_id[0], self.args.update_umu_id[1])
+        
+        if self.args.add_achievement:
+            self.achievements.add_achievement(self.args.add_achievement[0])
         if self.args.get_umu_id:
             print(self.gameSet.get_umu_id(self.args.get_umu_id[0]))

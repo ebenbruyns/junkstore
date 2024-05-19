@@ -8,9 +8,49 @@ import { FaBoxOpen } from "react-icons/fa";
 
 import { Content } from "./ContentTabs";
 import { About } from "./About";
+import { addAchievement, getAchievementDetails } from "./Utils/achievements";
+import Logger from "./Utils/logger";
+
+declare global {
+  interface Window {
+    toastAchievement(achievement: string): void;
+
+  }
+}
+
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
+  try {
+    window.toastAchievement = (achievement: string) => {
+
+      const temp = getAchievementDetails(achievement);
+      if (temp) {
+        const toast = {
+          title: "Achievement unlocked: " + temp.name,
+          body: temp.description,
+          icon: temp.icon,
+        }
+        serverApi.toaster.toast(toast);
+      }
+    }
+  } catch (e) {
+
+
+  }
+  const currentTime = new Date();
+  const currentHour = currentTime.getHours();
+  const currentMinute = currentTime.getMinutes();
+
+  if (currentHour === 0 && currentMinute >= 0 && currentMinute <= 15) {
+      addAchievement("MTAx")
+  }
+  const currentDate = new Date();
+  const currentDay = currentDate.getDay();
+  const currentMonth = currentDate.getMonth() + 1;
+  if (currentDay === 5 && currentMonth === 13) {
+      addAchievement("MTEw")
+  }
   serverApi.routerHook.addRoute(
     "/junk-store-content/:initActionSet/:initAction",
     () => {

@@ -7,6 +7,8 @@ import Logger, { log } from "./Utils/logger";
 import { LogViewer } from "./LogViewer";
 import { ScrollableWindowRelative } from './ScrollableWindow';
 import { Developer } from "./Developer";
+import { addAchievement, checkAchievements, hasAchievement, hasAchievements } from "./Utils/achievements";
+import { Achievements } from "./Achievements";
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const [url, setUrl] = useState("");
@@ -23,6 +25,8 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const showDeveloperMode = (show: boolean) => {
         setIsDeveloperMode(show)
         localStorage.setItem('js_developermode', show.toString())
+        if(show)
+            addAchievement('MTA=')
     }
 
     const download = async () => {
@@ -34,6 +38,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         });
         await serverAPI.callPluginMethod("reload", {})
         setIsDownloading(false);
+        addAchievement('MTAw')
     };
     const socialLinks = [
         {
@@ -262,6 +267,25 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                     {isInstalling ? "Working... Do not close this screen." : "Uninstall Dependencies"}
                                 </DialogButton>
                             </PanelSection>
+                            {!hasAchievement("MTEx") &&
+                                <PanelSection>
+                                    <DialogButton
+                                        onClick={() => {
+                                            addAchievement("MTEx")
+                                            showModal(<ConfirmModal strTitle="Do you feel luck?" strDescription="I told you not to click this button!" strOKButtonText="Yes"
+                                                onOK={() => {
+                                                    if (!hasAchievement("MTAwMA=="))
+                                                        addAchievement("MTAwMQ==")
+                                                }} strCancelButtonText="No"
+                                                onCancel={() => {
+                                                    if (!hasAchievement("MTAwMQ=="))
+                                                        addAchievement("MTAwMA==")
+                                                }} />)
+                                        }}>
+                                        Do NOT click this Button!
+                                    </DialogButton>
+                                </PanelSection>
+                            }
                         </>
                     },
                     {
@@ -360,6 +384,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                     <DialogButton
                                         onClick={() => {
                                             Navigation.NavigateToExternalWeb(linkInfo.link);
+                                            addAchievement("MTAxMA==")
                                         }}
                                         style={{
                                             padding: "10px",
@@ -394,6 +419,13 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     {
                         title: "Logs",
                         content: <LogViewer serverAPI={serverAPI}></LogViewer>
+                    },
+                    {
+                        title: "Achievements",
+                        visible: hasAchievements(),
+                        content: 
+                            <Achievements serverAPI={serverAPI} />
+                           
                     },
                     {
                         title: "Developer",

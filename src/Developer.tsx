@@ -1,5 +1,6 @@
-import { ServerAPI, ToggleField } from "decky-frontend-lib";
+import { ButtonItem, ConfirmModal, DialogButton, ServerAPI, ToggleField, showModal } from "decky-frontend-lib";
 import { VFC, useState } from "react";
+import { resetAchievements } from "./Utils/achievements";
 
 
 export const Developer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
@@ -15,10 +16,10 @@ export const Developer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     return (
         <div>
             <ToggleField
-                    label="Enable UI Logging"
-                    checked={logging}
-                    onChange={(newValue) => toggleLogging(newValue.toString())}
-                
+                label="Enable UI Logging"
+                checked={logging}
+                onChange={(newValue) => toggleLogging(newValue.toString())}
+
 
             />
             <ToggleField
@@ -26,6 +27,14 @@ export const Developer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                 checked={firstLaunch}
                 onChange={(newValue) => toggleFirstLaunch(newValue.toString())}
             />
+            <DialogButton
+
+                onClick={async () => {
+                    showModal(<ConfirmModal strTitle="Confirm" strDescription={"Reset all achievements?"} onOK={() => { resetAchievements(); }} />)
+                }}
+            >
+                Reset Achievements
+            </DialogButton>
         </div>
     );
 };
