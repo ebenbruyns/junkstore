@@ -255,6 +255,24 @@ class Epic(GamesDb.GamesDb):
                         "Percentage": 100,
                         "Description": "Verification finished successfully."
                     }
+                if lines[-1].strip().startswith("[cli] INFO: For Origin games use \"legendary launch"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires Origin to be installed. This is not currently supported by Junk-Store."
+                    }
+                if lines[-1].strip().startswith("[cli] ERROR: The selected title has to be installed via a third-party store: Origin"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires Origin to be installed. This is not currently supported by Junk-Store."
+                    }
+                if lines[-1].strip().startswith("[cli] ERROR: The selected title has to be installed via a third-party store: The EA App"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires The EA App to be installed. This is not currently supported by Junk-Store."
+                    }
                 if lines[-1].strip() == "[cli] CRITICAL: Installation cannot proceed, exiting.":
                    
                     with open(file_path.replace(".progress", ".output"), "r") as f:
