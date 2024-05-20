@@ -149,12 +149,13 @@ jobs:
     - name: Prep Artifacts
       run: |
         mkdir /tmp/artifacts -p
-        unzip /tmp/output/junkstore.zip -d /tmp/artifacts
+        unzip /tmp/output/junkstore.zip -d /tmp/artifacts/
+        mv /tmp/artifacts/junkstore /tmp/artifacts/Junk-Store
     - name: Upload Artifacts to Github
       if: ${{ !env.ACT }}
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
         name: Junk-Store
-        path: /tmp/artifacts/junkstore/**/*
+        path: /tmp/artifacts/**/*
 
    
