@@ -1,8 +1,8 @@
 import json
 import sqlite3
 import sys
-import requests
-import urllib3
+import urllib.request
+
 import GameSet
 import traceback
 import concurrent.futures
@@ -54,9 +54,13 @@ class GamesDb(GameSet.GameSet):
     def get_game_info(self, store, id):
         
         url = f"https://gamesdb.gog.com/platforms/{self.storeName.lower()}/external_releases/{id}"
-        # print(f"Getting game info from {url}", file=sys.stderr)
-        response = requests.get(url)
-        json_data = response.json()
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        print( url, file=sys.stderr)
+        req = urllib.request.Request(url, headers=headers)
+        response = urllib.request.urlopen(req, timeout=5)
+        data = response.read()
+        json_data = json.loads(data)
+        
         if json_data.get('error'):
             print(f"Error getting game info for {id}: {json_data['error']}", file=sys.stderr)
             return None, []
@@ -207,7 +211,8 @@ class GamesDb(GameSet.GameSet):
                                 c.execute("INSERT INTO Images (GameID, ImagePath, FileName, SortOrder, Type) VALUES (?, ?, ?, ?, ?)", (game_id, image['ImagePath'], image['FileName'], image['SortOrder'], image['Type']))
                                 conn.commit()
                             except Exception as e:
-                                print(f"Error inserting image into database: {e}, {image["ImagePath"]}", file=sys.stderr)    
+                                path = image["ImagePath"]
+                                print(f"Error inserting image into database: {e}, {path}", file=sys.stderr)    
                 conn.commit()
 
             except Exception as e:
