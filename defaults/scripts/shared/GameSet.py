@@ -12,7 +12,7 @@ import configparser
 import urllib.request
 import base64
 import sys
-import aiohttp
+
 
 
 class GameSet:
