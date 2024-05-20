@@ -57,7 +57,7 @@ class GamesDb(GameSet.GameSet):
         headers = {'User-Agent': 'Mozilla/5.0'}
         print( url, file=sys.stderr)
         req = urllib.request.Request(url, headers=headers)
-        response = urllib.request.urlopen(req, timeout=5)
+        response = urllib.request.urlopen(req, timeout=60)
         data = response.read()
         json_data = json.loads(data)
         
