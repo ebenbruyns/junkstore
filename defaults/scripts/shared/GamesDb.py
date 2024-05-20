@@ -155,6 +155,7 @@ class GamesDb(GameSet.GameSet):
             
         return game_data, images
     def insert_data(self, id_list):
+        unprocessed_games = []
         def process_game(id):
             conn = self.get_connection()
             c = conn.cursor()
@@ -169,6 +170,7 @@ class GamesDb(GameSet.GameSet):
                 except Exception as e:
                     print(f"Error getting metadata for game: {id} {e}", file=sys.stderr)
                     traceback.print_exc()
+                    unprocessed_games.append(id)
                     return
                 if game_data is None:
                     if result is not None:
@@ -217,8 +219,11 @@ class GamesDb(GameSet.GameSet):
 
             except Exception as e:
                 print(f"Error parsing metadata for game: {id} {e}", file=sys.stderr)
+                unprocessed_games.append(id)
                 traceback.print_exc()
 
             conn.close()
         with concurrent.futures.ThreadPoolExecutor(max_workers=40) as executor:
             executor.map(process_game, id_list)
+        print(f"Unprocessed games: {unprocessed_games}", file=sys.stderr)
+        return unprocessed_games

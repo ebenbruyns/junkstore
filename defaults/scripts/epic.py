@@ -45,11 +45,107 @@ class Epic(GamesDb.GamesDb):
         games_list = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} list -T --json {offline_switch}"))
         id_list = []
+        game_dict = {}
         for game in games_list:
             shortname = game['metadata']['releaseInfo'][0]['appId'] if game['metadata'].get('releaseInfo') and game['metadata']['releaseInfo'][0].get('appId') else ""
             id_list.append(shortname)
+            game_dict.update({shortname: game})
                 
-        self.insert_data(id_list)
+        left_overs = self.insert_data(id_list)
+        print(f"left_overs: {left_overs}", file=sys.stderr)
+        for game in left_overs:
+            self.proccess_leftovers(game_dict[game])
+
+   
+    def proccess_leftovers(self, game):
+        print(f"Processing leftover game: {game['app_title']}", file=sys.stderr)
+        conn = self.get_connection()
+        c = conn.cursor()
+
+       
+        try:
+            title = game['app_title'].replace("''", "'")
+            shortname = game['asset_infos']['Windows']['asset_id']
+
+            c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
+            result = c.fetchone()
+            if result is None:
+                notes = game['metadata']['description']
+                application_path = ""
+                manual_path = ""
+                root_folder = ""
+                source = "Epic"
+                database_id = game['app_name']
+                genre = ""
+                configuration_path = ""
+                publisher = game['metadata']['developer']
+                developer = game['metadata']['developer']
+                release_date = game['metadata']['creationDate']
+                vals = [
+                    title,
+                    notes,
+                    application_path,
+                    manual_path,
+                    publisher,
+                    root_folder,
+                    source,
+                    database_id,
+                    genre,
+                    configuration_path,
+                    developer,
+                    release_date,
+                    "",
+                    "",
+                    "",
+                    "",
+                    shortname,
+                    
+                ]
+                cols = ["Title",
+                        "Notes",
+                        "ApplicationPath",
+                        "ManualPath",
+                        "Publisher",
+                        "RootFolder",
+                        "Source",
+                        "DatabaseID",
+                        "Genre",
+                        "ConfigurationPath",
+                        "Developer",
+                        "ReleaseDate",
+                        "Size",
+                        "InstallPath",
+                        "UmuId"
+                        ]
+                # print(f"Inserting game {title} into database: {vals}")
+
+                placeholders = ', '.join(
+                    ['?' for _ in range(len(cols))])
+                cols_with_pk = cols + ["SteamClientID", "ShortName"]
+                placeholders = ', '.join(
+                    ['?' for _ in range(len(cols_with_pk))])
+                tmp = f"INSERT INTO Game ({', '.join(cols_with_pk)}) VALUES ({placeholders})"
+                # print(tmp)
+                c.execute(tmp, vals)
+
+                game_id = c.lastrowid
+                # Insert images into the Images table
+                for image in game['metadata']['keyImages']:
+                    width = image['width']
+                    height = image['height']
+                    Type = ""
+                    if height > width:
+                        Type = "vertical_cover"
+                    else:
+                        Type = "horizontal_artwork"
+                    c.execute(
+                        "INSERT INTO Images (GameID, ImagePath, FileName, SortOrder, Type) VALUES (?, ?, ?, ?,?)", (game_id, image['url'], '', image['width'], Type))
+                conn.commit()
+
+        except Exception as e:
+            print(f"Error parsing metadata for game: {title} {e}")
+
+        conn.close()
 
     def get_working_dir(self, game_id, offline):
         self.get_directory(offline, game_id, 'working_directory')
