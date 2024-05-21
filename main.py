@@ -204,7 +204,54 @@ class Helper:
 
         except Exception as e:
             decky_plugin.logger.error(f"Error in ws_handler: {e}")
+    @staticmethod
+    async def get_build_artifact_url(id, bearer_token=""):
+        decky_plugin.logger.info(f"Fetching artifact url for build {id}")
+        url = f"https://api.github.com/repos/ebenbruyns/junkstore/actions/runs/{id}/artifacts"
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+            session.headers.update({'Accept': 'application/vnd.github.v3+json'})
+            session.headers.update({"X-GitHub-Api-Version": "2022-11-28"})
+            if bearer_token and bearer_token != "":
+                session.headers.update({"Authorization": f"Bearer {bearer_token}"})
+            async with session.get(url) as response:
+                data = await response.json()
+                if(len(data['artifacts']) == 0):
+                    return ""
+                artifact_id = data['artifacts'][0]['id'] 
+                decky_plugin.logger.info(f"Artifact id: {artifact_id}")
+                return artifact_id
+    @staticmethod
+    async def download_build_artifact(id, head_sha, bearer_token=""):
+        try:
+            decky_plugin.logger.info(f"Downloading build artifact {id}")
+            artifact_id = await Helper.get_build_artifact_url(id, bearer_token)
+            url = f"https://nightly.link/ebenbruyns/junkstore/actions/artifacts/{artifact_id}.zip"
+            runtime_dir = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+            decky_plugin.logger.info(f"Downloading file from {url}")
 
+            # Create a temporary file to save the downloaded zip file
+            home_dir = os.environ.get("HOME")
+            
+            tmp = os.path.join(home_dir, "Downloads")
+            temp_file = os.path.join(tmp, f"Junk-Store-{head_sha}.zip")
+            decky_plugin.logger.info(f"Temp file: {temp_file}")
+            # disabling ssl verfication for testing, github doesn't seem to have a valid ssl cert, seems wrong
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+                decky_plugin.logger.info(f"Downloading {url}")
+                async with session.get(url, allow_redirects=True) as response:
+                    decky_plugin.logger.debug(f"Response status: {response}")
+                    # assert response.status == 200 
+                    with open(temp_file, "wb") as f:
+                        while True:
+                            chunk = await response.content.readany()
+                            if not chunk:
+                                break
+                            f.write(chunk)
+            decky_plugin.logger.debug(f"Downloaded {temp_file} from {url}")
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in download_build_artifact: {e}")
+        
+    @staticmethod
     async def start_ws_server():
         try:
             port = 8765
@@ -252,6 +299,7 @@ class Plugin:
 
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
+            
 
     async def reload(self):
         try:
@@ -372,7 +420,37 @@ class Plugin:
                 {"FileName": "console_log.txt", "Content": content})
 
         return log_files
+    
+   
+    async def download_build(self, id, head_sha, bearer_token):
+        decky_plugin.logger.info(f"Downloading build {id}")
+        await Helper.download_build_artifact(id, head_sha, bearer_token)
 
+    async def get_latest_builds(self, branch, bearer_token):
+        result = []
+        try:
+            url = f"https://api.github.com/repos/ebenbruyns/junkstore/actions/runs?status=success&branch={branch}&per_page=10"
+            decky_plugin.logger.info(f"Fetching latest builds from {url}")
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+                session.headers.update({'Accept': 'application/vnd.github.v3+json'})
+                session.headers.update({"X-GitHub-Api-Version": "2022-11-28"})
+                if bearer_token and bearer_token != "":
+                    session.headers.update({"Authorization": f"Bearer {bearer_token}"})
+                async with session.get(url) as response:
+                    data = await response.json()
+                    decky_plugin.logger.info(f"Latest builds: {data}")
+                    for run in data['workflow_runs']:
+                        id = run['id']
+                        title = run['display_title']
+                        date = run['created_at'].replace("-", "/").replace("T", " ").replace("Z", "")
+                        if run['head_branch']:
+                            head_sha = run['head_sha'][:7]
+                        result.append({"id": id, "title": title, "date": date, "head_sha": head_sha})
+                    
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in get_latest_builds: {e}")
+
+        return result
     async def _unload(self):
         decky_plugin.logger.info("Goodbye World!")
 
