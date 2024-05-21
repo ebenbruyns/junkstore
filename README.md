@@ -2,7 +2,8 @@
 
 ![Junk-Store installs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fplugins.deckbrew.xyz%2Fplugins&query=%24%5B%3F(%40.name%20%3D%3D%20'Junk-Store')%5D.downloads&suffix=%20installs&label=Junk-Store%20Downloads&color=3ea6a3)
 
-main branch: [![Junk-Store main Build](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml)
+main branch:        [![Junk-Store main Build](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml)
+
 development branch: [![Junk-Store Development Build](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml/badge.svg?branch=development)](https://github.com/ebenbruyns/junkstore/actions/workflows/docker-image.yml)
 ## About Junk-Store
 Junk-Store is a revolutionary plugin designed to enhance your gaming experience on the Steam Deck. Developed with passion and innovation, Junk-Store seamlessly integrates non-Steam games into your Steam Deck library, opening up a world of gaming possibilities beyond Steam.
