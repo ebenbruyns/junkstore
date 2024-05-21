@@ -1,18 +1,13 @@
 const isLoggerEnabled = () => { return localStorage.getItem('enableLogger') === 'true' || false };
 
-declare global {
-    interface Window {
-        JunkStoreLoggerEnable(): void;
-        JunkStoreLoggerDisable(): void;
-    }
-}
 
-window.JunkStoreLoggerEnable = () => {
+
+export const JunkStoreLoggerEnable = () => {
     localStorage.setItem('enableLogger', 'true');
 };
 
 
-window.JunkStoreLoggerDisable = () => {
+export const JunkStoreLoggerDisable = () => {
     localStorage.setItem('enableLogger', 'false');
 };
 

@@ -8,36 +8,21 @@ import { FaBoxOpen } from "react-icons/fa";
 
 import { Content } from "./ContentTabs";
 import { About } from "./About";
-import { addAchievement, getAchievementDetails } from "./Utils/achievements";
+import { addAchievement, getAchievementDetails, toastAchievement, toastFactory } from "./Utils/achievements";
 import Logger from "./Utils/logger";
 
-declare global {
-  interface Window {
-    toastAchievement(achievement: string): void;
 
-  }
-}
 
 
 //@ts-ignore
 export default definePlugin((serverApi: ServerAPI) => {
-  try {
-    window.toastAchievement = (achievement: string) => {
-
-      const temp = getAchievementDetails(achievement);
-      if (temp) {
-        const toast = {
-          title: "Achievement unlocked: " + temp.name,
-          body: temp.description,
-          icon: temp.icon,
-        }
-        serverApi.toaster.toast(toast);
-      }
-    }
-  } catch (e) {
+  
+    
+  toastFactory(serverApi.toaster);
+    
 
 
-  }
+  
   const currentTime = new Date();
   const currentHour = currentTime.getHours();
   const currentMinute = currentTime.getMinutes();

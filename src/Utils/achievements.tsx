@@ -1,8 +1,10 @@
-import {  MdErrorOutline, MdNoFood, MdSocialDistance } from "react-icons/md";
+import { MdErrorOutline, MdNoFood, MdSocialDistance } from "react-icons/md";
 import Logger from "./logger";
 import { SiBrave, SiCodingninjas } from "react-icons/si";
 import { FaCat, FaEgg, FaRebel, FaStar, FaUserSecret } from "react-icons/fa6";
 import { FaSkullCrossbones } from "react-icons/fa";
+import { Toaster } from "decky-frontend-lib";
+
 
 type Achievement = string; // Each achievement is represented by a base64 string
 export interface AchievementDetails {
@@ -101,80 +103,91 @@ export const checkAchievements = (): number => {
         return 0;
     }
 }
+export let toastAchievement: (achievement: string) => void;
 
-export const addAchievement = (achievementBase64: Achievement) => {
-    try {
-        const achievement = parseInt(atob(achievementBase64), 2);
-        if (!hasAchievement(achievementBase64)) {
-            let achievements = checkAchievements();
-            achievements |= 1 << achievement;
-            localStorage.setItem('achievements', btoa(achievements.toString(2)));
-            window.toastAchievement(achievementBase64);
-            if(getAchievements().length == 10) {
-                addAchievement("MTAxMQ==")
+export const toastFactory = (toaster: Toaster) => {
+
+    toastAchievement = (achievement: string) => {
+        try {
+            const temp = getAchievementDetails(achievement);
+            if (temp) {
+                const toast = {
+                    title: "Achievement unlocked: " + temp.name,
+                    body: temp.description,
+                    icon: temp.icon,
+                }
+                toaster.toast(toast)
+
             }
         }
-    }
-    catch (e) {
-        logger.error("Error adding achievement: ", e);
-    }
-}
-export const hasAchievement = (achievementBase64: Achievement): boolean => {
-    try {
-        const achievement = parseInt(atob(achievementBase64), 2);
-        const achievements = checkAchievements();
-        return (achievements & (1 << achievement)) !== 0;
-    }
-    catch (e) {
-        logger.error("Error checking achievement: ", e);
-        return false;
-    }
-}
-
-export const getAchievements = (): Achievement[] => {
-    try {
-        let achievementsBitField = checkAchievements();
-        const achievements: Achievement[] = [];
-        let achievementNumber = 0;
-
-        while (achievementsBitField > 0) {
-            if ((achievementsBitField & 1) === 1) {
-                achievements.push(btoa(achievementNumber.toString(2)));
-            }
-            achievementsBitField >>= 1;
-            achievementNumber++;
+        catch (e) {
         }
-        logger.log(`Achievements: ${achievements}`);
-        return achievements;
-    }
-    catch (e) {
-        logger.error("Error getting achievements: ", e);
-        return [];
     }
 }
 
-export const hasAchievements = (): boolean => {
-    try {
-        return getAchievements().length > 0;
+    export const addAchievement = (achievementBase64: Achievement) => {
+        try {
+            const achievement = parseInt(atob(achievementBase64), 2);
+            if (!hasAchievement(achievementBase64)) {
+                let achievements = checkAchievements();
+                achievements |= 1 << achievement;
+                localStorage.setItem('achievements', btoa(achievements.toString(2)));
+                toastAchievement(achievementBase64);
+                if (getAchievements().length == 10) {
+                    addAchievement("MTAxMQ==")
+                }
+            }
+        }
+        catch (e) {
+            logger.error("Error adding achievement: ", e);
+        }
     }
-    catch (e) {
-        logger.error("Error checking achievements: ", e);
-        return false;
+    export const hasAchievement = (achievementBase64: Achievement): boolean => {
+        try {
+            const achievement = parseInt(atob(achievementBase64), 2);
+            const achievements = checkAchievements();
+            return (achievements & (1 << achievement)) !== 0;
+        }
+        catch (e) {
+            logger.error("Error checking achievement: ", e);
+            return false;
+        }
     }
-}
+
+    export const getAchievements = (): Achievement[] => {
+        try {
+            let achievementsBitField = checkAchievements();
+            const achievements: Achievement[] = [];
+            let achievementNumber = 0;
+
+            while (achievementsBitField > 0) {
+                if ((achievementsBitField & 1) === 1) {
+                    achievements.push(btoa(achievementNumber.toString(2)));
+                }
+                achievementsBitField >>= 1;
+                achievementNumber++;
+            }
+            logger.log(`Achievements: ${achievements}`);
+            return achievements;
+        }
+        catch (e) {
+            logger.error("Error getting achievements: ", e);
+            return [];
+        }
+    }
+
+    export const hasAchievements = (): boolean => {
+        try {
+            return getAchievements().length > 0;
+        }
+        catch (e) {
+            logger.error("Error checking achievements: ", e);
+            return false;
+        }
+    }
 
 
 
-export const intToAchievement = (achievement: number): Achievement => {
-    return btoa(achievement.toString(2));
-}
-declare global {
-    interface Window {
-        intToAchievement(achievement: number): Achievement;
-        addAchievement(achievement: Achievement): void;
-  
+    export const intToAchievement = (achievement: number): Achievement => {
+        return btoa(achievement.toString(2));
     }
-  }
-  
-window.intToAchievement = intToAchievement;  
-window.addAchievement = addAchievement;
