@@ -1,4 +1,4 @@
-import { DialogButton, DialogLabel, ServerAPI } from "decky-frontend-lib";
+import { DialogButton, DialogLabel, Navigation, ServerAPI } from "decky-frontend-lib";
 import { ReactElement, VFC, useEffect, useState } from "react";
 import {
     ActionSet, ContentError, ContentResult, ContentType,
@@ -17,6 +17,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     const [actionSetName, setActionSetName] = useState<string>("");
     const [LoggedIn, setLoggedIn] = useState<string>("false");
     const [SteamClientId, setSteamClientId] = useState<string>("");
+    const originRoute = location.pathname.replace('/routes', '');
     useEffect(() => {
         if (actionSetName !== "") {
             updateLoginStatus();
@@ -35,6 +36,13 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
         }
         setContent(result);
         logger.debug("Login status: ", result);
+    };
+    const onLoginExit = (id) => {
+        Navigation.CloseSideMenus();
+        Navigation.Navigate(originRoute);
+        setTimeout(() => {
+            SteamClient.Apps.RemoveShortcut(id);
+        }, 1000);
     };
     const createShortcut = async (launchOptions: LaunchOptions) => {
         logger.debug("Creating shortcut for login: ", launchOptions);
@@ -98,7 +106,9 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
                 {
                     appId: String(id),
                     gameId: String(gameId)
-                });
+                },
+                () => onLoginExit(id)
+            );
 
             setContent(launchOptionsResult);            
             setLoggedIn("true");
@@ -110,6 +120,7 @@ export const LoginContent: VFC<{ serverAPI: ServerAPI; initActionSet: string; in
     
     const logout = async () => {
         try {
+            setContent({ Type: "Empty", Content: {} });
             const data = await executeAction<ExecuteArgs, LoginStatus>(serverAPI, actionSetName,
                 "Logout",
                 {

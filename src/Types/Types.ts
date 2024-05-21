@@ -81,6 +81,7 @@ export interface ScriptActions extends ContentType {
 // Define the grid container
 export interface GameDataList extends ContentType {
   NeedsLogin?: string;
+  storeURL?: string;
   Games: GameData[];
 }
 export interface GameData {
@@ -127,6 +128,7 @@ export interface FileData {
 export interface ProgressUpdate extends ContentType {
   Percentage: number;
   Description: string;
+  Error?: string;
 }
 export interface GameImages extends ContentType {
   Grid: string;

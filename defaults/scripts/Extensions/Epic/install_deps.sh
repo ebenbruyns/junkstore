@@ -1,5 +1,18 @@
 #!/bin/bash
 DOWNLOAD_LOCATION=https://github.com/ebenbruyns/legendary-flatpak/releases/latest/download/legendary.flatpak
+function uninstall() {
+    echo "Uninstalling flatpaks"
+    if flatpak list | grep -q "com.github.derrod.legendary"; then
+        echo "legendary flatpak is installed, removing"
+        flatpak --user uninstall com.github.derrod.legendary -y
+    fi
+    if flatpak list | grep -q "com.github.Matoking.protontricks"; then
+        echo "protontricks flatpak is installed, removing"
+        flatpak --user uninstall com.github.Matoking.protontricks -y
+    fi
+    echo "Removing unused flatpaks"
+    flatpak --user uninstall --unused -y
+}
 
 function download_and_install() {
     cd /tmp
@@ -11,8 +24,18 @@ function download_and_install() {
     rm legendary.flatpak
 }
 
-if flatpak list | grep -q "com.github.derrod.legendary"; then
-    echo "legendary flatpak is installed, removing and reinstalling"
-    flatpak uninstall com.github.derrod.legendary -y    
+function install() {
+    if flatpak list | grep -q "com.github.derrod.legendary"; then
+        echo "legendary flatpak is installed, removing and reinstalling"
+        flatpak --user uninstall com.github.derrod.legendary -y    
+    fi
+    download_and_install
+}
+
+if [ "$1" == "uninstall" ]; then
+    echo "Uninstalling dependencies: Epic extension"
+    uninstall
+else
+    echo "Installing dependencies: Epic extension"
+    install
 fi
-download_and_install

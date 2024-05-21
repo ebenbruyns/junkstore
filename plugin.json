@@ -3,8 +3,8 @@
   "author": "Eben Bruyns",
   "flags": [],
   "publish": {
-    "tags": ["Epic"],
-    "description": "Junk store for games from other origins. The default configuration is for the Epic Games store. Browse, install and play EGS games directly in Steam. This is particularly useful for games that you want to play in dosbox, with some custom scripting.",
-    "image": "https://steamuserimages-a.akamaihd.net/ugc/2213016405730070989/E2430249F611FE5995A05748F488EB594318B62B/"
+    "tags": ["Epic", "Launcher", "88mph"],
+    "description": "Transform your gaming experience with Junk-Store - the ultimate solution for seamlessly integrating non-Steam games into your Steam Deck library. Say goodbye to clunky work arounds and hello to a world of endless gaming possibilities. Get ready to elevate your gaming to the next level with Junk-Store!",
+    "image": "https://www.junkstore.xyz/assets/junkstore.jpg"
   }
 }

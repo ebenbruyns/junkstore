@@ -134,12 +134,6 @@
           "InstalledOnly": "True"
         },
         {
-          "ActionId": "DownloadSaves",
-          "Title": "Download saves",
-          "Type": "ScriptAction",
-          "InstalledOnly": "True"
-        },
-        {
           "ActionId": "Verify",
           "Title": "Verify Game",
           "Type": "ScriptAction",
@@ -169,16 +163,9 @@
           "Type": "ScriptActionConfirm",
           "InstalledOnly": "True"
         },
-
         {
           "ActionId": "ProtonTricks",
           "Title": "Proton Tricks",
-          "Type": "ScriptAction",
-          "InstalledOnly": "True"
-        },
-        {
-          "ActionId": "RegistryFix",
-          "Title": "Registry Fix",
           "Type": "ScriptAction",
           "InstalledOnly": "True"
         },
@@ -364,6 +351,12 @@
           "Title": "Uninstall game",
           "Type": "Uninstall",
           "Command": "./scripts/junk-store.sh Epic uninstall"
+        },
+        {
+          "Id": "Move",
+          "Title": "Move game",
+          "Type": "Move",
+          "Command": "./scripts/junk-store.sh Epic move"
         },
         {
           "Id": "EnableEOSoverlay",

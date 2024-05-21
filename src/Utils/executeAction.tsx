@@ -27,7 +27,8 @@ export async function executeAction<Arguments extends ExecuteArgs, Content exten
         const newLaunchOptions = res.result.Content as LaunchOptions;
         if (args.appId) {
             const id = parseInt(args.appId);
-            const details = getAppDetails(id);
+            //await appDetailsStore.RequestAppDetails(id);
+            const details = await getAppDetails(id);
             logger.log("details: ", details);
             const oldLaunchOptions: LaunchOptions = {
                 Name: details?.strDisplayName || "",

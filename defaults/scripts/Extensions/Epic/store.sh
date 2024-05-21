@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Register actions with the junk-store.sh script
-ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-idaste")
+ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-id")
 
 # Register Epic as a platform with the junk-store.sh script
 PLATFORMS+=("Epic")
@@ -13,7 +13,7 @@ if [[ "${PLATFORM}" == "Epic" ]]; then
 fi
 
 function Epic_init() {
-    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE &> /dev/null
+    $EPICCONF --list --dbfile $DBFILE $OFFLINE_MODE  &> /dev/null
 }
 
 function Epic_refresh() {
@@ -42,8 +42,11 @@ function Epic_getgames(){
     # checking if the Game's content is empty, if it is, then we need to refresh the list
     #{"Type": "GameGrid", "Content": {"NeedsLogin": "true", "Games": []}}
     if [[ $TEMP == "{\"Type\": \"GameGrid\", \"Content\": {\"NeedsLogin\": \"true\", \"Games\": []}}" ]]; then
-        TEMP=$(Epic_init)
-        TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+        if [[ $FILETER == "" ]] && [[ $INSTALLED == "false" ]]; then
+            TEMP=$(Epic_init)
+            TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
+        fi
+        
     fi
     echo $TEMP
 }
@@ -67,9 +70,11 @@ function Epic_cancelinstall(){
 
 function Epic_download(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
+    # attempting to fix path issues if an install failed.
+    $LEGENDARY move "${1}" "${INSTALL_DIR}" --skip-move &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
-   
-    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}" >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+     
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --max-shared-memory 4096 --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}"  2> $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/${1}.output" &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 
@@ -152,14 +157,15 @@ function Epic_import(){
 }
 function Epic_move(){
     PROGRESS_LOG="${DECKY_PLUGIN_LOG_DIR}/${1}.progress"
-    GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
-    SKIP_MOVE=""
-    if [ -d "${GAME_DIR}" ]; then
-        SKIP_MOVE="--skip-move"
-    fi
-    updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
+    $LEGENDARY move "${1}" "${INSTALL_DIR}" &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
+    # GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE $OFFLINE_MODE)
+    # SKIP_MOVE=""
+    # if [ -d "${GAME_DIR}" ]; then
+    #     SKIP_MOVE="--skip-move"
+    # fi
+    # updategamedetailsaftercmd $1 $LEGENDARY move $1 "${GAME_DIR}" $SKIP_MOVE $OFFLINE_MODE >> "${DECKY_PLUGIN_LOG_DIR}/${1}.log" 2>> $PROGRESS_LOG &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
-    echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Updating\"}}"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"${1} moved to ${INSTALL_DIR}\"}}"
 
 }
 function Epic_update-umu-id(){
@@ -213,10 +219,10 @@ function Epic_getprogress()
     echo $TEMP
 }
 function Epic_loginstatus(){
-     if [ -z "${1}" ]; then
-        FLUSH_CACHE="--flush-cache"
-    else
+    if [[ -z $1 ]]; then
         FLUSH_CACHE=""
+    else 
+        FLUSH_CACHE="--flush-cache"
     fi
     TEMP=$($EPICCONF --getloginstatus --dbfile $DBFILE --dbfile $DBFILE $OFFLINE_MODE  $FLUSH_CACHE)
     echo $TEMP
@@ -261,7 +267,7 @@ function Epic_get-exe-list(){
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
     cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
     IFS=$'\n' 
-    LIST=$(find . -name "*.exe")
+    LIST=$(find . \( -name "*.exe" -o -iname "*.bat" -o -iname "*.msi" \))
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"Files\": ["
    
     for FILE in $LIST; do
@@ -299,7 +305,7 @@ function launchoptions () {
 }
 function Epic_login(){
     get_steam_env
-    launchoptions "${LEGENDARY}" "auth" "." "Epic Games Login" 
+    launchoptions "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/login.sh" "" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 function loginlaunchoptions () {
     Exe=$1 
@@ -320,13 +326,13 @@ function loginlaunchoptions () {
 }
 function Epic_login-launch-options(){
     get_steam_env
-    loginlaunchoptions  "${LEGENDARY}" "auth" "." "Epic Games Login" 
+    loginlaunchoptions  "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/login.sh" "" "${DECKY_PLUGIN_LOG_DIR}" "Epic Games Login" 
 }
 
 
 function Epic_logout(){
     TEMP=$($LEGENDARY auth --delete)
-    loginstatus --flush-cache
+    Epic_loginstatus --flush-cache
 }
 
 function Epic_getsetting(){

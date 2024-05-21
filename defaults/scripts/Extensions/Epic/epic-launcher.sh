@@ -9,6 +9,22 @@ ID=$1
 echo $1
 shift
 
+
+
+#########################################################################
+# If you enable cloud saves and things go wrong, you got what you       #
+# deserved this is a minefield and a lot can go wrong here.             #
+# Do not ask me for support and do not cry about losing you saves,      #
+# you have been warned. If you complain on a public forum I will        #
+# link to this code and make sure people understand it was YOUR fault.  #
+#########################################################################
+
+function sync-saves(){
+    echo "sync-saves"
+}
+
+
+
 source "${DECKY_PLUGIN_DIR}/scripts/Extensions/Epic/settings.sh"
 
 echo "dbfile: ${DBFILE}"
@@ -48,9 +64,8 @@ if [ -z "${RUNTIMES_FSR_STRENGTH}" ]; then
 else
     export WINE_FULLSCREEN_FSR_STRENGTH=${RUNTIMES_FSR_STRENGTH}
 fi
-if [ -z "${RUNTIMES_LIMIT_FRAMERATE}" ]; then
-    unset DXVK_FRAME_RATE
-else
+
+if [[ "${RUNTIMES_LIMIT_FRAMERATE}" == "true" ]]; then
     export DXVK_FRAME_RATE=${RUNTIMES_FRAME_RATE}
 fi
 if [[ "${RUNTIMES_EASYANTICHEAT}" == "true" ]]; then
@@ -72,23 +87,62 @@ else
 fi
 
 CMD=$@
-function sync-saves(){
-    if [[ "${OFFLINE_MODE}" == "" ]]; then
-    $LEGENDARY sync-saves $ID
-fi
-}
-# sync-saves
+
+
+
+
+sync-saves
+
 
 QUOTED_ARGS=""
+ALL_BUT_LAST_ARG=""
+REG_FIX=""
 for arg in "$@"; do
     QUOTED_ARGS+=" \"${arg}\"" 
+    if [[ "${arg}" != "${!#}" ]]; then
+        ALL_BUT_LAST_ARG+=" \"${arg}\""
+        REG_FIX+=" \"${arg}\""
+    else
+        ALL_BUT_LAST_ARG+=" \"install_deps.bat\""
+    fi
 done
 
 ARGS=$("${ARGS_SCRIPT}" $ID)
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
     QUOTED_ARGS+=" \"${arg}\"" 
+    
 done
+
+pushd "${DECKY_PLUGIN_DIR}"
+GAME_PATH=$($EPICCONF --get-game-dir $ID --dbfile $DBFILE --offline)
+popd
+echo "game path: ${GAME_PATH}" &> "${GAME_PATH}/launcher.log"
+
+if [ -f "${GAME_PATH}/install.done" ]; then
+    echo "install_deps.bat exists"
+    echo "install_deps.bat exists" &>> "${GAME_PATH}/launcher.log"
+    pwd &>> "${GAME_PATH}/launcher.log"
+else
+    echo "installing deps" &>> "${GAME_PATH}/launcher.log"
+    echo "install_deps.bat does not exist"
+    pwd &>> "${GAME_PATH}/launcher.log"
+    echo "`echo -e \"${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f\"`" &>> "${GAME_PATH}/launcher.log" &>> "${GAME_PATH}/launcher.log"
+  
+    eval "`echo -e \"${REG_FIX} reg add HKEY_CLASSES_ROOT\\\\\\\\\\\\\\\\com.epicgames.launcher /f"`" &>> "${GAME_PATH}/launcher.log"
+   
+    echo "EpicOnlineServices\\EpicOnlineServicesInstaller.exe" > "${GAME_PATH}/install_deps.bat"
+    echo "echo \"install done\" > install.done" >> "${GAME_PATH}/install_deps.bat"
+   
+
+    echo "running install_deps.bat" >> "${GAME_PATH}/launcher.log"
+    pushd "${GAME_PATH}"
+  
+    echo "path: ${GAME_PATH}" &>> "${GAME_PATH}/launcher.log"
+    echo "`echo -e $ALL_BUT_LAST_ARG`" &>> "${GAME_PATH}/launcher.log"
+    eval "`echo -e $ALL_BUT_LAST_ARG`"  # &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+    popd
+fi
 
 echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
@@ -98,7 +152,8 @@ export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
 # export PROTON_FORCE_LARGE_ADDRESS_AWARE=1
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-# sync-saves
+
+sync-saves
 
 
 # echo "#!/bin/bash" > run.sh

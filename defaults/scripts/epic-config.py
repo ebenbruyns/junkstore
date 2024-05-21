@@ -7,10 +7,12 @@ import GameSet
 
 
 class EpicArgs(GameSet.GenericArgs):
-    def __init__(self, setNameConfig):
+    def __init__(self, storeName, setNameConfig):
         super().__init__()
         self.addArguments()
         self.setNameConfig = setNameConfig
+        self.storeName = storeName
+        
 
     def addArguments(self):
         super().addArguments()
@@ -47,7 +49,7 @@ class EpicArgs(GameSet.GenericArgs):
 
     def parseArgs(self):
         super().parseArgs()
-        self.gameSet = epic.Epic(self.args.dbfile, self.setNameConfig)
+        self.gameSet = epic.Epic(self.args.dbfile, self.storeName, self.setNameConfig)
         self.gameSet.create_tables()
 
     def processArgs(self):
@@ -98,7 +100,7 @@ class EpicArgs(GameSet.GenericArgs):
 
 
 def main():
-    epicArgs = EpicArgs("Proton")
+    epicArgs = EpicArgs("Epic","Proton")
     epicArgs.parseArgs()
     epicArgs.processArgs()
 

@@ -10,16 +10,18 @@ import xml.etree.ElementTree as ET
 from typing import List
 import subprocess
 import time
-import GameSet
+
+import GamesDb
 import re
 from datetime import datetime, timedelta
 
 class CmdException(Exception):
     pass
 
-class Epic(GameSet.GameSet):
-    def __init__(self, db_file, setNameConfig=None):
-        super().__init__(db_file, setNameConfig)
+class Epic(GamesDb.GamesDb):
+    def __init__(self, db_file, storeName, setNameConfig=None):
+        super().__init__(db_file, storeName=storeName,  setNameConfig=setNameConfig)
+        self.storeURL = "https://store.epicgames.com/"
 
     legendary_cmd = os.path.expanduser( os.environ['LEGENDARY'])
 
@@ -31,9 +33,9 @@ class Epic(GameSet.GameSet):
 
         if "[cli] ERROR:" in result:
             raise CmdException(result)
-        print(f" result: {result}", file=sys.stderr)
+        # print(f" result: {result}", file=sys.stderr)
         if result.strip() == "":
-            raise CmdException("Command produced no output")
+            raise CmdException(f"Command produced no output: {cmd}")
         return json.loads(result)
 
     # sample json for game returned from legendary list --json
@@ -41,8 +43,109 @@ class Epic(GameSet.GameSet):
     def get_list(self,  offline):
         offline_switch = "--offline" if offline else ""
         games_list = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} list --json {offline_switch}"))
-        self.insert_data(games_list)
+            f"{self.legendary_cmd} list -T --json {offline_switch}"))
+        id_list = []
+        game_dict = {}
+        for game in games_list:
+            shortname = game['metadata']['releaseInfo'][0]['appId'] if game['metadata'].get('releaseInfo') and game['metadata']['releaseInfo'][0].get('appId') else ""
+            id_list.append(shortname)
+            game_dict.update({shortname: game})
+                
+        left_overs = self.insert_data(id_list)
+        print(f"left_overs: {left_overs}", file=sys.stderr)
+        for game in left_overs:
+            self.proccess_leftovers(game_dict[game])
+
+   
+    def proccess_leftovers(self, game):
+        print(f"Processing leftover game: {game['app_title']}", file=sys.stderr)
+        conn = self.get_connection()
+        c = conn.cursor()
+
+       
+        try:
+            title = game['app_title'].replace("''", "'")
+            shortname = game['asset_infos']['Windows']['asset_id']
+
+            c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
+            result = c.fetchone()
+            if result is None:
+                notes = game['metadata']['description']
+                application_path = ""
+                manual_path = ""
+                root_folder = ""
+                source = "Epic"
+                database_id = game['app_name']
+                genre = ""
+                configuration_path = ""
+                publisher = game['metadata']['developer']
+                developer = game['metadata']['developer']
+                release_date = game['metadata']['creationDate']
+                vals = [
+                    title,
+                    notes,
+                    application_path,
+                    manual_path,
+                    publisher,
+                    root_folder,
+                    source,
+                    database_id,
+                    genre,
+                    configuration_path,
+                    developer,
+                    release_date,
+                    "",
+                    "",
+                    "",
+                    "",
+                    shortname,
+                    
+                ]
+                cols = ["Title",
+                        "Notes",
+                        "ApplicationPath",
+                        "ManualPath",
+                        "Publisher",
+                        "RootFolder",
+                        "Source",
+                        "DatabaseID",
+                        "Genre",
+                        "ConfigurationPath",
+                        "Developer",
+                        "ReleaseDate",
+                        "Size",
+                        "InstallPath",
+                        "UmuId"
+                        ]
+                # print(f"Inserting game {title} into database: {vals}")
+
+                placeholders = ', '.join(
+                    ['?' for _ in range(len(cols))])
+                cols_with_pk = cols + ["SteamClientID", "ShortName"]
+                placeholders = ', '.join(
+                    ['?' for _ in range(len(cols_with_pk))])
+                tmp = f"INSERT INTO Game ({', '.join(cols_with_pk)}) VALUES ({placeholders})"
+                # print(tmp)
+                c.execute(tmp, vals)
+
+                game_id = c.lastrowid
+                # Insert images into the Images table
+                for image in game['metadata']['keyImages']:
+                    width = image['width']
+                    height = image['height']
+                    Type = ""
+                    if height > width:
+                        Type = "vertical_cover"
+                    else:
+                        Type = "horizontal_artwork"
+                    c.execute(
+                        "INSERT INTO Images (GameID, ImagePath, FileName, SortOrder, Type) VALUES (?, ?, ?, ?,?)", (game_id, image['url'], '', image['width'], Type))
+                conn.commit()
+
+        except Exception as e:
+            print(f"Error parsing metadata for game: {title} {e}")
+
+        conn.close()
 
     def get_working_dir(self, game_id, offline):
         self.get_directory(offline, game_id, 'working_directory')
@@ -68,9 +171,11 @@ class Epic(GameSet.GameSet):
             self.clear_cache(cache_key)
             
         cache = self.get_cache(cache_key)
+        print(f"cache: {cache}", file=sys.stderr)
         if cache is not None:
+            
             return cache
-        
+        print(f"cache miss!", file=sys.stderr)
         result = self.execute_shell(os.path.expanduser(
             f"{self.legendary_cmd} status --json {offline_switch}"))
         
@@ -139,7 +244,7 @@ class Epic(GameSet.GameSet):
                 'Type': 'LaunchOptions',
                 'Content':
                 {
-                    'Exe': f"\\\"{os.path.join(result['game_directory'], result['game_executable'])}\\\"",
+                    'Exe': f"\"{os.path.join(result['game_directory'], result['game_executable'])}\"",
                     'Options': f"{script_path} {game_id}%command%",
                     'WorkingDir': result['working_directory'],
                     'Compatibility': True,
@@ -147,71 +252,8 @@ class Epic(GameSet.GameSet):
                 }
             })
 
-    def insert_data(self, games_list):
-        conn = self.get_connection()
-        c = conn.cursor()
-
-        for game in games_list:
-
-            try:
-                title = game['app_title'].replace("''", "'")
-                shortname = game['asset_infos']['Windows']['asset_id']
-
-                c.execute("SELECT * FROM Game WHERE ShortName=?", (shortname,))
-                result = c.fetchone()
-                if result is None:
-                    notes = game['metadata']['description']
-                    application_path = ""
-                    manual_path = ""
-                    root_folder = ""
-                    source = "Epic"
-                    database_id = game['app_name']
-                    genre = ""
-                    configuration_path = ""
-                    publisher = game['metadata']['developer']
-                    developer = game['metadata']['developer']
-                    release_date = game['metadata']['creationDate']
-                    vals = [
-                        title,
-                        notes,
-                        application_path,
-                        manual_path,
-                        publisher,
-                        root_folder,
-                        source,
-                        database_id,
-                        genre,
-                        configuration_path,
-                        developer,
-                        release_date,
-                        "",
-                        "",
-                        shortname,
-                        
-                    ]
-
-                    # print(f"Inserting game {title} into database: {vals}")
-
-                    placeholders = ', '.join(
-                        ['?' for _ in range(len(self.cols))])
-                    cols_with_pk = self.cols + ["SteamClientID", "ShortName"]
-                    placeholders = ', '.join(
-                        ['?' for _ in range(len(cols_with_pk))])
-                    tmp = f"INSERT INTO Game ({', '.join(cols_with_pk)}) VALUES ({placeholders})"
-                    # print(tmp)
-                    c.execute(tmp, vals)
-
-                    game_id = c.lastrowid
-                    # Insert images into the Images table
-                    for image in game['metadata']['keyImages']:
-                        c.execute(
-                            "INSERT INTO Images (GameID, ImagePath, FileName, SortOrder) VALUES (?, ?, ?, ?)", (game_id, image['url'], '', image['width']))
-                    conn.commit()
-
-            except Exception as e:
-                print(f"Error parsing metadata for game: {title} {e}")
-
-        conn.close()
+        
+        
        
     def update_game_details(self, game_id):
         conn = self.get_connection()
@@ -223,16 +265,17 @@ class Epic(GameSet.GameSet):
             game = result['game']
             title = game['title']
             install = result['install']
-            print(f"install info: {install}", file=sys.stderr)
-            if install != None and bool(install['disk_size']):
-                disk_size = install['disk_size']
-                print(f"disk_size: {disk_size}", file=sys.stderr)
+            if install != None:
+                print(f"install info: {install}", file=sys.stderr)
+                if install != None and bool(install['disk_size']):
+                    disk_size = install['disk_size']
+                    print(f"disk_size: {disk_size}", file=sys.stderr)
 
-                size = f"{self.convert_bytes(disk_size)}"
-                print(f"size: {size}", file=sys.stderr)
+                    size = f"{self.convert_bytes(disk_size)}"
+                    print(f"size: {size}", file=sys.stderr)
 
-            else:
-                size = None
+                else:
+                    size = None
 
             c.execute(
                 "UPDATE Game SET Title=?, Size=? WHERE ShortName=?", 
@@ -281,12 +324,18 @@ class Epic(GameSet.GameSet):
                 for i in range(len(lines) - 5):
                     if match := progress_re.search(''.join(lines[i: i + 6])):
                         downloaded = round(float(match.group(6)), 2)
-                        percent = round(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)))
+                        percent, _ = divmod(100 * (downloaded + previously_dl_size) / total_dl_size if previously_dl_size else float(match.group(1)), 1)
+                        if percent == 100:
+                            percent = 99
                         last_progress_update = {
                             "Percentage": percent,
                             "Description": (f"Downloaded {round(downloaded + previously_dl_size, 2)} MB/{total_dl_size} MB" if previously_dl_size else f"Downloaded {downloaded} MB/{total_dl_size} MB" if total_dl_size != None else f"Downloaded {downloaded} MB") + f" ({percent}%)\nSpeed: {match.group(11)} MB/s"
                         }
-
+                if lines[-1].strip().startswith("[cli] INFO: Finished installation process"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Finished installation process"
+                    }
                 if lines[-1].strip() == "[cli] INFO: Download size is 0, the game is either already up to date or has not changed. Exiting...":
                     last_progress_update = {
                         "Percentage": 100,
@@ -302,6 +351,38 @@ class Epic(GameSet.GameSet):
                         "Percentage": 100,
                         "Description": "Verification finished successfully."
                     }
+                if lines[-1].strip().startswith("[cli] INFO: For Origin games use \"legendary launch"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires Origin to be installed. This is not currently supported by Junk-Store."
+                    }
+                if lines[-1].strip().startswith("[cli] ERROR: The selected title has to be installed via a third-party store: Origin"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires Origin to be installed. This is not currently supported by Junk-Store."
+                    }
+                if lines[-1].strip().startswith("[cli] ERROR: The selected title has to be installed via a third-party store: The EA App"):
+                    last_progress_update = {
+                        "Percentage": 100,
+                        "Description": "Error instaling:",
+                        "Error": "This game requires The EA App to be installed. This is not currently supported by Junk-Store."
+                    }
+                if lines[-1].strip() == "[cli] CRITICAL: Installation cannot proceed, exiting.":
+                   
+                    with open(file_path.replace(".progress", ".output"), "r") as f:
+                        content = f.readlines()
+                    content = '<br />'.join(content)
+                    if content is None:
+                        content = "Installation Failed. Reason unknown, check logs for details."
+                    last_progress_update = {
+                        "Percentage": 0,
+                        "Description": "Installation Failed.",
+                        "Error": content
+                    } 
+                    
+
                 if last_progress_update is None:
                     last_progress_update = {
                         "Percentage": 0,

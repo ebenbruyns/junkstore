@@ -2,9 +2,11 @@ import { PanelSection, ModalRoot, Focusable, } from "decky-frontend-lib";
 import { VFC } from "react";
 import { ErrorModalProps } from "./ConfEditor";
 import { ErrorDisplay } from "./Components/ErrorDisplay";
+import { addAchievement } from "./Utils/achievements";
 
 
 export const ErrorModal: VFC<ErrorModalProps> = ({ Error, onCancel, onOK, onEscKeypress, bAllowFullSize, bCancelDisabled, bOKDisabled, closeModal }) => {
+    addAchievement("MQ==")
     return (
         <ModalRoot
             onCancel={onCancel}

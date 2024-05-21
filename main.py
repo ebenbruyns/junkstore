@@ -13,7 +13,7 @@ import concurrent.futures
 
 
 class Helper:
-
+    websocket_port = 8765
     action_cache = {}
     working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
 
@@ -198,18 +198,29 @@ class Helper:
                 data = json.loads(message.data)
                 if (data['action'] == 'install_dependencies'):
                     await Helper.pyexec_subprocess("./scripts/install_deps.sh", websocket=websocket, stream_output=True)
+                if (data['action'] == 'uninstall_dependencies'):
+                    await Helper.pyexec_subprocess("./scripts/install_deps.sh uninstall",  websocket=websocket, stream_output=True)
+                    
 
         except Exception as e:
             decky_plugin.logger.error(f"Error in ws_handler: {e}")
 
     async def start_ws_server():
         try:
-            app = web.Application()
-            app.router.add_get('/ws', Helper.ws_handler)
-            runner = web.AppRunner(app)
-            await runner.setup()
-            site = web.TCPSite(runner, 'localhost', 8765)
-            await site.start()
+            port = 8765
+            while True:
+                try:
+                    decky_plugin.logger.info(f"Starting WebSocket server on port {port}")
+                    app = web.Application()
+                    app.router.add_get('/ws', Helper.ws_handler)
+                    runner = web.AppRunner(app)
+                    await runner.setup()
+                    site = web.TCPSite(runner, 'localhost', port)
+                    await site.start()
+                    Helper.websocket_port = port
+                    break
+                except OSError:
+                    port += 1
 
             decky_plugin.logger.info("WebSocket server started")
             while True:
@@ -259,7 +270,8 @@ class Plugin:
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
 
-        
+    async def get_websocket_port(self):
+        return Helper.websocket_port    
 
     # ...
 

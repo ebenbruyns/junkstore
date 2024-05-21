@@ -113,11 +113,12 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                 {isInstalled &&
                     <>
                         <MenuItem onSelected={resetLaunchOptions}>Reset Launch Options</MenuItem>
-                        <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => { uninstaller(); }} />)}> {/*pass uninstall fn like this so it doesn't wait for the async fn to close the modal */}
-                            Uninstall Game
-                        </MenuItem>
+
                     </>
                 }
+                <MenuItem onSelected={() => showModal(<ConfirmModal strTitle="Confirm" strDescription={"Uninstall " + name + "?"} onOK={() => { uninstaller(); }} />)}> {/*pass uninstall fn like this so it doesn't wait for the async fn to close the modal */}
+                    Uninstall Game
+                </MenuItem>
                 {actions && actions.length > 0 && actions.map((action) => {
                     const mustBeInstalled = action.InstalledOnly != undefined && action.InstalledOnly == true;
                     const show = isInstalled || !mustBeInstalled;
