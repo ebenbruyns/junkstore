@@ -380,6 +380,8 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                         justifyContent: "right",
                                         padding: "4px",
                                     }}
+                                    //@ts-ignore
+                                    navEntryPreferPosition={2} //maintain x
                                 >
                                     <DialogButton
                                         onClick={() => {
