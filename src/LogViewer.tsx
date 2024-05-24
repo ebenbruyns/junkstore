@@ -52,7 +52,7 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
 
                         }} />
                     <ScrollableWindowRelative >
-                        <div style={{ padding: '5px 0', whiteSpace: 'pre-wrap' }}>
+                        <div style={{ padding: '5px 10px 5px 0', whiteSpace: 'pre-wrap' }}>
                             {logContent}
                         </div>
                     </ScrollableWindowRelative>

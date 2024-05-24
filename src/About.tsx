@@ -141,7 +141,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                         content: (
                             <div style={{ padding: '0 15px', height: '100%', display: 'flex' }}>
                                 <ScrollableWindowRelative>
-                                    <div style={{ padding: '5px 0' }}>
+                                    <div style={{ padding: '5px 10px 5px 0' }}>
                                         <div>
                                             Junk Store emerged from a simple need: a convenient solution for installing and updating games beyond Steam's offerings, including titles from GOG and Epic Games.
                                             <br />
@@ -330,7 +330,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                             <div style={{ display: 'flex', flex: 'auto', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ padding: '0 15px', flex: 'auto', display: 'flex' }}>
                                     <ScrollableWindowRelative>
-                                        <div style={{ padding: '5px 0' }}>
+                                        <div style={{ padding: '5px 10px 5px 0' }}>
                                             I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
                                             <br />
                                             <br />
