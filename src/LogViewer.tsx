@@ -5,7 +5,7 @@ import { LogFile } from "./Types/Types";
 import { ScrollableWindowRelative } from './ScrollableWindow';
 
 
-export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
+export const LogViewer: VFC<{ serverAPI: ServerAPI; onScrollWindowCancel?: () => void; }> = ({ serverAPI, onScrollWindowCancel }) => {
     const [logs, setLogs] = useState<LogFile[]>([] as LogFile[]);
     const [logContent, setLogContent] = useState("");
     const logger = new Logger("LogViewer");
@@ -51,7 +51,7 @@ export const LogViewer: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                             setLogContent(temp?.Content || "");
 
                         }} />
-                    <ScrollableWindowRelative >
+                    <ScrollableWindowRelative onCancel={onScrollWindowCancel} >
                         <div style={{ padding: '5px 10px 5px 0', whiteSpace: 'pre-wrap' }}>
                             {logContent}
                         </div>

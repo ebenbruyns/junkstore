@@ -10,6 +10,13 @@ import { Developer } from "./Developer";
 import { addAchievement, hasAchievement, hasAchievements } from "./Utils/achievements";
 import { Achievements } from "./Achievements";
 
+const simulateLeftArrow = () => {
+    //@ts-ignore
+    SteamClient.Input.ControllerKeyboardSetKeyState(80, true);
+    //@ts-ignore
+    SteamClient.Input.ControllerKeyboardSetKeyState(80, false);
+}
+
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const [url, setUrl] = useState("");
     const [backup, setBackup] = useState("false");
@@ -140,7 +147,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                         title: "About",
                         content: (
                             <div style={{ padding: '0 15px', height: '100%', display: 'flex' }}>
-                                <ScrollableWindowRelative>
+                                <ScrollableWindowRelative onCancel={simulateLeftArrow}>
                                     <div style={{ padding: '5px 10px 5px 0' }}>
                                         <div>
                                             Junk Store emerged from a simple need: a convenient solution for installing and updating games beyond Steam's offerings, including titles from GOG and Epic Games.
@@ -329,7 +336,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                         content: (
                             <div style={{ display: 'flex', flex: 'auto', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ padding: '0 15px', flex: 'auto', display: 'flex' }}>
-                                    <ScrollableWindowRelative>
+                                    <ScrollableWindowRelative onCancel={simulateLeftArrow}>
                                         <div style={{ padding: '5px 10px 5px 0' }}>
                                             I try to make the Junk Store as easy to use as possible, but it is still a work in progress. While it  is free for you to use and download, this is first and foremost a passion project.
                                             <br />
@@ -402,7 +409,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                     },
                     {
                         title: "Logs",
-                        content: <LogViewer serverAPI={serverAPI}></LogViewer>
+                        content: <LogViewer serverAPI={serverAPI} onScrollWindowCancel={simulateLeftArrow} />
                     },
                     {
                         title: "Achievements",
