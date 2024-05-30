@@ -1,5 +1,4 @@
-import { ConfirmModal, Focusable, ModalRoot, ModalRootProps, PanelSection, ServerAPI, ToggleField, gamepadTabbedPageClasses, showModal } from "decky-frontend-lib";
-import { get } from "mobx";
+import { Focusable, ModalRoot, ModalRootProps, PanelSection, ServerAPI, gamepadTabbedPageClasses, showModal } from "decky-frontend-lib";
 import { VFC, useState } from "react";
 import { AchievementDetails, addAchievement, getAchievementDetails, getAchievements, hasAchievement } from "./Utils/achievements";
 import { IconContext } from "react-icons";
