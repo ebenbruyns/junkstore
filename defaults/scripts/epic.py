@@ -43,7 +43,7 @@ class Epic(GamesDb.GamesDb):
     def get_list(self,  offline):
         offline_switch = "--offline" if offline else ""
         games_list = self.execute_shell(os.path.expanduser(
-            f"{self.legendary_cmd} list -T --json {offline_switch}"))
+            f"{self.legendary_cmd} list --json {offline_switch}"))
         id_list = []
         game_dict = {}
         for game in games_list:

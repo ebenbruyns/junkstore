@@ -177,7 +177,7 @@ function Epic_install(){
     rm $PROGRESS_LOG &>> ${DECKY_PLUGIN_LOG_DIR}/${1}.log
     RESULT=$($EPICCONF --addsteamclientid "${1}" "${2}" --dbfile $DBFILE)
     TEMP=$($EPICCONF --update-umu-id "${1}" egs --dbfile $DBFILE)
-    # mkdir -p "${HOME}/.compat/${1}"
+    mkdir -p "${HOME}/Games/epic/"
     ARGS=$($ARGS_SCRIPT "${1}")
     TEMP=$($EPICCONF --launchoptions "${1}" "${ARGS}" "" --dbfile $DBFILE $OFFLINE_MODE)
     echo $TEMP
@@ -192,11 +192,13 @@ function Epic_getlaunchoptions(){
 }
 
 function Epic_uninstall(){
+    WORKING_DIR=$($EPICCONF --get-game-dir "${1}")
     updategamedetailsaftercmd $1 $LEGENDARY uninstall $1  -y $OFFLINE_MODE>> "${DECKY_PLUGIN_LOG_DIR}/${1}.log"
 
     # this should be fixed before used, it might kill the entire machine
-    # WORKING_DIR=$($EPICCONF --get-working-dir "${1}")
-    # rm -rf "${WORKING_DIR}"
+    
+    #echo "Working dir is ${WORKING_DIR}"
+    rm "${WORKING_DIR}/install.done"
     TEMP=$($EPICCONF --clearsteamclientid "${1}" --dbfile $DBFILE)
     echo $TEMP
     
