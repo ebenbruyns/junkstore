@@ -25,11 +25,12 @@ export const showQrModal = (url: string) => {
     );
 };
 
-export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initActionSet: string; initAction: string }> = ({
+export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initActionSet: string; initAction: string; closeModal?: ()=>any }> = ({
     serverApi,
     content,
     initAction,
-    initActionSet }) => {
+    initActionSet,
+closeModal}) => {
     useEffect(() => {
         if (localStorage.getItem('js_firstlaunch') != "false") {
             Navigation.CloseSideMenus();
@@ -48,6 +49,8 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
                                 layout="below"
                                 onClick={() => {
                                     Navigation.CloseSideMenus();
+                                    if (closeModal)
+                                        closeModal();
                                     Navigation.Navigate(`/junk-store-content/${encodeURIComponent(initActionSet)}/${encodeURIComponent(action.ActionId)}`);
                                 }}
                             >
@@ -65,6 +68,8 @@ export const MainMenu: VFC<{ serverApi: ServerAPI; content: StoreContent; initAc
                         layout="below"
                         onClick={() => {
                             Navigation.CloseSideMenus();
+                            if (closeModal)
+                                closeModal();
                             Navigation.Navigate("/about-junk-store");
                         }}
                     >

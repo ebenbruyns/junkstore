@@ -67,7 +67,7 @@ export const ContentTabs: VFC<ContentTabsProperties> = ({ serverAPI, content, in
     );
 };
 
-export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; }> = ({ serverAPI, initActionSet, initAction }) => {
+export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAction: string; closeModal?: ()=>void}> = ({ serverAPI, initActionSet, initAction, closeModal }) => {
     const logger = new Logger("Content");
     const [content, setContent] = useState<ContentResult<ContentType>>({ Type: "Empty", Content: {} });
     const [actionSetName, setActionSetName] = useState("");
@@ -155,6 +155,7 @@ export const Content: VFC<{ serverAPI: ServerAPI; initActionSet: string; initAct
                 content={content.Content as StoreContent}
                 initActionSet={actionSetName}
                 initAction=""
+                closeModal={closeModal}
             />;
 
         case "Text":
