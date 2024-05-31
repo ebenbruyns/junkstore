@@ -708,7 +708,9 @@ class GameSet:
             
 class Achievements:
     def __init__(self):
-        self.achievements_file = os.path.expanduser("~/homebrew/settings/Junk-Store/achievements.txt")
+        basepath = os.environ.get('DECKY_PLUGIN_RUNTIME_DIR', "")
+        achievements_path = os.path.join(basepath, "achievements.txt")
+        self.achievements_file = achievements_path
 
     def check_achievements(self):
         try:
