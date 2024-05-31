@@ -1,5 +1,5 @@
 #!/bin/bash
-mkdir ~/homebrew/data/Junk-Store/scripts/Extensions -p
+mkdir "${DECKY_PLUGIN_RUNTIME_DIR}/scripts/Extensions" -p
 source "./scripts/settings.sh"
 source "${DECKY_PLUGIN_DIR}/scripts/shared.sh"
 
