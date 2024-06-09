@@ -1,6 +1,6 @@
 #!/bin/bash
-mkdir "${DECKY_PLUGIN_RUNTIME_DIR}/scripts/Extensions" -p
 source "./scripts/settings.sh"
+mkdir "${DECKY_PLUGIN_RUNTIME_DIR}/scripts/Extensions" -p
 source "${DECKY_PLUGIN_DIR}/scripts/shared.sh"
 
 # plugins hook into the junk-store.sh script by defining a function with the same name as the plugin prefixed with the platform name
@@ -16,7 +16,7 @@ ACTIONS=("init" "getgames" "getactions" "saveconfig" "getconfig" "download" \
 "getgamedetails" "getbats" "savebats" "getprogress" "login" \
 "login-launch-options" "logout" "loginstatus" "getsetting" "savesetting" \
 "getlaunchoptions" "run-exe" "get-exe-list" "gettabconfig" "savetabconfig" \
-"saveplatformconfig" "getplatformconfig" "refresh" "getgamesize" "move" )
+"saveplatformconfig" "getplatformconfig" "refresh" "getgamesize" "move" "repair_and_update")
 
 
 # Function to source scripts recursively from a directory
