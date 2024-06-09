@@ -399,7 +399,7 @@ class GameSet:
         for section in sections:
             script += f"# {section['Name']}\n"
             for option in section['Options']:
-                script += f"export {section['Name'].upper()}_{option['Key'].upper()}={option['Value']}\n"
+                script += f"export {section['Name'].upper()}_{option['Key'].upper()}=\"{option['Value']}\"\n"
             script += "\n"
         return script
 
