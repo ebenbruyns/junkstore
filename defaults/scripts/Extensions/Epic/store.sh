@@ -233,14 +233,14 @@ function Epic_loginstatus(){
 
 function Epic_enable-eos-overlay(){
     APP_ID=$2
-    $LEGENDARY eos-overlay enable --prefix "~/.local/share/Steam/steamapps/compatdata/${APP_ID}/pfx"
-    echo "{\"Type\": \"Overlay\", \"Content\": {\"Message\": \"Enabled\"}}"
+    $LEGENDARY eos-overlay enable --prefix "${HOME}/.local/share/Steam/steamapps/compatdata/${APP_ID}/pfx"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"EOS overlay Enabled\"}}"
 }
 
 function Epic_disable-eos-overlay(){
     APP_ID=$2
-    $LEGENDARY eos-overlay disable --prefix "~/.local/share/Steam/steamapps/compatdata/${APP_ID}/pfx"
-    echo "{\"Type\": \"Overlay\", \"Content\": {\"Message\": \"Enabled\"}}"
+    $LEGENDARY eos-overlay disable --prefix "${HOME}/.local/share/Steam/steamapps/compatdata/${APP_ID}/pfx"
+    echo "{\"Type\": \"Success\", \"Content\": {\"Message\": \"EOS overlay Disabled\"}}"
 }
 
 function Epic_run-exe(){
