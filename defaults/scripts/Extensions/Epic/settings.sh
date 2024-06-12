@@ -31,8 +31,8 @@ elif [[ "${EPIC_INSTALLLOCATION}" == "MicroSD" ]]; then
     NVME=$(lsblk --list | grep nvme0n1\ |awk '{ print $2}' |  awk '{split($0, a,":"); print a[1]}')
     LINK=$(find /run/media -maxdepth 1  -type l )
     LINK_TARGET=$(readlink -f "${LINK}")
-    MOUNT_PONT=$(lsblk --list --exclude "${NVME}" | grep part | cut -d \  -f 11-)
-    if [[ "${MOUNT_PONT}" == "${LINK_TARGET}" ]]; then
+    MOUNT_POINT=$(lsblk --list --exclude "${NVME}" | grep part | cut -d \  -f 11-)
+    if [[ "${MOUNT_POINT}" == "${LINK_TARGET}" ]]; then
         INSTALL_DIR="${LINK}/Games/epic/"
     else    
         INSTALL_DIR="/run/media/mmcblk0p1/Games/epic/"
