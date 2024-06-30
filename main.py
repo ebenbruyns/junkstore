@@ -18,59 +18,62 @@ class Helper:
     working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
 
     verbose = False
-
+    
+    lock = asyncio.Lock()
     @staticmethod
     async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None, websocket=None, stream_output: bool = False, app_id='', game_id=''):
-        try:
-            if unprivilege:
-                cmd = f'sudo -u {decky_plugin.DECKY_USER} {cmd}'
-            decky_plugin.logger.info(f"running cmd: {cmd}")
-            if env is None:
-                env = Helper.get_environment()
-                env['APP_ID'] = app_id
-                env['SteamOverlayGameId'] = game_id
-                env['SteamGameId'] = game_id
-            proc = await asyncio.create_subprocess_shell(cmd,
-                                                         stdout=asyncio.subprocess.PIPE,
-                                                         stderr=asyncio.subprocess.PIPE,
-                                                         stdin=asyncio.subprocess.PIPE,
-                                                         shell=True,
-                                                         env=env,
-                                                         cwd=Helper.working_directory,
-                                                         start_new_session=True,
-                                                         
-                                                         )
-            if stream_output:
-                while True:
-                    stdout = await proc.stdout.readline()
-                    stderr = await proc.stderr.readline()
-                    if stdout:
-                        stdout = stdout.decode()
-                        if stream_output:
-                            await websocket.send_str(json.dumps({'status': 'open', 'data': stdout}))
-                    if stderr:
-                        stderr = stderr.decode()
-                        if stream_output:
-                            await websocket.send_str(json.dumps({'status': 'open', 'data': stderr}))
-                    if proc.stdout.at_eof() and proc.stderr.at_eof():
-                        await websocket.send_str(json.dumps({'status': 'closed', 'data': ''}))
-                        break
-                await proc.wait()
-                return {'returncode': proc.returncode}
-            else:
-                # await proc.wait()
-                stdout, stderr = await proc.communicate(input.encode())
-                # await proc.wait()
-                stdout = stdout.decode()
-                stderr = stderr.decode()
-                if Helper.verbose:
-                    decky_plugin.logger.info(
-                        f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
-                return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
+        async with Helper.lock:
+            try:
+                if unprivilege:
+                    cmd = f'sudo -u {decky_plugin.DECKY_USER} {cmd}'
+                decky_plugin.logger.info(f"running cmd: {cmd}")
+                if env is None:
+                    env = Helper.get_environment()
+                    env['APP_ID'] = app_id
+                    env['SteamOverlayGameId'] = game_id
+                    env['SteamGameId'] = game_id
+                proc = await asyncio.create_subprocess_shell(cmd,
+                                                            stdout=asyncio.subprocess.PIPE,
+                                                            stderr=asyncio.subprocess.PIPE,
+                                                            stdin=asyncio.subprocess.PIPE,
+                                                            shell=True,
+                                                            env=env,
+                                                            cwd=Helper.working_directory,
+                                                            start_new_session=True,
+                                                            
+                                                            )
+                if stream_output:
+                    while True:
+                        stdout = await proc.stdout.readline()
+                        stderr = await proc.stderr.readline()
+                        if stdout:
+                            stdout = stdout.decode()
+                            if stream_output:
+                                await websocket.send_str(json.dumps({'status': 'open', 'data': stdout}))
+                        if stderr:
+                            stderr = stderr.decode()
+                            if stream_output:
+                                await websocket.send_str(json.dumps({'status': 'open', 'data': stderr}))
+                        if proc.stdout.at_eof() and proc.stderr.at_eof():
+                            await websocket.send_str(json.dumps({'status': 'closed', 'data': ''}))
+                            break
+                    await proc.wait()
+                    return {'returncode': proc.returncode}
+                else:
+                    # await proc.wait()
+                    stdout, stderr = await proc.communicate(input.encode())
+                    # await proc.wait()
+                    stdout = stdout.decode()
+                    stderr = stderr.decode()
+                    if Helper.verbose:
+                        decky_plugin.logger.info(
+                            f'Returncode: {proc.returncode}\nSTDOUT: {stdout[:300]}\nSTDERR: {stderr[:300]}')
+                    return {'returncode': proc.returncode, 'stdout': stdout, 'stderr': stderr}
 
-        except Exception as e:
-            decky_plugin.logger.error(f"Error in pyexec_subprocess: {e}")
-            return None
+            except Exception as e:
+                decky_plugin.logger.error(f"Error in pyexec_subprocess: {e}")
+                return None
+            
 
     @staticmethod
     def get_environment(platform=""):

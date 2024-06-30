@@ -186,7 +186,10 @@ class Epic(GamesDb.GamesDb):
         value = json.dumps({'Type': 'LoginStatus', 'Content': {'Username': account, 'LoggedIn': logged_in}})
         
         timeout = datetime.now() + timedelta(hours=1)
-        self.add_cache(cache_key, value, timeout)
+        try:
+            self.add_cache(cache_key, value, timeout)
+        except Exception as e:
+            print(f"Error adding cache: {e}", file=sys.stderr)
         return value
         
     
