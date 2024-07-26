@@ -15,7 +15,7 @@ Junk-Store is a revolutionary plugin designed to enhance your gaming experience 
 
 ## Key Features:
 - Enhanced Compatibility: Say goodbye to compatibility issues and enjoy smooth gaming experiences with Junk-Store.
-- Seamless Integration: Easily install and update games from various platforms, including GOG and Epic Games, directly onto your Steam Deck.
+- Seamless Integration: Easily install and update games from various platforms, including GOG (only available to Patreon and Ko-Fi supporters, currently) and Epic Games, directly onto your Steam Deck.
 - User-Friendly Interface: Navigate through your game library with ease and discover new gaming adventures effortlessly.
 - Active Development: Our dedicated team is committed to continuously improving Junk-Store, with regular updates and feature enhancements.
 
