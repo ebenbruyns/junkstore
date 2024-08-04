@@ -611,8 +611,8 @@ class GameSet:
         editors = []
         if self.setNameConfig != None:
 
-            c.execute("select id, platform, forkname, version from config_set where id = ? AND platform = ? AND forkname = '' AND version = ''",
-                      (game_id, self.setNameConfig))
+            c.execute("select id, platform, forkname, version from config_set where shortname = ? AND platform = ? AND forkname = '' AND version = ''",
+                      (shortname, self.setNameConfig))
             row = c.fetchone()
             if (not row):
                 self.create_empty_config_set(
