@@ -85,6 +85,16 @@ if [[ "${RUNTIMES_RADV_PERFTEST}" == "" ]]; then
 else
     export RADV_PERFTEST=$RUNTIMES_RADV_PERFTEST
 fi
+if [[ "${RUNTIMES_PROTON_FORCE_LARGE_ADDRESS_AWARE}" == "true" ]]; then
+    export PROTON_FORCE_LARGE_ADDRESS_AWARE=1
+else
+    unset PROTON_FORCE_LARGE_ADDRESS_AWARE
+fi
+
+if [[ "${ADVANCED_VK_ICD_FILENAMES}" == "true" ]]; then
+    export VK_ICD_FILENAMES="${HOME}/mesa/share/vulkan/icd.d/radeon_icd.x86_64.json"
+fi
+
 
 CMD=$@
 
@@ -108,6 +118,7 @@ for arg in "$@"; do
 done
 
 ARGS=$("${ARGS_SCRIPT}" $ID)
+ARGS="${ARGS} ${ADVANCED_ARGUMENTS}"
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
     QUOTED_ARGS+=" \"${arg}\"" 
@@ -149,7 +160,8 @@ echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 export STORE="egs"
 export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
 
-# export PROTON_FORCE_LARGE_ADDRESS_AWARE=1
+
+eval "`echo -e ${ADVANCED_VARIABLES}`" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 # eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 

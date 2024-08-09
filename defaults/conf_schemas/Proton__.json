@@ -1,3 +1,4 @@
+
 {
   "Sections": [
     {
@@ -146,6 +147,67 @@
           "Min": 0,
           "Max": 90,
           "ModeLevel": 0,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "PROTON_FORCE_LARGE_ADDRESS_AWARE",
+          "Label": "Force Large Address Aware",
+          "Description": "Enable Large Address Aware. This can help with performance in some games, but can also cause issues in others.",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
+        }
+
+      ]
+    },
+    {
+      "Name": "Advanced",
+      "Visible": true,
+      "Description": "Additional arguments to use",
+      "ModeLevel": 2,
+      "Options": [
+        {
+          "Key": "Variables",
+          "Label": "Additional Variables",
+          "Description": "Additional variables to pass to the environment, usefull for things like WINEDEBUG=-all",
+          "DefaultValue": "",
+          "Value": "",
+          "Type": "String",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "Arguments",
+          "Label": "Additional Arguments",
+          "Description": "Additional arguments to pass to the game, usefull for things like -nolauncher or -windowed",
+          "DefaultValue": "",
+          "Value": "",
+          "Type": "String",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": [{ "Key": "-epicdeploymentid=78a046d4ac1b42d7aaba9fe80f88a5d8", "Description": "work around to get Cygni running", "Label": "Cygni epic deployment id" }]
+        },
+        {
+          "Key": "VK_ICD_FILENAMES",
+          "Label": "Custom Mesa ICD",
+          "Description": "Custom Mesa ICD file to use, please make sure the file is in /home/(YOUR-USER-PROFILE-NAME)/mesa/share/vulkan/icd.d/radeon_icd.x86_64.json",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
           "Parents": [],
           "EnumValues": []
         }
