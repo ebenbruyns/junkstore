@@ -3,7 +3,7 @@ import { executeAction } from "./Utils/executeAction";
 import { getAppDetails } from './Utils/utils';
 import { ActionSet, ExecuteGetExeActionSetArgs, ExecuteGetFilesDataArgs, ExecuteRunBinaryArgs, FilesData, SaveRefresh } from "./Types/Types";
 import { DialogButton, ModalRoot, PanelSection, ScrollPanelGroup, SteamSpinner } from "decky-frontend-lib";
-import Logger from "./Utils/logger";
+import Logger, { log } from "./Utils/logger";
 import { gameIDFromAppID } from "./Utils/utils";
 import { EditorProperties } from './Types/EditorProperties';
 
@@ -20,6 +20,27 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
     const [actionSetName, setActionSetName] = useState("" as string);
     const [filesData, setFilesData] = useState<FilesData>({ Files: [] } as FilesData);
     const [busy, setBusy] = useState(false);
+    const getFilePath = (path: string, startDir: string) => {
+        logger.debug("getFilePath: " + path + " " + startDir);
+        let unquotedPath = path
+        if (path.startsWith("\"") && path.endsWith("\"")) {
+           
+            unquotedPath = path.substring(1, path.length - 1);
+           
+        }
+        if (unquotedPath.startsWith(startDir) && unquotedPath.length > startDir.length) {
+            logger.debug("unquotedPath: ", unquotedPath);
+            logger.debug("returning: ", "\"" + unquotedPath + "\"");
+            return "\"" + unquotedPath + "\"";
+        }
+        if (unquotedPath.startsWith("./")) {
+            return "\"" + startDir.endsWith("/") ? "\"" + startDir + unquotedPath.substring(1 ) + "\"" : startDir + "/" + unquotedPath.substring(1) + "\"";
+        }
+        if (unquotedPath.startsWith("/")) {
+            return "\"" + unquotedPath + "\"";
+        }
+        return "error could not set path"
+    }
     const OnInit = async () => {
         logger.debug("OnInit");
         logger.debug("initActionSet: ", initActionSet);
@@ -144,7 +165,8 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
 
                         
                         const startDir = appDetails.strShortcutStartDir;
-                        const gameExe = file.Path.startsWith(startDir) ?  file.Path :  startDir.substring(0,startDir.length-1)  + file.Path.substring(1) + "\"";
+                        const gameExe = getFilePath(file.Path, startDir);
+                        logger.debug("gameExe: ", gameExe);
                         SteamClient.Apps.SetShortcutExe(parseInt(contentId), gameExe);
                         closeModal();
                     };
