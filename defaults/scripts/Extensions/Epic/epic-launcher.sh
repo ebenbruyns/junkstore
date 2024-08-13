@@ -118,7 +118,13 @@ for arg in "$@"; do
 done
 
 ARGS=$("${ARGS_SCRIPT}" $ID)
-ARGS="${ARGS} ${ADVANCED_ARGUMENTS}"
+if [[ "${ADVANCED_IGNORE_EPIC_ARGS}" == "true" ]]; then
+    ARGS="${ADVANCED_ARGUMENTS}"
+else
+    ARGS="${ARGS} ${ADVANCED_ARGUMENTS}"
+fi
+
+
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
     QUOTED_ARGS+=" \"${arg}\"" 

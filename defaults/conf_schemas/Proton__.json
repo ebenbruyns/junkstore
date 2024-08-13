@@ -210,6 +210,19 @@
           "ModeLevel": 2,
           "Parents": [],
           "EnumValues": []
+        },
+        {
+          "Key": "IGNORE_EPIC_ARGS",
+          "Label": "Ignore EGS Arguments in launcher",
+          "Description": "Ignores the arguments passed by the Epic Games Store launcher",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
         }
       ]
     }
