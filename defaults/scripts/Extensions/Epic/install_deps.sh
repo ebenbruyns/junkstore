@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 DOWNLOAD_LOCATION=https://github.com/ebenbruyns/legendary-flatpak/releases/latest/download/legendary.flatpak
 function uninstall() {
     echo "Uninstalling flatpaks"

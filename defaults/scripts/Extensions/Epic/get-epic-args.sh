@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 PLATFORM=Epic
 export DECKY_PLUGIN_RUNTIME_DIR="${HOME}/homebrew/data/Junk-Store"
 export DECKY_PLUGIN_DIR="${HOME}/homebrew/plugins/Junk-Store"

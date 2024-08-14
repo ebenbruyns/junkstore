@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source "./scripts/settings.sh"
 mkdir "${DECKY_PLUGIN_RUNTIME_DIR}/scripts/Extensions" -p
 source "${DECKY_PLUGIN_DIR}/scripts/shared.sh"

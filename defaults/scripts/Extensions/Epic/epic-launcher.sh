@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # These need to be exported because it does not get executed in the context of the plugin.
 export DECKY_PLUGIN_RUNTIME_DIR="${HOME}/homebrew/data/Junk-Store"
 export DECKY_PLUGIN_DIR="${HOME}/homebrew/plugins/Junk-Store"
@@ -174,7 +174,7 @@ eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 sync-saves
 
 
-# echo "#!/bin/bash" > run.sh
+# echo "#!/usr/bin/env bash" > run.sh
 # echo "${CMD} ${ARGS}" >> run.sh
 # chmod +x run.sh
 # ./run.sh && rm run.sh
