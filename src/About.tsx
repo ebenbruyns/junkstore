@@ -60,16 +60,22 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
             buttonText: "Buy me a coffee",
         },
         {
+            label: "Sponsor on GitHub",
+            icon: <SiGithubsponsors />,
+            link: "https://github.com/sponsors/ebenbruyns",
+            buttonText: "Sponsor",
+        },
+        {
             label: "GitHub",
             icon: <SiGithub />,
             link: "https://github.com/ebenbruyns/junkstore",
             buttonText: "Report issues",
         },
         {
-            label: "Sponsor on GitHub",
-            icon: <SiGithubsponsors />,
-            link: "https://github.com/sponsors/ebenbruyns",
-            buttonText: "Sponsor",
+            label: "Junk-Store Wiki",
+            icon: <IoMdHelp />,
+            link: "https://wiki.junkstore.xyz/wiki/Main_Page",
+            buttonText: "Wiki",
         },
         {
             label: "Reddit Community",
@@ -144,13 +150,13 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
                                 <ScrollableWindowRelative>
                                     <div style={{ padding: '5px 0' }}>
                                         <div>
-                                            Junk Store emerged from a simple need: a convenient solution for installing and updating games beyond Steam's offerings, including titles from GOG and Epic Games.
+                                            Junk Store emerged from a simple need: I wanted a way to play DOS games through Steam utilising Steam input for controller mapping.
                                             <br />
                                             <br />
-                                            Starting with DOS classics, it quickly evolved to encompass a wider array of titles. The plugin's versatility extends far beyond its Epic extension; with basic to intermediate programming skills, you can create your own extensions to tailor it to your needs.
+                                            Starting with DOS classics, it quickly evolved to encompass a wider array of collections. The plugin's versatility extends far beyond its Epic extension; with basic to intermediate programming skills, you can create your own extensions to tailor it to your needs.
                                             <br />
                                             <br />
-                                            While initially designed to address my requirements, I'm open to suggestions and requests. However, not all features may be feasible to implement. Your support is invaluable in shaping the project's direction and expanding its capabilities.
+                                            While initially designed to address my requirements, I have made it available to become a community project. I am open to suggestions and PR's. However, not all features may be feasible to implement. Your support is invaluable in shaping the project's direction and expanding its capabilities.
                                             <br />
                                             <br />
                                             Please note: Before diving in, make sure to install the listed dependencies from the 'Dependencies' tab.
