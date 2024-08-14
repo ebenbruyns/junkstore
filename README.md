@@ -3,7 +3,26 @@
 ![Decky Loader](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fplugins.deckbrew.xyz%2Fplugins&query=%24%5B%3F(%40.name%20%3D%3D%20'Junk-Store')%5D.downloads&suffix=%20installs&label=decky&color=3ea6a3)
 
 ## About Junk-Store
-Junk-Store is a revolutionary plugin designed to enhance your gaming experience on the Steam Deck. Developed with passion and innovation, Junk-Store seamlessly integrates non-Steam games into your Steam Deck library, opening up a world of gaming possibilities beyond Steam.
+Junk-Store is an open and extensible launcher framework and platform. It's not a single launcher but has the potential to be an everything launcher. If you have the technical know-how and expertise you can extend it, launch any game from any platform using shell scripts and helper applications.
+
+To give it some functionality for users it comes with a pre-written script to allow for Epic Games integration.
+
+## Key Features:
+- Built to be used in Game Mode. Once Junk-Store is installed you can download and launch games without needing to go into Desktop Mode.
+- Junk-Store utilises the Steam-native interface for managing games, allowing Steam to handle most of the process.
+- Junk-Store leverages Steam's built-in functionality to manage Proton prefixes.
+- You can use the QAM to adjust per game Proton settings such as FPS limiting.
+- It is open and extensible! You can write whatever you want for Junk-Store integrations if you have the skill. You don't need to wait on anyone else to add features or store front integrations.
+
+## Integrations:
+Currently we have fully integrated support for Epic Games that ships with the plugin.
+
+Gog integration is via Patreon or Ko-fi only at this time. You can sign up as a monthly supporter or purchase the Gog script as a one off.
+
+
+## Installing
+
+Simply head over to the Decky store and find Junk-Store and click install. Also check out the decky testing store for a sneek peek at up coming releases.
 
 ### Check it out in these videos below for installion instructions
 
@@ -12,24 +31,13 @@ Junk-Store is a revolutionary plugin designed to enhance your gaming experience 
 
 [![GameTechPlanet's awesome video](https://i.ytimg.com/vi/tgc7yiKtpW0/hqdefault.jpg)](https://www.youtube.com/watch?v=tgc7yiKtpW0?si=6SyGMX_VHHDm0QhV)
 
-
-## Key Features:
-- Enhanced Compatibility: Say goodbye to compatibility issues and enjoy smooth gaming experiences with Junk-Store.
-- Seamless Integration: Easily install and update games from various platforms, including GOG (only available to Patreon and Ko-Fi supporters, currently) and Epic Games, directly onto your Steam Deck.
-- User-Friendly Interface: Navigate through your game library with ease and discover new gaming adventures effortlessly.
-- Active Development: Our dedicated team is committed to continuously improving Junk-Store, with regular updates and feature enhancements.
-
-## Installing
-
-Simply head over to the Decky store and find Junk-Store and click install. Also check out the decky testing store for a sneek peek at up coming releases.
-
 ## Frequently Asked Questions
 
-- Checkout our wiki [Faq](https://github.com/ebenbruyns/junkstore/wiki/FAQ)
+- Checkout our wiki [Faq](https://wiki.junkstore.xyz/wiki/Help:FAQ/Plugin_FAQ)
 
 ## Troubleshooting
 
-- Checkout our wiki [Troubleshooting](https://github.com/ebenbruyns/junkstore/wiki/Troubleshooting)
+- Checkout our wiki [Troubleshooting](https://wiki.junkstore.xyz/wiki/Help:Troubleshooting)
 
 ## Help me, I'm stuck please!
 
