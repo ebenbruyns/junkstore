@@ -1,7 +1,7 @@
 import { ConfirmModal, DialogBody, DialogButton, DialogControlsSection, Field, Focusable, Navigation, PanelSection, ServerAPI, SidebarNavigation, TextField, ToggleField, showModal } from "decky-frontend-lib";
 import { VFC, useEffect, useRef, useState } from "react";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import { SiDiscord, SiFacebook, SiGithub, SiGithubsponsors, SiKofi, SiPatreon, SiReddit, SiX } from "react-icons/si";
+import { SiDiscord, SiGithub, SiGithubsponsors, SiKofi, SiPatreon, SiReddit, SiX } from "react-icons/si";
 import { showQrModal } from "./MainMenu";
 import Logger, { log } from "./Utils/logger";
 import { LogViewer } from "./LogViewer";
@@ -9,6 +9,7 @@ import { ScrollableWindowRelative } from './ScrollableWindow';
 import { Developer } from "./Developer";
 import { addAchievement, checkAchievements, hasAchievement, hasAchievements } from "./Utils/achievements";
 import { Achievements } from "./Achievements";
+import { FaInfo, FaQ, FaQuestion } from "react-icons/fa6";
 
 export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
     const [url, setUrl] = useState("");
@@ -73,7 +74,7 @@ export const About: VFC<{ serverAPI: ServerAPI; }> = ({ serverAPI }) => {
         },
         {
             label: "Junk-Store Wiki",
-            icon: <IoMdHelp />,
+            icon: <FaQuestion />,
             link: "https://wiki.junkstore.xyz/wiki/Main_Page",
             buttonText: "Wiki",
         },

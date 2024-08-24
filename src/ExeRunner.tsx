@@ -20,26 +20,16 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
     const [actionSetName, setActionSetName] = useState("" as string);
     const [filesData, setFilesData] = useState<FilesData>({ Files: [] } as FilesData);
     const [busy, setBusy] = useState(false);
-    const getFilePath = (path: string, startDir: string) => {
-        logger.debug("getFilePath: " + path + " " + startDir);
+    const getFilePath = (path: string, pathRoot: string) => {
+        logger.debug("getFilePath: " + path + " " + pathRoot);
         let unquotedPath = path
         if (path.startsWith("\"") && path.endsWith("\"")) {
            
             unquotedPath = path.substring(1, path.length - 1);
            
         }
-        if (unquotedPath.startsWith(startDir) && unquotedPath.length > startDir.length) {
-            logger.debug("unquotedPath: ", unquotedPath);
-            logger.debug("returning: ", "\"" + unquotedPath + "\"");
-            return "\"" + unquotedPath + "\"";
-        }
-        if (unquotedPath.startsWith("./")) {
-            return "\"" + startDir.endsWith("/") ? "\"" + startDir + unquotedPath.substring(1 ) + "\"" : startDir + "/" + unquotedPath.substring(1) + "\"";
-        }
-        if (unquotedPath.startsWith("/")) {
-            return "\"" + unquotedPath + "\"";
-        }
-        return "error could not set path"
+        
+        return pathRoot + unquotedPath.substring(1);
     }
     const OnInit = async () => {
         logger.debug("OnInit");
@@ -164,10 +154,10 @@ export const ExeRunner: VFC<ExeRunnerProperties> = ({
                         }
 
                         
-                        const startDir = appDetails.strShortcutStartDir;
-                        const gameExe = getFilePath(file.Path, startDir);
+                        //const startDir = appDetails.strShortcutStartDir;
+                        const gameExe = getFilePath(file.Path, filesData.PathRoot || "");
                         logger.debug("gameExe: ", gameExe);
-                        SteamClient.Apps.SetShortcutExe(parseInt(contentId), gameExe);
+                        SteamClient.Apps.SetShortcutExe(parseInt(contentId), "\""+ gameExe + "\"");
                         closeModal();
                     };
                     return (

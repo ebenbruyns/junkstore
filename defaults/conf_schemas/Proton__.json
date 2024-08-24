@@ -21,7 +21,7 @@
           "EnumValues": []
         },
         {
-          "Key": "BattleEye",
+          "Key": "BattlEye",
           "Label": "BattlEye",
           "Description": "Enable BattlEye runtime. You may have to install this from desktop mode from the steam store if it's not already installed.",
           "DefaultValue": "false",

@@ -111,6 +111,7 @@ export interface SaveRefresh extends ContentType {
   Refresh: boolean;
 }
 export interface FilesData extends ContentType {
+  PathRoot?: string;
   Files: FileData[];
 }
 export interface SettingsData extends ContentType {
