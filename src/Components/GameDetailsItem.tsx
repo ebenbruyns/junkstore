@@ -31,6 +31,8 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
     logger.log("GameDetailsItem steamClientID", steamClientID);
     const [installing, setInstalling] = useState(false);
     logger.log("GameDetailsItem installing", installing);
+    const [shouldUpdateShortcut, setShouldUpdateShortcut] = useState(false);
+    logger.log("GameDetailsItem shouldUpdateshortcut", shouldUpdateShortcut);
 
     const originRoute = location.pathname.replace('/routes', '');
    // useEffect(() => reaction(() => SteamUIStore.WindowStore.GamepadUIMainWindowInstance?.LocationPathName, closeModal), []);
@@ -129,8 +131,12 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                     }
                     if (progressUpdate.Percentage >= 100) {
 
-
-                        install();
+                        if (shouldUpdateShortcut) {
+                            install();
+                        }
+                        else {
+                            setInstalling(false);
+                        }
 
                         break;
                     }
@@ -182,6 +188,7 @@ export const GameDetailsItem: VFC<GameDetailsItemProperties> = ({ serverAPI, sho
                 }
             );
             if (result?.Type == "Progress") {
+                setShouldUpdateShortcut(true);
                 setInstalling(true);
             }
         } catch (error) {
