@@ -74,7 +74,7 @@ function Epic_download(){
     $LEGENDARY move "${1}" "${INSTALL_DIR}" --skip-move &>> ${DECKY_PLUGIN_LOG_DIR}/debug.log
     GAME_DIR=$($EPICCONF --get-game-dir "${1}" --dbfile $DBFILE)
      
-    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --max-shared-memory 4096 --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}"  2> $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/${1}.output" &
+    updategamedetailsaftercmd $1 $LEGENDARY install $1 --skip-sdl --enable-reordering --max-shared-memory 8192 --with-dlcs -y --platform Windows --base-path "${INSTALL_DIR}"  2> $PROGRESS_LOG > "${DECKY_PLUGIN_LOG_DIR}/${1}.output" &
     echo $! > "${DECKY_PLUGIN_LOG_DIR}/${1}.pid"
     echo "{\"Type\": \"Progress\", \"Content\": {\"Message\": \"Downloading\"}}"
 

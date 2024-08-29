@@ -264,6 +264,9 @@ const GameDisplay: VFC<GameDisplayProperties> = (
                             style={{ paddingRight: '10px', whiteSpace: 'pre-wrap' }}
                             dangerouslySetInnerHTML={{ __html: description }}
                         />
+                        {steamClientID && (<div style={{ marginTop: '20px' }}>
+                            Steam Client ID: {steamClientID}
+                        </div>)}
                     </ScrollableWindow>
                 </div>
             </FocusOnMount>
