@@ -35,7 +35,7 @@ class Epic(GamesDb.GamesDb):
             raise CmdException(result)
         # print(f" result: {result}", file=sys.stderr)
         if result.strip() == "":
-            raise CmdException(f"Command produced no output: {cmd}")
+            raise CmdException(f"Command produced no output (try installing dependencies from the About menu): {cmd}")
         return json.loads(result)
 
     # sample json for game returned from legendary list --json
