@@ -1,6 +1,7 @@
 import asyncio
 import os
 import json
+import sys
 
 from aiohttp import web
 import shlex
@@ -16,14 +17,22 @@ class Helper:
     websocket_port = 8765
     action_cache = {}
     working_directory = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR
+       
+    ws_loop = None
+    app = None
+    site = None
+    runner = None
+    wsServerIsRunning = False
 
     verbose = False
     
     lock = asyncio.Lock()
     @staticmethod
     async def pyexec_subprocess(cmd: str, input: str = '', unprivilege: bool = False, env=None, websocket=None, stream_output: bool = False, app_id='', game_id=''):
+        decky_plugin.logger.info(f"creating lock")
         async with Helper.lock:
             try:
+                decky_plugin.logger.info(f"inside lock")
                 if unprivilege:
                     cmd = f'sudo -u {decky_plugin.DECKY_USER} {cmd}'
                 decky_plugin.logger.info(f"running cmd: {cmd}")
@@ -209,27 +218,60 @@ class Helper:
             decky_plugin.logger.error(f"Error in ws_handler: {e}")
 
     async def start_ws_server():
+        Helper.ws_loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            await Helper.ws_loop.run_in_executor(pool, Helper._start_ws_server_thread)
+
+    @staticmethod
+    def _start_ws_server_thread():
         try:
+            Helper.wsServerIsRunning = True
             port = 8765
-            while True:
+            while Helper.wsServerIsRunning:
                 try:
                     decky_plugin.logger.info(f"Starting WebSocket server on port {port}")
-                    app = web.Application()
-                    app.router.add_get('/ws', Helper.ws_handler)
-                    runner = web.AppRunner(app)
-                    await runner.setup()
-                    site = web.TCPSite(runner, 'localhost', port)
-                    await site.start()
+                    Helper.app = web.Application()
+                    Helper.app.router.add_get('/ws', Helper.ws_handler)
+                    Helper.runner = web.AppRunner(Helper.app)
+                  
+                   
+                    Helper.runner.setup()
+                    Helper.site = web.TCPSite(Helper.runner, 'localhost', port)
+                    Helper.site.start()
                     Helper.websocket_port = port
                     break
                 except OSError:
                     port += 1
 
             decky_plugin.logger.info("WebSocket server started")
-            while True:
-                await asyncio.sleep(10)
+            
         except Exception as e:
             decky_plugin.logger.error(f"Error in start_ws_server: {e}")
+    
+    async def stop_ws_server():
+        try:
+            
+            decky_plugin.logger.info("Stopping WebSocket server")
+            if Helper.site:
+                decky_plugin.logger.info("Stopping site")
+                await Helper.site.stop()
+                decky_plugin.logger.info("Site stopped")
+              
+            if Helper.runner:
+               
+                await Helper.runner.cleanup()
+                decky_plugin.logger.info("Runner cleaned up")
+
+            for ws in Helper.app['websockets']:
+                decky_plugin.logger.info("Closing websocket")
+                await ws.close()
+            
+        except Exception as e:
+            decky_plugin.logger.error(f"Error in stop_ws_server: {e}")
+        finally:
+            Helper.ws_loop.stop()
+            decky_plugin.logger.info("WebSocket server stopped")
+            Helper.wsServerIsRunning = False
 
 
 # import requests
@@ -238,6 +280,7 @@ class Helper:
 class Plugin:
 
     async def _main(self):
+        decky_plugin.logger.info("Junk-Store starting up...")
         try:
             Helper.action_cache = {}
             if os.path.exists(os.path.join(decky_plugin.DECKY_PLUGIN_RUNTIME_DIR, "init.json")):
@@ -248,10 +291,13 @@ class Plugin:
             decky_plugin.logger.info(
                 f"plugin: {decky_plugin.DECKY_PLUGIN_NAME} dir: {decky_plugin.DECKY_PLUGIN_RUNTIME_DIR}")
             # pass cmd argument to _call_script method
+            decky_plugin.logger.info("Junk Store initializing")
             result = await Helper.execute_action("init", "init")
+            decky_plugin.logger.info("Junk Store initialized")
             if Helper.verbose:
                 decky_plugin.logger.info(f"init result: {result}")
             await Helper.start_ws_server()
+            decky_plugin.logger.info("Junk-Store started")
 
         except Exception as e:
             decky_plugin.logger.error(f"Error in _main: {e}")
@@ -377,7 +423,9 @@ class Plugin:
         return log_files
 
     async def _unload(self):
-        decky_plugin.logger.info("Goodbye World!")
+        await Helper.stop_ws_server()
+        decky_plugin.logger.info("Junk-Store out!")
+        #sys.exit(0)
 
     async def _migration(self):
         plugin_dir = "Junk-Store"
