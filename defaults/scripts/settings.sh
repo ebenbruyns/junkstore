@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -z "${DECKY_PLUGIN_DIR}" ]]; then
     export DECKY_PLUGIN_DIR="${HOME}/homebrew/plugins/Junk-Store"

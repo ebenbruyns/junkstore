@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function init() {
     for platform in "${PLATFORMS[@]}"; do
