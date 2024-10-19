@@ -3,6 +3,10 @@
 ![Decky Loader](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fplugins.deckbrew.xyz%2Fplugins&query=%24%5B%3F(%40.name%20%3D%3D%20'Junk-Store')%5D.downloads&suffix=%20installs&label=decky&color=3ea6a3)
 
 ## About Junk-Store
+Imagine having all your streaming services unified into one interface—a single hub where you can navigate your Netflix, Prime Video (Amazon), Hulu, Neon accounts, and more, all in one easy-to-search platform. Think of something like Kodi, and you'll get a sense of what we’re aiming to build for the Steam Deck.
+
+This is the vision behind Junk Store, but instead of streaming services, it’s for all your non-Steam games. The developer of Junk Store wants to turn the Steam Deck into an "everything" deck. Junk Store’s goal is to provide an interface that allows you to easily access all your non-Steam games, no matter which store or platform they’re from, directly from Game Mode.
+
 Junk-Store is an open and extensible launcher framework and platform. It's not a single launcher but has the potential to be an everything launcher. If you have the technical know-how and expertise you can extend it, launch any game from any platform using shell scripts and helper applications.
 
 To give it some functionality for users it comes with a pre-written script to allow for Epic Games integration.
