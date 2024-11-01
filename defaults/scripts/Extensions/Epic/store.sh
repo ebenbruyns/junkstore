@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Register actions with the junk-store.sh script
 ACTIONS+=("install-overlay" "update-overlay" "remove-overlay" "registry-fix" "update-umu-id")

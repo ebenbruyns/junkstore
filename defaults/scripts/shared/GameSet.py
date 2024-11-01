@@ -393,7 +393,7 @@ class GameSet:
             return self.generate_bash_env_settings(content)
 
     def generate_bash_env_settings(self, config_json):
-        script = "#!/bin/bash\n"
+        script = "#!/usr/bin/env bash\n"
         config = json.loads(config_json)
         sections = config['Sections']
         for section in sections:
