@@ -165,7 +165,9 @@ echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
 export STORE="egs"
 export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
-
+export PROTON_SET_GAME_DRIVE="gamedrive"
+export STEAM_COMPAT_INSTALL_PATH=${GAME_PATH}
+export STEAM_COMPAT_LIBRARY_PATHS=${STEAM_COMPAT_LIBRARY_PATHS}:${GAME_PATH}
 
 eval "`echo -e ${ADVANCED_VARIABLES}`" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
