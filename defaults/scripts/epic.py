@@ -247,7 +247,7 @@ class Epic(GamesDb.GamesDb):
                 'Type': 'LaunchOptions',
                 'Content':
                 {
-                    'Exe': f"\"{os.path.join(result['game_directory'], result['game_executable'])}\"",
+                    'Exe': f"\"{os.path.join(result['game_directory'], result['game_executable'])}\"".replace("$", "\\\\\\$"),
                     'Options': f"{script_path} {game_id}%command%",
                     'WorkingDir': result['working_directory'],
                     'Compatibility': True,

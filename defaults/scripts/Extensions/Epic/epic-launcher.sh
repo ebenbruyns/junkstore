@@ -96,9 +96,9 @@ if [[ "${ADVANCED_VK_ICD_FILENAMES}" == "true" ]]; then
 fi
 
 
-CMD=$@
+CMD=${*:q}
 
-
+echo "CMD: ${CMD:q}"
 
 
 sync-saves
@@ -108,10 +108,10 @@ QUOTED_ARGS=""
 ALL_BUT_LAST_ARG=""
 REG_FIX=""
 for arg in "$@"; do
-    QUOTED_ARGS+=" \"${arg}\"" 
+    QUOTED_ARGS+=" \"${arg:q}\"" 
     if [[ "${arg}" != "${!#}" ]]; then
-        ALL_BUT_LAST_ARG+=" \"${arg}\""
-        REG_FIX+=" \"${arg}\""
+        ALL_BUT_LAST_ARG+=" \"${arg:q}\""
+        REG_FIX+=" \"${arg:q}\""
     else
         ALL_BUT_LAST_ARG+=" \"install_deps.bat\""
     fi
@@ -121,13 +121,13 @@ ARGS=$("${ARGS_SCRIPT}" $ID)
 if [[ "${ADVANCED_IGNORE_EPIC_ARGS}" == "true" ]]; then
     ARGS="${ADVANCED_ARGUMENTS}"
 else
-    ARGS="${ARGS} ${ADVANCED_ARGUMENTS}"
+    ARGS="${ARGS:q} ${ADVANCED_ARGUMENTS}"
 fi
 
 
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
-    QUOTED_ARGS+=" \"${arg}\"" 
+    QUOTED_ARGS+=" \"${arg:q}\"" 
     
 done
 
@@ -165,13 +165,13 @@ echo -e "Running: ${QUOTED_ARGS}" >> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
 export STORE="egs"
 export UMU_ID=$($EPICCONF --get-umu-id $ID --dbfile $DBFILE)
-export PROTON_SET_GAME_DRIVE="gamedrive"
 export STEAM_COMPAT_INSTALL_PATH=${GAME_PATH}
 export STEAM_COMPAT_LIBRARY_PATHS=${STEAM_COMPAT_LIBRARY_PATHS}:${GAME_PATH}
+export PROTON_SET_GAME_DRIVE="gamedrive"
 
 eval "`echo -e ${ADVANCED_VARIABLES}`" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 eval "`echo -e $QUOTED_ARGS`"  &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
-# eval "${CMD} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
+# eval "${CMD:q} ${ARGS}"  &> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 
 sync-saves
 

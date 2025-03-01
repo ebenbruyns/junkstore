@@ -22,16 +22,20 @@ ACTIONS=("init" "getgames" "getactions" "saveconfig" "getconfig" "download" \
 # Function to source scripts recursively from a directory
 source_scripts() {
     local dir=$1
-    if [[ -d "$dir" ]]; then
-        local store_script="$dir/store.sh"
+    if [[ -d "${dir}" ]]; then
+        local store_script="${dir}/store.sh"
         if [[ -f "$store_script" ]]; then
             source "$store_script"
         fi
-        for subdir in "$dir"/*; do
-            if [[ -d "$subdir" ]]; then
-                source_scripts "$subdir"
-            fi
-        done
+        local store_platform_script="${dir}/${PLATFORM}/store.sh"
+        if [[ -f "$store_platform_script" ]]; then
+            source "$store_platform_script"
+        fi
+        # for subdir in "$dir"/*; do
+        #     if [[ -d "$subdir" ]]; then
+        #         source_scripts "$subdir"
+        #     fi
+        # done
     fi
 }
     
