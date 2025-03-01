@@ -17,7 +17,7 @@ function uninstall() {
 function download_and_install() {
     cd /tmp
     flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    flatpak --user install flathub org.gnome.Platform//45 -y
+    flatpak --user install flathub org.gnome.Platform//47 -y
     flatpak --user install com.github.Matoking.protontricks -y
     wget $DOWNLOAD_LOCATION
     flatpak --user install legendary.flatpak -y

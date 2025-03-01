@@ -6,7 +6,7 @@ function init() {
        
         INIT="${platform}_init"
         if [[ "$(type -t $INIT)" == "function" ]]; then
-            TEMP=$($0 $platform init)
+            $0 $platform init &> /dev/null &
         fi
         
     done

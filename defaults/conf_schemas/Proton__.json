@@ -223,6 +223,32 @@
           "ModeLevel": 2,
           "Parents": [],
           "EnumValues": []
+        },
+        {
+          "Key": "GAMESCOPE_HACK",
+          "Label": "Hack to show windows that are hidden by gamescope",
+          "Description": "This for games that run in the background like pumpkin jack",
+          "DefaultValue": "false",
+          "Value": "false",
+          "Type": "Boolean",
+          "Min": 0,
+          "Max": 0,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
+        },
+        {
+          "Key": "GAMESCOPE_HACK_DELAY",
+          "Label": "Delay for applying gamescope hack",
+          "Description": "Ignores the arguments passed by the Epic Games Store launcher",
+          "DefaultValue": "20",
+          "Value": "20",
+          "Type": "Range",
+          "Min": 0,
+          "Max": 60,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": []
         }
       ]
     }
