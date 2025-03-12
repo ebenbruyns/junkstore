@@ -198,7 +198,13 @@ class Epic(GamesDb.GamesDb):
         try:
             result = self.execute_shell(
             f"{self.legendary_cmd} launch {game_id} --json --skip-version-check {offline_switch} ")
-            return " ".join(result['egl_parameters'])
+            game_args = ""
+            for arg in result['game_parameters']:
+                parts = arg.split("=")
+                game_args += f"{parts[0]}=\"{parts[1]}\" "
+            #game_args = " ".join([f'{param.replace(' ', '\\ ')}' for param in result['game_parameters']])
+            egl_args = " ".join(result['egl_parameters'])
+            return egl_args + " " + game_args
         except CmdException as e:
             raise e
     
