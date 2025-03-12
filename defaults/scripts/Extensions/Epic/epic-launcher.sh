@@ -127,7 +127,7 @@ fi
 
 echo "ARGS: ${ARGS}" &>> "${DECKY_PLUGIN_LOG_DIR}/${ID}.log"
 for arg in $ARGS; do
-    QUOTED_ARGS+=" \"${arg:q}\"" 
+    QUOTED_ARGS+=" ${arg:q}" 
     
 done
 
