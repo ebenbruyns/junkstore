@@ -220,52 +220,54 @@ class Helper:
     async def start_ws_server():
         Helper.ws_loop = asyncio.get_event_loop()
         with concurrent.futures.ThreadPoolExecutor() as pool:
-            await Helper.ws_loop.run_in_executor(pool, Helper._start_ws_server_thread)
+            await Helper._start_ws_server_thread()
 
     @staticmethod
-    def _start_ws_server_thread():
+    async def _start_ws_server_thread():
         try:
             Helper.wsServerIsRunning = True
             port = 8765
             while Helper.wsServerIsRunning:
                 try:
-                    decky_plugin.logger.info(f"Starting WebSocket server on port {port}")
+                    decky_plugin.logger.info(
+                        f"Starting WebSocket server on port {port}")
+
+                    # Helper.runner.setup()
                     Helper.app = web.Application()
                     Helper.app.router.add_get('/ws', Helper.ws_handler)
                     Helper.runner = web.AppRunner(Helper.app)
-                  
-                   
-                    Helper.runner.setup()
+                    await Helper.runner.setup()
                     Helper.site = web.TCPSite(Helper.runner, 'localhost', port)
-                    Helper.site.start()
+
                     Helper.websocket_port = port
+                    await Helper.site.start()
                     break
                 except OSError:
                     port += 1
 
             decky_plugin.logger.info("WebSocket server started")
-            
+
         except Exception as e:
             decky_plugin.logger.error(f"Error in start_ws_server: {e}")
-    
+
     async def stop_ws_server():
         try:
-            
+
             decky_plugin.logger.info("Stopping WebSocket server")
             if Helper.site:
                 decky_plugin.logger.info("Stopping site")
                 await Helper.site.stop()
                 decky_plugin.logger.info("Site stopped")
-              
+
             if Helper.runner:
-               
+
                 await Helper.runner.cleanup()
                 decky_plugin.logger.info("Runner cleaned up")
 
             for ws in Helper.app['websockets']:
                 decky_plugin.logger.info("Closing websocket")
                 await ws.close()
-            
+
         except Exception as e:
             decky_plugin.logger.error(f"Error in stop_ws_server: {e}")
         finally:
