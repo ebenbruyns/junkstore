@@ -94,6 +94,11 @@ fi
 if [[ "${ADVANCED_VK_ICD_FILENAMES}" == "true" ]]; then
     export VK_ICD_FILENAMES="${HOME}/mesa/share/vulkan/icd.d/radeon_icd.x86_64.json"
 fi
+if [[ "${RUNTIMES_MESA_EXTENSION_MAX_YEAR}" == "" ]]; then
+    unset MESA_EXTENSION_MAX_YEAR
+else
+    export MESA_EXTENSION_MAX_YEAR=$RUNTIMES_MESA_EXTENSION_MAX_YEAR
+fi
 
 
 CMD=${*:q}

@@ -162,6 +162,21 @@
           "ModeLevel": 2,
           "Parents": [],
           "EnumValues": []
+        },
+        {
+          "Key": "MESA_EXTENSION_MAX_YEAR",
+          "Label": "Mesa Extension Max Year",
+          "Description": "Set the max year for Mesa extensions, empty to disable",
+          "DefaultValue": "",
+          "Value": "",
+          "Type": "String",
+          "Min": 1990,
+          "Max": 2030,
+          "ModeLevel": 2,
+          "Parents": [],
+          "EnumValues": [
+           
+          ]
         }
 
       ]
@@ -240,7 +255,7 @@
         {
           "Key": "GAMESCOPE_HACK_DELAY",
           "Label": "Delay for applying gamescope hack",
-          "Description": "Ignores the arguments passed by the Epic Games Store launcher",
+          "Description": "This is the delay in seconds before the hack is applied",
           "DefaultValue": "20",
           "Value": "20",
           "Type": "Range",
