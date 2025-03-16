@@ -30,7 +30,7 @@ Simply head over to the Decky store and find Junk-Store and click install. Also 
 
 ### Check it out in these videos below for installion instructions
 
-[![Steam Deck Gaming's awesome video](https://i.ytimg.com/vi/u9Z66HMD31Y/hqdefault.jpg)](https://www.youtube.com/watch?v=tgc7yiKtpW0?si=u9Z66HMD31Y)
+[![Steam Deck Gaming's awesome video](https://i.ytimg.com/vi/u9Z66HMD31Y/hqdefault.jpg)](https://www.youtube.com/watch?v=u9Z66HMD31Y)
 
 
 [![GameTechPlanet's awesome video](https://i.ytimg.com/vi/tgc7yiKtpW0/hqdefault.jpg)](https://www.youtube.com/watch?v=tgc7yiKtpW0?si=6SyGMX_VHHDm0QhV)
