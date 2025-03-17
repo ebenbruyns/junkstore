@@ -34,7 +34,12 @@ export function runApp(appId: number, onAppClose?: () => void, onAppLaunch?: () 
     }
     if (onAppClose) {
         const { unregister } = registerForAppRunStateChange(appId, () => {
-            onAppClose();
+            // Add a delay due to UI not updating in time - this is a workaround for now
+            setTimeout(() => {
+                logger.debug(`App ${appId} closed running onAppClose callback`);
+                onAppClose();
+            }
+                , 1000);
             unregister();
         }, AppRunStateChange.END);
     }
