@@ -190,6 +190,21 @@ export const GridContent: VFC<GridContentProps> = ({ content, serverAPI, initAct
                     <div style={{ backgroundColor: '#8b929a66', flex: 'auto', height: '1px' }} />
                 </div>
             )}
+            {content.Games?.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '15px' }}>
+                   
+                    {argsCache.filter !== "" && (
+                        <div>
+                            No games match the filter: {argsCache.filter}. Clear the search bar.
+                        </div>
+                    )}
+                    {argsCache.installed && (
+                        <div>
+                            No installed games. Push X to toggle installed games off.
+                        </div>
+                    )}
+                </div>   
+            )}
             <GridItems
                 serverAPI={serverAPI}
                 games={content.Games ?? []}
