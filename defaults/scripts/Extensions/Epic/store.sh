@@ -40,13 +40,12 @@ function Epic_getgames(){
     TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
     # This might be a bit fragile, but it should work for now.
     # checking if the Game's content is empty, if it is, then we need to refresh the list
-    #{"Type": "GameGrid", "Content": {"NeedsLogin": "true", "Games": []}}
-    if [[ $TEMP == "{\"Type\": \"GameGrid\", \"Content\": {\"NeedsLogin\": \"true\", \"Games\": []}}" ]]; then
-        if [[ $FILETER == "" ]] && [[ $INSTALLED == "false" ]]; then
+    echo $TEMP >> $DECKY_PLUGIN_LOG_DIR/debug.log
+    if echo "$TEMP" | jq -e '.Content.Games | length == 0' &>/dev/null; then
+        if [[ $FILTER == "" ]] && [[ $INSTALLED == "false" ]]; then
             TEMP=$(Epic_init)
             TEMP=$($EPICCONF --getgameswithimages "${IMAGE_PATH}" "${FILTER}" "${INSTALLED}" "${LIMIT}" "true" --dbfile $DBFILE)
         fi
-        
     fi
     echo $TEMP
 }
