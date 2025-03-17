@@ -52,21 +52,22 @@ class Helper:
                                                             
                                                             )
                 if stream_output:
-                    while True:
-                        stdout = await proc.stdout.readline()
-                        stderr = await proc.stderr.readline()
-                        if stdout:
-                            stdout = stdout.decode()
-                            if stream_output:
-                                await websocket.send_str(json.dumps({'status': 'open', 'data': stdout}))
-                        if stderr:
-                            stderr = stderr.decode()
-                            if stream_output:
-                                await websocket.send_str(json.dumps({'status': 'open', 'data': stderr}))
-                        if proc.stdout.at_eof() and proc.stderr.at_eof():
-                            await websocket.send_str(json.dumps({'status': 'closed', 'data': ''}))
-                            break
+                    async def read_stream(stream, stream_type):
+                        while True:
+                            line = await stream.readline()
+                            if line:
+                                line = line.decode()
+                                if stream_output:
+                                    await websocket.send_str(json.dumps({'status': 'open', 'data': line, 'type': stream_type}))
+                            else:
+                                break
+
+                    await asyncio.gather(
+                        read_stream(proc.stdout, 'stdout'),
+                        read_stream(proc.stderr, 'stderr')
+                    )
                     await proc.wait()
+                    await websocket.send_str(json.dumps({'status': 'closed', 'data': ''}))
                     return {'returncode': proc.returncode}
                 else:
                     # await proc.wait()
