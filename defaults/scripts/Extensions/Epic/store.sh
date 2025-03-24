@@ -267,16 +267,16 @@ function Epic_get-exe-list(){
     export STEAM_COMPAT_DATA_PATH="${HOME}/.local/share/Steam/steamapps/compatdata/${STEAM_ID}"
     export STEAM_COMPAT_CLIENT_INSTALL_PATH="${GAME_PATH}"
     cd "${STEAM_COMPAT_CLIENT_INSTALL_PATH}"
-    IFS=$'\n' 
-    LIST=$(find . \( -name "*.exe" -o -iname "*.bat" -o -iname "*.msi" \))
     JSON="{\"Type\": \"FileContent\", \"Content\": {\"PathRoot\": \"${GAME_PATH}\", \"Files\": ["
-   
-    for FILE in $LIST; do
-       JSON="${JSON}{\"Path\": \"${FILE}\"},"
-    done
-    JSON=$(echo "$JSON" | sed 's/,$//')
+    SEP=""
+
+    while IFS= read -r -d '' FILE; do
+        JSON="${JSON}${SEP}{\"Path\": \"${FILE}\"}"
+        SEP=","
+    done < <(find . \( -name "*.exe" -o -iname "*.bat" -o -iname "*.msi" \) -print0)
+
     JSON="${JSON}]}}"
-    echo $JSON
+    echo "$JSON"
 }
 function Epic_registry-fix(){
     # reg add HKEY_CLASSES_ROOT\\com.epicgames.launcher /f
